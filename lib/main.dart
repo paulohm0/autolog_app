@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -9,6 +10,6 @@ class AutoLogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'AutoLog', theme: ThemeData());
+    return MaterialApp(title: 'AutoLog', theme: AppTheme.theme);
   }
 }
