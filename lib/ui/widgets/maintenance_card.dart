@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -80,7 +81,7 @@ class MaintenanceCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: AppSpacing.md),
-          Text('VALOR DO SERVIÇO', style: AppTextStyles.labelMedium),
+          Text(AppStrings.serviceValueLabel, style: AppTextStyles.labelMedium),
           const SizedBox(height: 4),
           Text(
             amount,

@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/home/view/home_screen.dart';
 import 'package:autolog_app/ui/register_service/view/register_service_screen.dart';
@@ -15,7 +16,7 @@ class AutoLogApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'AutoLog',
+      title: AppStrings.appBrandName,
       theme: AppTheme.theme,
       initialRoute: '/register_vehicle',
       routes: {

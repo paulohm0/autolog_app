@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ class HomeScreen extends StatelessWidget {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Auto',
+                text: AppStrings.appBrandNameSplit1,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -22,7 +23,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: 'Log',
+                text: AppStrings.appBrandNameSplit2,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -74,7 +75,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'TOTAL GASTO COM MANUTENÇÃO EM 2024',
+              AppStrings.totalExpenseLabel,
               style: AppTextStyles.labelLarge.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -103,7 +104,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           _StatRow(
             icon: Icons.directions_car,
-            label: 'Veículos Ativos',
+            label: AppStrings.activeVehiclesLabel,
             value: '03',
             onTap: () => showModalBottomSheet(
               context: context,
@@ -132,7 +133,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           _StatRow(
             icon: Icons.water_drop,
-            label: 'Próxima Troca de Óleo',
+            label: AppStrings.nextOilChangeLabel,
             value: '85.500 km',
             valueColor: AppColors.warning,
             onTap: () => showModalBottomSheet(
@@ -163,7 +164,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text(
-                'Histórico de Manutenção',
+                AppStrings.maintenanceHistory,
                 style: AppTextStyles.headlineLarge,
               ),
               IconButton(
@@ -177,14 +178,17 @@ class HomeScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Filtros', style: AppTextStyles.headlineLarge),
+                        Text(
+                          AppStrings.filters,
+                          style: AppTextStyles.headlineLarge,
+                        ),
                         const SizedBox(height: AppSpacing.lg),
                         Row(
                           children: [
                             Expanded(
                               child: _FilterChip(
-                                label: 'VEÍCULO',
-                                value: 'Todos os Veículos',
+                                label: AppStrings.vehicleFilter,
+                                value: AppStrings.allVehicles,
                                 trailing: const Icon(
                                   Icons.keyboard_arrow_down_rounded,
                                   size: 18,
@@ -194,7 +198,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: AppSpacing.md),
                             _FilterChip(
-                              label: 'ANO',
+                              label: AppStrings.yearFilter,
                               value: '2024',
                               trailing: const Icon(
                                 Icons.calendar_today_outlined,

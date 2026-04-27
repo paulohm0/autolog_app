@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/autolog_brand.dart';
@@ -21,7 +22,7 @@ class RegisterVehicleScreen extends StatelessWidget {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Auto',
+                text: AppStrings.appBrandNameSplit1,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -29,7 +30,7 @@ class RegisterVehicleScreen extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: 'Log',
+                text: AppStrings.appBrandNameSplit2,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -69,14 +70,17 @@ class RegisterVehicleScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'VEÍCULO',
+          AppStrings.vehicleSection,
           style: AppTextStyles.labelLarge.copyWith(
             color: AppColors.primary,
             letterSpacing: 1.2,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Registrar Veículo', style: AppTextStyles.displayMedium),
+        Text(
+          AppStrings.registerVehicleTitle,
+          style: AppTextStyles.displayMedium,
+        ),
       ],
     );
   }
@@ -85,20 +89,20 @@ class RegisterVehicleScreen extends StatelessWidget {
     return Column(
       children: const [
         AppTextField(
-          label: 'Marca',
-          hintText: 'Ex: BMW, Porsche, Honda',
+          label: AppStrings.brandLabel,
+          hintText: AppStrings.brandHint,
           prefixIcon: Icons.business_outlined,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Modelo',
-          hintText: 'Ex: 320i, 911, Civic',
+          label: AppStrings.modelLabel,
+          hintText: AppStrings.modelHint,
           prefixIcon: Icons.directions_car_outlined,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: 'Placa',
-          hintText: 'ABC-1234 OU ABC1D23',
+          label: AppStrings.plateLabel,
+          hintText: AppStrings.plateHint,
           prefixIcon: Icons.tag_rounded,
         ),
       ],
@@ -126,18 +130,24 @@ class RegisterVehicleScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text('Detalhes Opcionais', style: AppTextStyles.titleLarge),
+              Text(AppStrings.optionalDetails, style: AppTextStyles.titleLarge),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Expanded(
-                child: _OptionalField(label: 'ANO', value: '2024'),
+                child: _OptionalField(
+                  label: AppStrings.yearLabel,
+                  value: '2024',
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: _OptionalField(label: 'COR', value: 'Prata'),
+                child: _OptionalField(
+                  label: AppStrings.colorLabel,
+                  value: 'Prata',
+                ),
               ),
             ],
           ),
@@ -150,12 +160,12 @@ class RegisterVehicleScreen extends StatelessWidget {
     return Column(
       children: [
         const PrimaryButton(
-          label: 'Salvar Veículo',
+          label: AppStrings.saveVehicleButton,
           icon: Icons.save_alt_rounded,
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Ao salvar, este veículo será adicionado à sua\ngaragem digital e sincronizado com sua conta.',
+          AppStrings.saveVehicleDescription,
           textAlign: TextAlign.center,
           style: AppTextStyles.bodySmall.copyWith(fontSize: 12),
         ),

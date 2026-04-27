@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
@@ -21,7 +22,7 @@ class RegisterServiceScreen extends StatelessWidget {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Auto',
+                text: AppStrings.appBrandNameSplit1,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -29,7 +30,7 @@ class RegisterServiceScreen extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: 'Log',
+                text: AppStrings.appBrandNameSplit2,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -54,7 +55,7 @@ class RegisterServiceScreen extends StatelessWidget {
               _buildFinancialSection(),
               const SizedBox(height: AppSpacing.xxl),
               const PrimaryButton(
-                label: 'Salvar Manutenção',
+                label: AppStrings.saveMaintenanceButton,
                 icon: Icons.save_alt_rounded,
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -70,14 +71,17 @@ class RegisterServiceScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'MANUTENÇÃO',
+          AppStrings.maintenanceSection,
           style: AppTextStyles.labelLarge.copyWith(
             color: AppColors.primary,
             letterSpacing: 1.2,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Registrar Serviço', style: AppTextStyles.displayMedium),
+        Text(
+          AppStrings.registerServiceTitle,
+          style: AppTextStyles.displayMedium,
+        ),
       ],
     );
   }
@@ -86,22 +90,22 @@ class RegisterServiceScreen extends StatelessWidget {
     return Column(
       children: [
         AppDropdownField(
-          label: 'Veículo',
-          hintText: 'Selecione o carro',
+          label: AppStrings.vehicleLabel,
+          hintText: AppStrings.selectCarHint,
           prefixIcon: Icons.directions_car_outlined,
         ),
         const SizedBox(height: AppSpacing.lg),
         _buildDateField(),
         const SizedBox(height: AppSpacing.lg),
         const AppTextField(
-          label: 'Oficina / Estabelecimento',
-          hintText: 'Ex: Performance Garage SP',
+          label: AppStrings.workshopLabel,
+          hintText: AppStrings.workshopHint,
           prefixIcon: Icons.storefront_outlined,
         ),
         const SizedBox(height: AppSpacing.lg),
         const AppTextField(
-          label: 'Descrição dos Serviços e Peças',
-          hintText: 'Descreva os itens trocados e serviços realizados...',
+          label: AppStrings.servicesDescriptionLabel,
+          hintText: AppStrings.servicesDescriptionHint,
           prefixIcon: Icons.build_outlined,
           maxLines: 4,
         ),
@@ -113,7 +117,7 @@ class RegisterServiceScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('DATA DA MANUTENÇÃO', style: AppTextStyles.labelLarge),
+        Text(AppStrings.maintenanceDateLabel, style: AppTextStyles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
@@ -127,7 +131,7 @@ class RegisterServiceScreen extends StatelessWidget {
                   readOnly: true,
                   style: AppTextStyles.bodyLarge,
                   decoration: InputDecoration(
-                    hintText: 'mm/dd/yyyy',
+                    hintText: AppStrings.dateHint,
                     hintStyle: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.textHint,
                     ),
@@ -171,7 +175,10 @@ class RegisterServiceScreen extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text('VALOR TOTAL', style: AppTextStyles.titleMedium),
+              Text(
+                AppStrings.totalValueLabel,
+                style: AppTextStyles.titleMedium,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -188,7 +195,7 @@ class RegisterServiceScreen extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'R\$',
+                  AppStrings.moneySignLabel,
                   style: AppTextStyles.titleMedium.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
@@ -218,7 +225,7 @@ class RegisterServiceScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            '* O valor inserido será contabilizado no seu relatório anual de gastos automotivos automaticamente.',
+            AppStrings.valueWarning,
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 11,
               fontStyle: FontStyle.italic,

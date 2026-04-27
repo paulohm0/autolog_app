@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
 
+class AppTheme {
+  AppTheme._(); // impedir instanciação
+  static ThemeData get theme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+      scaffoldBackgroundColor: AppColors.background,
+      fontFamily: AppTextStyles.fontFamily,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+}
+
 class AppColors {
+  AppColors._();
   // Primary
   static const Color primary = Color(0xFF2D54E8);
   static const Color primaryDark = Color(0xFF1A3CC9);
@@ -28,6 +52,7 @@ class AppColors {
 }
 
 class AppTextStyles {
+  AppTextStyles._();
   static const String fontFamily = 'Inter';
 
   static const TextStyle displayLarge = TextStyle(
@@ -103,29 +128,8 @@ class AppTextStyles {
   );
 }
 
-class AppTheme {
-  static ThemeData get theme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-      scaffoldBackgroundColor: AppColors.background,
-      fontFamily: AppTextStyles.fontFamily,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
 class AppSpacing {
+  AppSpacing._();
   static const double xs = 4;
   static const double sm = 8;
   static const double md = 12;
@@ -136,6 +140,7 @@ class AppSpacing {
 }
 
 class AppRadius {
+  AppRadius._();
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;

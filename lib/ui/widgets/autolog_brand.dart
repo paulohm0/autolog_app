@@ -1,3 +1,4 @@
+import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class AutoLogBrand extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'AutoLog',
+          AppStrings.appBrandName,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -30,7 +31,7 @@ class AutoLogBrand extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Text(
-              'PRO',
+              AppStrings.proBadge,
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
