@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "30599763414",
+    "project_id": "autolog-5064456",
+    "storage_bucket": "autolog-5064456.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30599763414:android:f83df6fb428b3fdb040077",
+        "android_client_info": {
+          "package_name": "dev.paulo.autolog_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBM5Tjuvma8-_HE5GmnmhJj-K5UrHZW0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
