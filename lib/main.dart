@@ -1,8 +1,8 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
-import 'package:autolog_app/ui/home/view/home_screen.dart';
-import 'package:autolog_app/ui/register_service/view/register_service_screen.dart';
-import 'package:autolog_app/ui/register_vehicle/view/register_vehicle_screen.dart';
+import 'package:autolog_app/ui/routes/home/home_screen.dart';
+import 'package:autolog_app/ui/routes/register_service/register_service_screen.dart';
+import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class AutoLogApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: AppStrings.appBrandName,
       theme: AppTheme.theme,
-      initialRoute: '/register_vehicle',
+      initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
         '/register_service': (context) => RegisterServiceScreen(),
