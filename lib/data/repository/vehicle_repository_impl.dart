@@ -1,13 +1,18 @@
+import 'package:autolog_app/core/error/failure.dart';
 import 'package:autolog_app/data/model/vehicle_model.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
 
 class VehicleRepositoryImpl implements IVehicleRepository {
-  final FirebaseFirestore _firestoreDB = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestoreDB;
+
+  VehicleRepositoryImpl({required FirebaseFirestore firestoreDB})
+    : _firestoreDB = firestoreDB;
 
   @override
-  Future<void> saveVehicle(VehicleEntity vehicle) async {
+  Future<Either<Failure, void>> saveVehicle(VehicleEntity vehicle) async {
     try {
       final newVehicle = VehicleModel(
         brand: vehicle.brand,
@@ -18,13 +23,14 @@ class VehicleRepositoryImpl implements IVehicleRepository {
       );
 
       await _firestoreDB.collection('vehicles').add(newVehicle.toJson());
+      return Right(null);
     } catch (e) {
-      throw Exception('Falha ao salvar veículo');
+      return Left(ServerFailure());
     }
   }
 
   @override
-  Future<List<VehicleEntity>> getVehicles() {
+  Future<Either<Failure, List<VehicleEntity>>> getVehicles() {
     // TODO: implement getVehicles
     throw UnimplementedError();
   }

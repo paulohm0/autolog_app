@@ -1,5 +1,5 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
-import 'package:autolog_app/core/di/Injector.dart';
+import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/firebase_options.dart';
 import 'package:autolog_app/ui/routes/home/home_screen.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  Injector().setupDependencyInjection();
+  setupDependencyInjection();
   runApp(const AutoLogApp());
 }
 
