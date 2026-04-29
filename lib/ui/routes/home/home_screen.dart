@@ -1,4 +1,5 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
+import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/register_service');
+          Navigator.pushNamed(context, AppRoutes.registerService);
         },
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
@@ -116,7 +117,10 @@ class HomeScreen extends StatelessWidget {
                       const Text('Components'),
                       FloatingActionButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/register_vehicle');
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.registerVehicle,
+                          );
                         },
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.textOnPrimary,
