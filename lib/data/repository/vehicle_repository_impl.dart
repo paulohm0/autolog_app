@@ -30,8 +30,15 @@ class VehicleRepositoryImpl implements IVehicleRepository {
   }
 
   @override
-  Future<Either<Failure, List<VehicleEntity>>> getVehicles() {
-    // TODO: implement getVehicles
-    throw UnimplementedError();
+  Future<Either<Failure, List<VehicleEntity>>> getVehicles() async {
+    try {
+      final snapshot = await _firestoreDB.collection('vehicles').get();
+      final vehicles = snapshot.docs
+          .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
+          .toList();
+      return Right(vehicles);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
   }
 }

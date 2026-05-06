@@ -28,8 +28,11 @@ class AppStrings {
   static const String plateHint = 'ABC-1234 OU ABC1D23';
   static const String optionalDetails = 'Detalhes Opcionais';
   static const String yearLabel = 'ANO';
+  static const String yearHint = '2024';
   static const String colorLabel = 'COR';
+  static const String colorHint = 'Prata';
   static const String saveVehicleButton = 'Salvar Veículo';
+  static const String saveVehicleSnackBarMessage = 'Veículo salvo com sucesso!';
   static const String saveVehicleDescription =
       'Ao salvar, este veículo será adicionado à sua\ngaragem digital e sincronizado com sua conta.';
 

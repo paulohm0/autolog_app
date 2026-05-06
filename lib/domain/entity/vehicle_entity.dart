@@ -1,5 +1,5 @@
 class VehicleEntity {
-  final String? id;
+  final String? id; // id gerado pelo firestore
   final String brand;
   final String model;
   final String licensePlate;
@@ -11,7 +11,7 @@ class VehicleEntity {
     required this.brand,
     required this.model,
     required this.licensePlate,
-    required this.year,
-    required this.color,
+    this.year,
+    this.color,
   });
 }

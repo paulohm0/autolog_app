@@ -9,6 +9,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool readOnly;
   final VoidCallback? onTap;
+  final TextEditingController? controller;
 
   const AppTextField({
     super.key,
@@ -19,6 +20,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.readOnly = false,
     this.onTap,
+    this.controller,
   });
 
   @override
@@ -34,6 +36,7 @@ class AppTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: TextField(
+            controller: controller,
             maxLines: maxLines,
             keyboardType: keyboardType,
             readOnly: readOnly,
