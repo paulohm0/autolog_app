@@ -12,7 +12,20 @@
           "package_name": "dev.paulo.autolog_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "30599763414-16l60kqtr4s7sn00vqokljfioua52usc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.paulo.autolog_app",
+            "certificate_hash": "7f26354c7949bb2a0a60dca79d587b505101e118"
+          }
+        },
+        {
+          "client_id": "30599763414-8r9ipnif299c04g7c479pgekahm9ievn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBBM5Tjuvma8-_HE5GmnmhJj-K5UrHZW0A"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "30599763414-8r9ipnif299c04g7c479pgekahm9ievn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "30599763414-p9jd4lvr9od8omto2qovhadho9c730tf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.paulo.autologApp"
+              }
+            }
+          ]
         }
       }
     }

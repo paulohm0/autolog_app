@@ -22,7 +22,7 @@ class AutoLogApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: AppStrings.appBrandName,
       theme: AppTheme.theme,
-      initialRoute: AppRoutes.home,
+      initialRoute: AppRoutes.login,
       routes: AppRoutes.routes,
     );
   }
