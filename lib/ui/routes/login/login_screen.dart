@@ -10,7 +10,7 @@ class LoginScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.home);
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
           },
           child: Icon(Icons.login),
         ),
