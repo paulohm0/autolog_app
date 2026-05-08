@@ -17,6 +17,23 @@ dependencies:
   cloud_firestore: ^6.3.0
   firebase_auth: ^6.4.0
   google_sign_in: ^6.3.0
+  flutter_native_splash: ^2.4.7
+
+flutter_native_splash:
+  image: assets/autolog-logo.png
+  color: "#2963F7"
+
+  android_12:
+    image: assets/autolog-logo.png
+    color: "#2963F7"
+    icon_background_color: "#2963F7"
+
+  android: true
+  ios: true
+  web: false
+  android_gravity: center
+  ios_content_mode: center
+  fullscreen: true
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +44,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/
+    - assets/autolog-logo.png
   fonts:
     - family: Inter
       fonts:
