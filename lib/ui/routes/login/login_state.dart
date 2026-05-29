@@ -1,17 +1,18 @@
+// login_state.dart — nomes mais seguros
 import 'package:autolog_app/domain/entity/user_entity.dart';
 
 sealed class LoginState {}
 
-class InitialState extends LoginState {}
+class LoginInitial extends LoginState {}
 
-class LoadingState extends LoginState {}
+class LoginLoading extends LoginState {}
 
-class SuccessState extends LoginState {
+class LoginSuccess extends LoginState {
   final UserEntity user;
-  SuccessState({required this.user});
+  LoginSuccess({required this.user});
 }
 
-class ErrorState extends LoginState {
+class LoginError extends LoginState {
   final String message;
-  ErrorState({required this.message});
+  LoginError({required this.message});
 }

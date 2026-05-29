@@ -7,6 +7,9 @@ class AppStrings {
   static const String appBrandNameSplit2 = "Log";
   static const String proBadge = 'PRO';
 
+  // Login Screen
+  static const String signInGoogleLabel = 'Entrar com o Google';
+
   // Home Screen
   static const String totalExpenseLabel = 'TOTAL GASTO COM MANUTENÇÃO EM 2024';
   static const String activeVehiclesLabel = 'Veículos Ativos';

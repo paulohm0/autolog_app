@@ -15,6 +15,13 @@ class AuthRepositoryImpl implements IAuthRepository {
   }) : _firebaseAuth = firebaseAuth,
        _googleSignIn = googleSignIn;
 
+  UserEntity _toEntity(User user) => UserEntity(
+    id: user.uid,
+    email: user.email ?? 'e-mail não informado',
+    name: user.displayName ?? 'nome não informado',
+    photoUrl: user.photoURL,
+  );
+
   @override
   Future<Either<Failure, UserEntity>> signInWithGoogle() async {
     try {
@@ -31,15 +38,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         credential,
       );
       final user = userCredential.user!;
-
-      return Right(
-        UserEntity(
-          id: user.uid,
-          name: user.displayName ?? '',
-          email: user.email ?? '',
-          photoUrl: user.photoURL,
-        ),
-      );
+      return Right(_toEntity(user));
     } catch (e) {
       return Left(ServerFailure());
     }
@@ -53,6 +52,17 @@ class AuthRepositoryImpl implements IAuthRepository {
       return Right(null);
     } catch (e) {
       return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return Left(ServerFailure());
+      return Right(_toEntity(user));
+    } catch (e) {
+      return Left(UnexpectedFailure());
     }
   }
 }

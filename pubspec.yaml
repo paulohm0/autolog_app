@@ -20,11 +20,11 @@ dependencies:
   flutter_native_splash: ^2.4.7
 
 flutter_native_splash:
-  image: assets/autolog-logo.png
+  image: assets/images/autolog-logo.png
   color: "#2963F7"
 
   android_12:
-    image: assets/autolog-logo.png
+    image: assets/images/autolog-logo.png
     color: "#2963F7"
     icon_background_color: "#2963F7"
 
@@ -44,7 +44,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/
-    - assets/autolog-logo.png
+    - assets/images/autolog-logo.png
+    - assets/images/google-logo.png
   fonts:
     - family: Inter
       fonts:

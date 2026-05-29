@@ -7,23 +7,24 @@ class LoginCubit extends Cubit<LoginState> {
 
   LoginCubit({required IAuthRepository repository})
     : _repository = repository,
-      super(InitialState());
+      super(LoginInitial());
 
   Future<void> signIn() async {
-    emit(LoadingState());
+    emit(LoginLoading());
     final result = await _repository.signInWithGoogle();
+    if (isClosed) return;
     result.fold(
-      (failure) => emit(ErrorState(message: failure.message)),
-      (success) => emit(SuccessState(user: success)),
+      (failure) => emit(LoginError(message: failure.message)),
+      (success) => emit(LoginSuccess(user: success)),
     );
   }
 
   Future<void> signOut() async {
-    emit(LoadingState());
+    emit(LoginLoading());
     final result = await _repository.signOut();
     result.fold(
-      (failure) => emit(ErrorState(message: failure.message)),
-      (success) => emit(InitialState()),
+      (failure) => emit(LoginError(message: failure.message)),
+      (success) => emit(LoginInitial()),
     );
   }
 }

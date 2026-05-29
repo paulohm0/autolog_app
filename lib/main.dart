@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseAuth.instance.setLanguageCode('pt-BR');
   setupDependencyInjection();
   runApp(const AutoLogApp());
 }
@@ -41,9 +42,9 @@ class _AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            backgroundColor: const Color(0xFF2963F7),
+            backgroundColor: AppColors.primary,
             body: Center(
-              child: Image.asset('assets/autolog-logo.png', width: 150),
+              child: Image.asset('assets/images/autolog-logo.png', width: 150),
             ),
           );
         }

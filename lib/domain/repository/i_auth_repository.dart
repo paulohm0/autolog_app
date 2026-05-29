@@ -5,4 +5,5 @@ import 'package:dartz/dartz.dart';
 abstract class IAuthRepository {
   Future<Either<Failure, UserEntity>> signInWithGoogle();
   Future<Either<Failure, void>> signOut();
+  Future<Either<Failure, UserEntity>> getCurrentUser();
 }
