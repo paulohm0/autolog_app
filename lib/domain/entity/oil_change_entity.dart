@@ -1,5 +1,6 @@
 class OilChangeEntity {
   final String? id; // id gerado pelo firestore
+  final String? userId; // id do dono, atribuido pelo repositorio
   final String vehicleId;
   final String brand;
   final double liters;
@@ -7,6 +8,7 @@ class OilChangeEntity {
 
   OilChangeEntity({
     this.id,
+    this.userId,
     required this.vehicleId,
     required this.brand,
     required this.liters,

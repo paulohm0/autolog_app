@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class OilChangeModel extends OilChangeEntity {
   OilChangeModel({
     super.id,
+    super.userId,
     required super.vehicleId,
     required super.brand,
     required super.liters,
@@ -13,6 +14,7 @@ class OilChangeModel extends OilChangeEntity {
   factory OilChangeModel.fromMap(Map<String, dynamic> map, String id) {
     return OilChangeModel(
       id: id,
+      userId: map['userId'],
       vehicleId: map['vehicleId'],
       brand: map['brand'],
       liters: (map['liters'] as num).toDouble(),
@@ -22,6 +24,7 @@ class OilChangeModel extends OilChangeEntity {
 
   Map<String, dynamic> toJson() {
     return {
+      'userId': userId,
       'vehicleId': vehicleId,
       'brand': brand,
       'liters': liters,

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class MaintenanceModel extends MaintenanceEntity {
   MaintenanceModel({
     super.id,
+    super.userId,
     required super.vehicleId,
     required super.date,
     required super.workshop,
@@ -14,6 +15,7 @@ class MaintenanceModel extends MaintenanceEntity {
   factory MaintenanceModel.fromMap(Map<String, dynamic> map, String id) {
     return MaintenanceModel(
       id: id,
+      userId: map['userId'],
       vehicleId: map['vehicleId'],
       date: (map['date'] as Timestamp).toDate(),
       workshop: map['workshop'],
@@ -24,6 +26,7 @@ class MaintenanceModel extends MaintenanceEntity {
 
   Map<String, dynamic> toJson() {
     return {
+      'userId': userId,
       'vehicleId': vehicleId,
       'date': date,
       'workshop': workshop,

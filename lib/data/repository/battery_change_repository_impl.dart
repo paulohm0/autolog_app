@@ -4,12 +4,17 @@ import 'package:autolog_app/domain/entity/battery_change_entity.dart';
 import 'package:autolog_app/domain/repository/i_battery_change_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   final FirebaseFirestore _firestoreDB;
+  final FirebaseAuth _firebaseAuth;
 
-  BatteryChangeRepositoryImpl({required FirebaseFirestore firestoreDB})
-    : _firestoreDB = firestoreDB;
+  BatteryChangeRepositoryImpl({
+    required FirebaseFirestore firestoreDB,
+    required FirebaseAuth firebaseAuth,
+  }) : _firestoreDB = firestoreDB,
+       _firebaseAuth = firebaseAuth;
 
   @override
   Future<Either<Failure, void>> saveBatteryChange(
@@ -17,6 +22,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   ) async {
     try {
       final newBatteryChange = BatteryChangeModel(
+        userId: _firebaseAuth.currentUser!.uid,
         vehicleId: batteryChange.vehicleId,
         model: batteryChange.model,
         date: batteryChange.date,
@@ -36,6 +42,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
     try {
       final snapshot = await _firestoreDB
           .collection('battery_changes')
+          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
           .orderBy('date', descending: true)
           .get();
       final batteryChanges = snapshot.docs

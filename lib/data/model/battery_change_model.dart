@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class BatteryChangeModel extends BatteryChangeEntity {
   BatteryChangeModel({
     super.id,
+    super.userId,
     required super.vehicleId,
     required super.model,
     required super.date,
@@ -12,6 +13,7 @@ class BatteryChangeModel extends BatteryChangeEntity {
   factory BatteryChangeModel.fromMap(Map<String, dynamic> map, String id) {
     return BatteryChangeModel(
       id: id,
+      userId: map['userId'],
       vehicleId: map['vehicleId'],
       model: map['model'],
       date: (map['date'] as Timestamp).toDate(),
@@ -19,6 +21,11 @@ class BatteryChangeModel extends BatteryChangeEntity {
   }
 
   Map<String, dynamic> toJson() {
-    return {'vehicleId': vehicleId, 'model': model, 'date': date};
+    return {
+      'userId': userId,
+      'vehicleId': vehicleId,
+      'model': model,
+      'date': date,
+    };
   }
 }

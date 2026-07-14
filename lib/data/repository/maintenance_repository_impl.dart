@@ -4,12 +4,17 @@ import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/repository/i_maintenance_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   final FirebaseFirestore _firestoreDB;
+  final FirebaseAuth _firebaseAuth;
 
-  MaintenanceRepositoryImpl({required FirebaseFirestore firestoreDB})
-    : _firestoreDB = firestoreDB;
+  MaintenanceRepositoryImpl({
+    required FirebaseFirestore firestoreDB,
+    required FirebaseAuth firebaseAuth,
+  }) : _firestoreDB = firestoreDB,
+       _firebaseAuth = firebaseAuth;
 
   @override
   Future<Either<Failure, void>> saveMaintenance(
@@ -17,6 +22,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   ) async {
     try {
       final newMaintenance = MaintenanceModel(
+        userId: _firebaseAuth.currentUser!.uid,
         vehicleId: maintenance.vehicleId,
         date: maintenance.date,
         workshop: maintenance.workshop,
@@ -36,6 +42,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
     try {
       final snapshot = await _firestoreDB
           .collection('maintenances')
+          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
           .orderBy('date', descending: true)
           .get();
       final maintenances = snapshot.docs

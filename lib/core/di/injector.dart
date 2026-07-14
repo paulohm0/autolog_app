@@ -43,21 +43,25 @@ void setupDependencyInjection() {
   getIt.registerLazySingleton<IVehicleRepository>(
     () => VehicleRepositoryImpl(
       firestoreDB: getIt<FirebaseFirestore>(),
+      firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
   getIt.registerLazySingleton<IMaintenanceRepository>(
     () => MaintenanceRepositoryImpl(
       firestoreDB: getIt<FirebaseFirestore>(),
+      firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
   getIt.registerLazySingleton<IOilChangeRepository>(
     () => OilChangeRepositoryImpl(
       firestoreDB: getIt<FirebaseFirestore>(),
+      firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
   getIt.registerLazySingleton<IBatteryChangeRepository>(
     () => BatteryChangeRepositoryImpl(
       firestoreDB: getIt<FirebaseFirestore>(),
+      firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
 

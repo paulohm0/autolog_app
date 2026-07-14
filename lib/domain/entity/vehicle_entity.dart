@@ -1,5 +1,6 @@
 class VehicleEntity {
   final String? id; // id gerado pelo firestore
+  final String? userId; // id do dono, atribuido pelo repositorio
   final String brand;
   final String model;
   final String licensePlate;
@@ -8,6 +9,7 @@ class VehicleEntity {
 
   VehicleEntity({
     this.id,
+    this.userId,
     required this.brand,
     required this.model,
     required this.licensePlate,

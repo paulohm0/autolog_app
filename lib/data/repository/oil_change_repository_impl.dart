@@ -4,17 +4,23 @@ import 'package:autolog_app/domain/entity/oil_change_entity.dart';
 import 'package:autolog_app/domain/repository/i_oil_change_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OilChangeRepositoryImpl implements IOilChangeRepository {
   final FirebaseFirestore _firestoreDB;
+  final FirebaseAuth _firebaseAuth;
 
-  OilChangeRepositoryImpl({required FirebaseFirestore firestoreDB})
-    : _firestoreDB = firestoreDB;
+  OilChangeRepositoryImpl({
+    required FirebaseFirestore firestoreDB,
+    required FirebaseAuth firebaseAuth,
+  }) : _firestoreDB = firestoreDB,
+       _firebaseAuth = firebaseAuth;
 
   @override
   Future<Either<Failure, void>> saveOilChange(OilChangeEntity oilChange) async {
     try {
       final newOilChange = OilChangeModel(
+        userId: _firebaseAuth.currentUser!.uid,
         vehicleId: oilChange.vehicleId,
         brand: oilChange.brand,
         liters: oilChange.liters,
@@ -33,6 +39,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
     try {
       final snapshot = await _firestoreDB
           .collection('oil_changes')
+          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
           .orderBy('date', descending: true)
           .get();
       final oilChanges = snapshot.docs

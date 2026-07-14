@@ -1,5 +1,6 @@
 class MaintenanceEntity {
   final String? id; // id gerado pelo firestore
+  final String? userId; // id do dono, atribuido pelo repositorio
   final String vehicleId;
   final DateTime date;
   final String workshop;
@@ -8,6 +9,7 @@ class MaintenanceEntity {
 
   MaintenanceEntity({
     this.id,
+    this.userId,
     required this.vehicleId,
     required this.date,
     required this.workshop,
