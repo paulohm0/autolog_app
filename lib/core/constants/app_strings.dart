@@ -58,4 +58,10 @@ class AppStrings {
   static const String saveMaintenanceButton = 'Salvar Manutenção';
   static const String valueWarning =
       '* O valor inserido será contabilizado no seu relatório anual de gastos automotivos automaticamente.';
+  static const String saveMaintenanceSnackBarMessage =
+      'Manutenção salva com sucesso!';
+  static const String noVehiclesRegistered =
+      'Nenhum veículo cadastrado. Cadastre um veículo primeiro.';
+  static const String missingVehicleOrDate =
+      'Selecione o veículo e a data da manutenção.';
 }
