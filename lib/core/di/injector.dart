@@ -1,6 +1,12 @@
 import 'package:autolog_app/data/repository/auth_repository_impl.dart';
+import 'package:autolog_app/data/repository/battery_change_repository_impl.dart';
+import 'package:autolog_app/data/repository/maintenance_repository_impl.dart';
+import 'package:autolog_app/data/repository/oil_change_repository_impl.dart';
 import 'package:autolog_app/data/repository/vehicle_repository_impl.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
+import 'package:autolog_app/domain/repository/i_battery_change_repository.dart';
+import 'package:autolog_app/domain/repository/i_maintenance_repository.dart';
+import 'package:autolog_app/domain/repository/i_oil_change_repository.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
 import 'package:autolog_app/ui/routes/login/login_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
@@ -31,6 +37,21 @@ void setupDependencyInjection() {
   );
   getIt.registerLazySingleton<IVehicleRepository>(
     () => VehicleRepositoryImpl(
+      firestoreDB: getIt<FirebaseFirestore>(),
+    ),
+  );
+  getIt.registerLazySingleton<IMaintenanceRepository>(
+    () => MaintenanceRepositoryImpl(
+      firestoreDB: getIt<FirebaseFirestore>(),
+    ),
+  );
+  getIt.registerLazySingleton<IOilChangeRepository>(
+    () => OilChangeRepositoryImpl(
+      firestoreDB: getIt<FirebaseFirestore>(),
+    ),
+  );
+  getIt.registerLazySingleton<IBatteryChangeRepository>(
+    () => BatteryChangeRepositoryImpl(
       firestoreDB: getIt<FirebaseFirestore>(),
     ),
   );
