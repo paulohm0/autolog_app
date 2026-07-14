@@ -11,14 +11,14 @@ class AppStrings {
   static const String signInGoogleLabel = 'Entrar com o Google';
 
   // Home Screen
-  static const String totalExpenseLabel = 'TOTAL GASTO COM MANUTENÇÃO EM 2024';
   static const String activeVehiclesLabel = 'Veículos Ativos';
-  static const String nextOilChangeLabel = 'Próxima Troca de Óleo';
   static const String maintenanceHistory = 'Histórico de Manutenção';
   static const String filters = 'Filtros';
   static const String allVehicles = 'Todos os Veículos';
   static const String vehicleFilter = 'VEÍCULO';
   static const String yearFilter = 'ANO';
+  static const String emptyMaintenanceHistory =
+      'Nenhuma manutenção registrada ainda.';
 
   // Register Vehicle Screen
   static const String vehicleSection = 'VEÍCULO';

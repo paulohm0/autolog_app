@@ -1,99 +1,142 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
+import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/domain/entity/maintenance_entity.dart';
+import 'package:autolog_app/domain/entity/vehicle_entity.dart';
+import 'package:autolog_app/ui/routes/home/home_cubit.dart';
+import 'package:autolog_app/ui/routes/home/home_state.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomeScreen extends StatelessWidget {
+const _monthAbbreviations = [
+  'JAN',
+  'FEV',
+  'MAR',
+  'ABR',
+  'MAI',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SET',
+  'OUT',
+  'NOV',
+  'DEZ',
+];
+
+String _monthAbbrev(DateTime date) => _monthAbbreviations[date.month - 1];
+
+String _formatCurrency(double value) {
+  final fixed = value.toStringAsFixed(2);
+  final parts = fixed.split('.');
+  final digits = parts[0];
+  final cents = parts[1];
+  final buffer = StringBuffer();
+  for (var i = 0; i < digits.length; i++) {
+    final posFromEnd = digits.length - i;
+    buffer.write(digits[i]);
+    if (posFromEnd > 1 && posFromEnd % 3 == 1) {
+      buffer.write('.');
+    }
+  }
+  return 'R\$ $buffer,$cents';
+}
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final HomeCubit _homeCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeCubit = getIt<HomeCubit>();
+    _homeCubit.loadHomeData();
+  }
+
+  @override
+  void dispose() {
+    _homeCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: AppStrings.appBrandNameSplit1,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+    return BlocProvider.value(
+      value: _homeCubit,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: AppStrings.appBrandNameSplit1,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: AppStrings.appBrandNameSplit2,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                TextSpan(
+                  text: AppStrings.appBrandNameSplit2,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              return RefreshIndicator(
+                onRefresh: () => _homeCubit.loadHomeData(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 100),
+                  child: Column(
+                    children: [
+                      _buildQuickStats(context, state),
+                      _buildHistorySection(context),
+                      _buildMaintenanceList(state),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 100),
-          child: Column(
-            children: [
-              _buildSummaryCard(),
-              _buildQuickStats(context),
-              _buildHistorySection(context),
-              _buildMaintenanceList(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.registerService);
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
-        elevation: 4,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, size: 28),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppStrings.totalExpenseLabel,
-              style: AppTextStyles.labelLarge.copyWith(color: Colors.white70),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'R\$ 4.250,00',
-              style: AppTextStyles.displayLarge.copyWith(
-                color: AppColors.textOnPrimary,
-                fontSize: 34,
-              ),
-            ),
-          ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            await Navigator.pushNamed(context, AppRoutes.registerService);
+            _homeCubit.loadHomeData();
+          },
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.textOnPrimary,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, size: 28),
         ),
       ),
     );
   }
 
-  Widget _buildQuickStats(BuildContext context) {
+  Widget _buildQuickStats(BuildContext context, HomeState state) {
+    final vehicleCount = state is HomeLoaded
+        ? state.vehicleCount.toString().padLeft(2, '0')
+        : '--';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -101,54 +144,14 @@ class HomeScreen extends StatelessWidget {
         AppSpacing.lg,
         0,
       ),
-      child: Column(
-        children: [
-          _StatRow(
-            icon: Icons.directions_car,
-            label: AppStrings.activeVehiclesLabel,
-            value: '03',
-            onTap: () => showModalBottomSheet(
-              context: context,
-              builder: (context) => SizedBox(
-                height: 200,
-                child: Center(
-                  child: Column(
-                    children: [
-                      const Text('Components'),
-                      FloatingActionButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.registerVehicle,
-                          );
-                        },
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.textOnPrimary,
-                        elevation: 4,
-                        shape: const CircleBorder(),
-                        child: const Icon(Icons.add, size: 28),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _StatRow(
-            icon: Icons.water_drop,
-            label: AppStrings.nextOilChangeLabel,
-            value: '85.500 km',
-            valueColor: AppColors.warning,
-            onTap: () => showModalBottomSheet(
-              context: context,
-              builder: (context) => const SizedBox(
-                height: 200,
-                child: Center(child: Text('Conteúdo aqui')),
-              ),
-            ),
-          ),
-        ],
+      child: _StatRow(
+        icon: Icons.directions_car,
+        label: AppStrings.activeVehiclesLabel,
+        value: vehicleCount,
+        onTap: () async {
+          await Navigator.pushNamed(context, AppRoutes.registerVehicle);
+          _homeCubit.loadHomeData();
+        },
       ),
     );
   }
@@ -225,39 +228,71 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMaintenanceList() {
+  Widget _buildMaintenanceList(HomeState state) {
+    if (state is HomeLoading || state is HomeInitial) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state is HomeError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Text(
+          state.message,
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
+        ),
+      );
+    }
+
+    final loaded = state as HomeLoaded;
+
+    if (loaded.maintenances.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xxl,
+        ),
+        child: Center(
+          child: Text(
+            AppStrings.emptyMaintenanceHistory,
+            style: AppTextStyles.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         children: [
-          MaintenanceCard(
-            month: 'MAIO',
-            day: '18',
-            title: 'Troca de Óleo e Filtros',
-            workshop: 'HighTech Motors',
-            vehicle: 'BMW 320i M-Sport',
-            amount: 'R\$ 850,00',
-          ),
-          const SizedBox(height: AppSpacing.md),
-          MaintenanceCard(
-            month: 'ABR',
-            day: '05',
-            title: 'Troca de Discos e Pastilhas',
-            workshop: 'Precision Brake Center',
-            vehicle: 'Porsche Macan S',
-            amount: 'R\$ 2.400,00',
-          ),
-          const SizedBox(height: AppSpacing.md),
-          MaintenanceCard(
-            month: 'MAR',
-            day: '22',
-            title: 'Alinhamento e Balanceamento',
-            workshop: 'Pneus & Cia',
-            vehicle: 'Toyota Hilux SRX',
-            amount: 'R\$ 350,00',
-          ),
+          for (final maintenance in loaded.maintenances) ...[
+            _buildMaintenanceCard(maintenance, loaded.vehiclesById),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildMaintenanceCard(
+    MaintenanceEntity maintenance,
+    Map<String, VehicleEntity> vehiclesById,
+  ) {
+    final vehicle = vehiclesById[maintenance.vehicleId];
+    final vehicleLabel = vehicle != null
+        ? '${vehicle.brand} ${vehicle.model}'
+        : '';
+
+    return MaintenanceCard(
+      month: _monthAbbrev(maintenance.date),
+      day: maintenance.date.day.toString().padLeft(2, '0'),
+      title: maintenance.description,
+      workshop: maintenance.workshop,
+      vehicle: vehicleLabel,
+      amount: _formatCurrency(maintenance.value),
     );
   }
 }
@@ -266,14 +301,12 @@ class _StatRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
   final VoidCallback? onTap;
 
   const _StatRow({
     required this.icon,
     required this.label,
     required this.value,
-    this.valueColor,
     this.onTap,
   });
 
@@ -311,7 +344,7 @@ class _StatRow extends StatelessWidget {
                   Text(
                     value,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: valueColor ?? AppColors.textSecondary,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

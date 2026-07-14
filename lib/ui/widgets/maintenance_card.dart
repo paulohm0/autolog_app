@@ -42,7 +42,12 @@ class MaintenanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyles.titleLarge),
+                    Text(
+                      title,
+                      style: AppTextStyles.titleLarge,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
