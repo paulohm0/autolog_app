@@ -3,6 +3,7 @@ import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
+import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/autolog_brand.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
@@ -46,28 +47,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: AppStrings.appBrandNameSplit1,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextSpan(
-                    text: AppStrings.appBrandNameSplit2,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            title: const AppBrandTitle(),
             centerTitle: true,
           ),
           body: BlocListener<RegisterVehicleCubit, RegisterVehicleState>(

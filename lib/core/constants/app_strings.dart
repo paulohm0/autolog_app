@@ -64,4 +64,30 @@ class AppStrings {
       'Nenhum veículo cadastrado. Cadastre um veículo primeiro.';
   static const String missingVehicleOrDate =
       'Selecione o veículo e a data da manutenção.';
+
+  // Oil/Battery Screen
+  static const String oilToggleLabel = 'Óleo';
+  static const String batteryToggleLabel = 'Bateria';
+  static const String oilChangeHistoryTitle = 'Histórico de Troca de Óleo';
+  static const String batteryChangeHistoryTitle =
+      'Histórico de Troca de Bateria';
+  static const String emptyOilChangeHistory =
+      'Nenhuma troca de óleo registrada ainda.';
+  static const String emptyBatteryChangeHistory =
+      'Nenhuma troca de bateria registrada ainda.';
+  static const String addOilChangeTitle = 'Nova Troca de Óleo';
+  static const String addBatteryChangeTitle = 'Nova Troca de Bateria';
+  static const String oilBrandLabel = 'Marca do Óleo';
+  static const String oilBrandHint = 'Ex: Mobil, Castrol';
+  static const String litersLabel = 'Litros';
+  static const String litersHint = 'Ex: 4,5';
+  static const String batteryModelLabel = 'Modelo da Bateria';
+  static const String batteryModelHint = 'Ex: Moura 60Ah';
+  static const String changeDateLabel = 'DATA DA TROCA';
+  static const String saveOilChangeButton = 'Salvar Troca de Óleo';
+  static const String saveBatteryChangeButton = 'Salvar Troca de Bateria';
+  static const String saveOilChangeSnackBarMessage =
+      'Troca de óleo salva com sucesso!';
+  static const String saveBatteryChangeSnackBarMessage =
+      'Troca de bateria salva com sucesso!';
 }

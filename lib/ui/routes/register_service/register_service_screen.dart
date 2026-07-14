@@ -1,21 +1,18 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/date_formatter.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_cubit.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_state.dart';
+import 'package:autolog_app/ui/widgets/app_brand_title.dart';
+import 'package:autolog_app/ui/widgets/app_date_field.dart';
 import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-String formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
-}
 
 class RegisterServiceScreen extends StatefulWidget {
   const RegisterServiceScreen({super.key});
@@ -29,7 +26,6 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   final _workshopController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _valueController = TextEditingController();
-  final _dateController = TextEditingController();
 
   List<VehicleEntity> _vehicles = [];
   VehicleEntity? _selectedVehicle;
@@ -48,7 +44,6 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     _workshopController.dispose();
     _descriptionController.dispose();
     _valueController.dispose();
-    _dateController.dispose();
     super.dispose();
   }
 
@@ -60,12 +55,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       firstDate: DateTime(now.year - 10),
       lastDate: now,
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text = formatDate(picked);
-      });
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _pickVehicle() async {
@@ -130,28 +120,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: AppStrings.appBrandNameSplit1,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                TextSpan(
-                  text: AppStrings.appBrandNameSplit2,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          title: const AppBrandTitle(),
           centerTitle: true,
         ),
         body: BlocListener<RegisterServiceCubit, RegisterServiceState>(
@@ -233,7 +202,14 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
           onTap: _pickVehicle,
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildDateField(),
+        AppDateField(
+          label: AppStrings.maintenanceDateLabel,
+          hintText: AppStrings.dateHint,
+          displayText: _selectedDate != null
+              ? formatDate(_selectedDate!)
+              : null,
+          onTap: _pickDate,
+        ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
           controller: _workshopController,
@@ -248,60 +224,6 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
           hintText: AppStrings.servicesDescriptionHint,
           prefixIcon: Icons.build_outlined,
           maxLines: 4,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(AppStrings.maintenanceDateLabel, style: AppTextStyles.labelLarge),
-        const SizedBox(height: AppSpacing.sm),
-        GestureDetector(
-          onTap: _pickDate,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    readOnly: true,
-                    controller: _dateController,
-                    onTap: _pickDate,
-                    style: AppTextStyles.bodyLarge,
-                    decoration: InputDecoration(
-                      hintText: AppStrings.dateHint,
-                      hintStyle: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textHint,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.calendar_today_outlined,
-                        color: AppColors.textHint,
-                        size: 20,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.lg),
-                  child: const Icon(
-                    Icons.calendar_month_outlined,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
