@@ -12,6 +12,7 @@ import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/login/login_cubit.dart';
 import 'package:autolog_app/ui/routes/oil_battery/battery_change_cubit.dart';
 import 'package:autolog_app/ui/routes/oil_battery/oil_change_cubit.dart';
+import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,5 +91,8 @@ void setupDependencyInjection() {
       batteryChangeRepository: getIt<IBatteryChangeRepository>(),
       vehicleRepository: getIt<IVehicleRepository>(),
     ),
+  );
+  getIt.registerFactory(
+    () => ProfileCubit(repository: getIt<IAuthRepository>()),
   );
 }

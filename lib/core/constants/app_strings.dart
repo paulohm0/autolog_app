@@ -90,4 +90,8 @@ class AppStrings {
       'Troca de óleo salva com sucesso!';
   static const String saveBatteryChangeSnackBarMessage =
       'Troca de bateria salva com sucesso!';
+
+  // Profile Screen
+  static const String appVersionLabel = 'Versão do App';
+  static const String signOutButton = 'Sair';
 }
