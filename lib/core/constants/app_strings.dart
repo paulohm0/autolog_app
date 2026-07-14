@@ -94,4 +94,9 @@ class AppStrings {
   // Profile Screen
   static const String appVersionLabel = 'Versão do App';
   static const String signOutButton = 'Sair';
+
+  // Main Navigation
+  static const String navHistoryLabel = 'Histórico';
+  static const String navOilBatteryLabel = 'Óleo/Bateria';
+  static const String navProfileLabel = 'Perfil';
 }

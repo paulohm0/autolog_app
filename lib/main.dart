@@ -3,8 +3,8 @@ import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/firebase_options.dart';
-import 'package:autolog_app/ui/routes/home/home_screen.dart';
 import 'package:autolog_app/ui/routes/login/login_screen.dart';
+import 'package:autolog_app/ui/routes/main_navigation/main_navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +48,7 @@ class _AuthGate extends StatelessWidget {
             ),
           );
         }
-        if (snapshot.hasData) return const HomeScreen();
+        if (snapshot.hasData) return const MainNavigationScreen();
         return const LoginScreen();
       },
     );
