@@ -155,6 +155,7 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'oil_battery_fab',
         onPressed: _showOil ? _openAddOilSheet : _openAddBatterySheet,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,

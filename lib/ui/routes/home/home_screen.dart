@@ -95,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'home_fab',
           onPressed: () async {
             await Navigator.pushNamed(context, AppRoutes.registerService);
             _homeCubit.loadHomeData();
