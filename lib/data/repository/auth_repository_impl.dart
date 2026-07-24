@@ -40,7 +40,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       final user = userCredential.user!;
       return Right(_toEntity(user));
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -51,7 +51,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       await _firebaseAuth.signOut();
       return Right(null);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -62,7 +62,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       if (user == null) return Left(ServerFailure());
       return Right(_toEntity(user));
     } catch (e) {
-      return Left(UnexpectedFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 }

@@ -33,7 +33,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
       await _firestoreDB.collection('maintenances').add(newMaintenance.toJson());
       return Right(null);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -50,7 +50,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
           .toList();
       return Right(maintenances);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 }

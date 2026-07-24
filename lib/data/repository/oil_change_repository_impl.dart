@@ -30,7 +30,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
       await _firestoreDB.collection('oil_changes').add(newOilChange.toJson());
       return Right(null);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -47,7 +47,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
           .toList();
       return Right(oilChanges);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 }

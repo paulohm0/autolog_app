@@ -33,7 +33,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
           .add(newBatteryChange.toJson());
       return Right(null);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -50,7 +50,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
           .toList();
       return Right(batteryChanges);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 }

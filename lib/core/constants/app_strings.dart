@@ -99,4 +99,8 @@ class AppStrings {
   static const String navHistoryLabel = 'Histórico';
   static const String navOilBatteryLabel = 'Óleo/Bateria';
   static const String navProfileLabel = 'Perfil';
+
+  // Validação de formulários
+  static const String missingRequiredFields =
+      'Preencha todos os campos obrigatórios.';
 }

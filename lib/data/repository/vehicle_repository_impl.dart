@@ -31,7 +31,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
       await _firestoreDB.collection('vehicles').add(newVehicle.toJson());
       return Right(null);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 
@@ -47,7 +47,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
           .toList();
       return Right(vehicles);
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(mapExceptionToFailure(e));
     }
   }
 }

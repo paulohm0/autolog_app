@@ -74,11 +74,21 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       return;
     }
 
+    final workshop = _workshopController.text.trim();
+    final description = _descriptionController.text.trim();
+
+    if (workshop.isEmpty || description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
+      );
+      return;
+    }
+
     _cubit.saveMaintenance(
       vehicleId: _selectedVehicle!.id!,
       date: _selectedDate!,
-      workshop: _workshopController.text.trim(),
-      description: _descriptionController.text.trim(),
+      workshop: workshop,
+      description: description,
       value: double.tryParse(
             _valueController.text.trim().replaceAll(',', '.'),
           ) ??

@@ -35,6 +35,27 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
     super.dispose();
   }
 
+  void _save(BuildContext context) {
+    final brand = _brandController.text.trim();
+    final model = _modelController.text.trim();
+    final plate = _plateController.text.trim();
+
+    if (brand.isEmpty || model.isEmpty || plate.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
+      );
+      return;
+    }
+
+    context.read<RegisterVehicleCubit>().saveVehicleFromForm(
+      brand: brand,
+      model: model,
+      licensePlate: plate,
+      year: _yearController.text.trim(),
+      color: _colorController.text.trim(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -92,17 +113,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                         PrimaryButton(
                           label: AppStrings.saveVehicleButton,
                           icon: Icons.save_alt_rounded,
-                          onPressed: () {
-                            context
-                                .read<RegisterVehicleCubit>()
-                                .saveVehicleFromForm(
-                                  brand: _brandController.text.trim(),
-                                  model: _modelController.text.trim(),
-                                  licensePlate: _plateController.text.trim(),
-                                  year: _yearController.text.trim(),
-                                  color: _colorController.text.trim(),
-                                );
-                          },
+                          onPressed: () => _save(context),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(

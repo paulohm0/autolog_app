@@ -505,13 +505,20 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
       );
       return;
     }
-    widget.onSave(
-      _selectedVehicle!.id!,
-      _brandController.text.trim(),
-      double.tryParse(_litersController.text.trim().replaceAll(',', '.')) ??
-          0,
-      _selectedDate!,
+
+    final brand = _brandController.text.trim();
+    final liters = double.tryParse(
+      _litersController.text.trim().replaceAll(',', '.'),
     );
+
+    if (brand.isEmpty || liters == null || liters <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
+      );
+      return;
+    }
+
+    widget.onSave(_selectedVehicle!.id!, brand, liters, _selectedDate!);
   }
 
   @override
@@ -628,11 +635,17 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
       );
       return;
     }
-    widget.onSave(
-      _selectedVehicle!.id!,
-      _modelController.text.trim(),
-      _selectedDate!,
-    );
+
+    final model = _modelController.text.trim();
+
+    if (model.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
+      );
+      return;
+    }
+
+    widget.onSave(_selectedVehicle!.id!, model, _selectedDate!);
   }
 
   @override
