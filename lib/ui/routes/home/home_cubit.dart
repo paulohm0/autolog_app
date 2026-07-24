@@ -18,6 +18,7 @@ class HomeCubit extends Cubit<HomeState> {
     emit(HomeLoading());
     final vehiclesResult = await _vehicleRepository.getVehicles();
     final maintenancesResult = await _maintenanceRepository.getMaintenances();
+    if (isClosed) return;
 
     vehiclesResult.fold((failure) => emit(HomeError(message: failure.message)), (
       vehicles,

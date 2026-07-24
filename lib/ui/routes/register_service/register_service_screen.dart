@@ -61,30 +61,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   Future<void> _pickVehicle() async {
     final selected = await showModalBottomSheet<VehicleEntity>(
       context: context,
-      builder: (context) {
-        if (_vehicles.isEmpty) {
-          return const SizedBox(
-            height: 150,
-            child: Center(child: Text(AppStrings.noVehiclesRegistered)),
-          );
-        }
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final vehicle in _vehicles)
-                ListTile(
-                  leading: const Icon(
-                    Icons.directions_car_outlined,
-                    color: AppColors.primary,
-                  ),
-                  title: Text('${vehicle.brand} ${vehicle.model}'),
-                  onTap: () => Navigator.of(context).pop(vehicle),
-                ),
-            ],
-          ),
-        );
-      },
+      builder: (_) => _VehiclePickerSheet(vehicles: _vehicles),
     );
     if (selected != null) setState(() => _selectedVehicle = selected);
   }
@@ -149,11 +126,18 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPageTitle(),
+                  const _PageTitle(),
                   const SizedBox(height: AppSpacing.xxl),
-                  _buildForm(),
+                  _Form(
+                    selectedVehicle: _selectedVehicle,
+                    onVehicleTap: _pickVehicle,
+                    selectedDate: _selectedDate,
+                    onDateTap: _pickDate,
+                    workshopController: _workshopController,
+                    descriptionController: _descriptionController,
+                  ),
                   const SizedBox(height: AppSpacing.lg),
-                  _buildFinancialSection(),
+                  _FinancialSection(valueController: _valueController),
                   const SizedBox(height: AppSpacing.xxl),
                   PrimaryButton(
                     label: AppStrings.saveMaintenanceButton,
@@ -169,8 +153,45 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       ),
     );
   }
+}
 
-  Widget _buildPageTitle() {
+class _VehiclePickerSheet extends StatelessWidget {
+  final List<VehicleEntity> vehicles;
+
+  const _VehiclePickerSheet({required this.vehicles});
+
+  @override
+  Widget build(BuildContext context) {
+    if (vehicles.isEmpty) {
+      return const SizedBox(
+        height: 150,
+        child: Center(child: Text(AppStrings.noVehiclesRegistered)),
+      );
+    }
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final vehicle in vehicles)
+            ListTile(
+              leading: const Icon(
+                Icons.directions_car_outlined,
+                color: AppColors.primary,
+              ),
+              title: Text('${vehicle.brand} ${vehicle.model}'),
+              onTap: () => Navigator.of(context).pop(vehicle),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PageTitle extends StatelessWidget {
+  const _PageTitle();
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -189,37 +210,54 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       ],
     );
   }
+}
 
-  Widget _buildForm() {
+class _Form extends StatelessWidget {
+  final VehicleEntity? selectedVehicle;
+  final VoidCallback onVehicleTap;
+  final DateTime? selectedDate;
+  final VoidCallback onDateTap;
+  final TextEditingController workshopController;
+  final TextEditingController descriptionController;
+
+  const _Form({
+    required this.selectedVehicle,
+    required this.onVehicleTap,
+    required this.selectedDate,
+    required this.onDateTap,
+    required this.workshopController,
+    required this.descriptionController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         AppDropdownField(
           label: AppStrings.vehicleLabel,
-          hintText: _selectedVehicle != null
-              ? '${_selectedVehicle!.brand} ${_selectedVehicle!.model}'
+          hintText: selectedVehicle != null
+              ? '${selectedVehicle!.brand} ${selectedVehicle!.model}'
               : AppStrings.selectCarHint,
           prefixIcon: Icons.directions_car_outlined,
-          onTap: _pickVehicle,
+          onTap: onVehicleTap,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppDateField(
           label: AppStrings.maintenanceDateLabel,
           hintText: AppStrings.dateHint,
-          displayText: _selectedDate != null
-              ? formatDate(_selectedDate!)
-              : null,
-          onTap: _pickDate,
+          displayText: selectedDate != null ? formatDate(selectedDate!) : null,
+          onTap: onDateTap,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          controller: _workshopController,
+          controller: workshopController,
           label: AppStrings.workshopLabel,
           hintText: AppStrings.workshopHint,
           prefixIcon: Icons.storefront_outlined,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          controller: _descriptionController,
+          controller: descriptionController,
           label: AppStrings.servicesDescriptionLabel,
           hintText: AppStrings.servicesDescriptionHint,
           prefixIcon: Icons.build_outlined,
@@ -228,8 +266,15 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       ],
     );
   }
+}
 
-  Widget _buildFinancialSection() {
+class _FinancialSection extends StatelessWidget {
+  final TextEditingController valueController;
+
+  const _FinancialSection({required this.valueController});
+
+  @override
+  Widget build(BuildContext context) {
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +315,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                 ),
                 Expanded(
                   child: TextField(
-                    controller: _valueController,
+                    controller: valueController,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),

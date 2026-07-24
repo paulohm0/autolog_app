@@ -12,6 +12,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> loadUser() async {
     emit(ProfileLoading());
     final result = await _repository.getCurrentUser();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (user) => emit(ProfileLoaded(user: user)),
@@ -21,6 +22,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> signOut() async {
     emit(ProfileLoading());
     final result = await _repository.signOut();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) => emit(ProfileSignedOut()),

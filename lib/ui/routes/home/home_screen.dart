@@ -67,6 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<void> _openRegisterVehicle(BuildContext context) async {
+    await Navigator.pushNamed(context, AppRoutes.registerVehicle);
+    _homeCubit.loadHomeData();
+  }
+
+  Future<void> _openRegisterService(BuildContext context) async {
+    await Navigator.pushNamed(context, AppRoutes.registerService);
+    _homeCubit.loadHomeData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -84,9 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.only(bottom: 100),
                   child: Column(
                     children: [
-                      _buildQuickStats(context, state),
-                      _buildHistorySection(context),
-                      _buildMaintenanceList(state),
+                      _QuickStats(
+                        state: state,
+                        onVehiclesTap: () => _openRegisterVehicle(context),
+                      ),
+                      const _HistorySection(),
+                      _MaintenanceList(state: state),
                     ],
                   ),
                 ),
@@ -96,10 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         floatingActionButton: FloatingActionButton(
           heroTag: 'home_fab',
-          onPressed: () async {
-            await Navigator.pushNamed(context, AppRoutes.registerService);
-            _homeCubit.loadHomeData();
-          },
+          onPressed: () => _openRegisterService(context),
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textOnPrimary,
           elevation: 4,
@@ -109,10 +119,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildQuickStats(BuildContext context, HomeState state) {
+class _QuickStats extends StatelessWidget {
+  final HomeState state;
+  final VoidCallback onVehiclesTap;
+
+  const _QuickStats({required this.state, required this.onVehiclesTap});
+
+  @override
+  Widget build(BuildContext context) {
     final vehicleCount = state is HomeLoaded
-        ? state.vehicleCount.toString().padLeft(2, '0')
+        ? (state as HomeLoaded).vehicleCount.toString().padLeft(2, '0')
         : '--';
 
     return Padding(
@@ -126,15 +144,17 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.directions_car,
         label: AppStrings.activeVehiclesLabel,
         value: vehicleCount,
-        onTap: () async {
-          await Navigator.pushNamed(context, AppRoutes.registerVehicle);
-          _homeCubit.loadHomeData();
-        },
+        onTap: onVehiclesTap,
       ),
     );
   }
+}
 
-  Widget _buildHistorySection(BuildContext context) {
+class _HistorySection extends StatelessWidget {
+  const _HistorySection();
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -157,46 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.textSecondary,
                 onPressed: () => showModalBottomSheet(
                   context: context,
-                  builder: (_) => Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.filters,
-                          style: AppTextStyles.headlineLarge,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _FilterChip(
-                                label: AppStrings.vehicleFilter,
-                                value: AppStrings.allVehicles,
-                                trailing: const Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 18,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            _FilterChip(
-                              label: AppStrings.yearFilter,
-                              value: '2024',
-                              trailing: const Icon(
-                                Icons.calendar_today_outlined,
-                                size: 16,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                      ],
-                    ),
-                  ),
+                  builder: (_) => const _FiltersSheet(),
                 ),
               ),
             ],
@@ -205,8 +186,60 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildMaintenanceList(HomeState state) {
+class _FiltersSheet extends StatelessWidget {
+  const _FiltersSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(AppStrings.filters, style: AppTextStyles.headlineLarge),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _FilterChip(
+                  label: AppStrings.vehicleFilter,
+                  value: AppStrings.allVehicles,
+                  trailing: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _FilterChip(
+                label: AppStrings.yearFilter,
+                value: '2024',
+                trailing: const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
+
+class _MaintenanceList extends StatelessWidget {
+  final HomeState state;
+
+  const _MaintenanceList({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
     if (state is HomeLoading || state is HomeInitial) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
@@ -218,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Text(
-          state.message,
+          (state as HomeError).message,
           style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
         ),
       );
@@ -247,18 +280,29 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           for (final maintenance in loaded.maintenances) ...[
-            _buildMaintenanceCard(maintenance, loaded.vehiclesById),
+            _MaintenanceListItem(
+              maintenance: maintenance,
+              vehiclesById: loaded.vehiclesById,
+            ),
             const SizedBox(height: AppSpacing.md),
           ],
         ],
       ),
     );
   }
+}
 
-  Widget _buildMaintenanceCard(
-    MaintenanceEntity maintenance,
-    Map<String, VehicleEntity> vehiclesById,
-  ) {
+class _MaintenanceListItem extends StatelessWidget {
+  final MaintenanceEntity maintenance;
+  final Map<String, VehicleEntity> vehiclesById;
+
+  const _MaintenanceListItem({
+    required this.maintenance,
+    required this.vehiclesById,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final vehicle = vehiclesById[maintenance.vehicleId];
     final vehicleLabel = vehicle != null
         ? '${vehicle.brand} ${vehicle.model}'

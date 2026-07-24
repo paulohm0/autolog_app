@@ -18,6 +18,7 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
   Future<void> loadVehicles() async {
     emit(RegisterServiceLoading());
     final result = await _vehicleRepository.getVehicles();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(RegisterServiceError(message: failure.message)),
       (vehicles) => emit(RegisterServiceVehiclesLoaded(vehicles: vehicles)),
@@ -40,6 +41,7 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       value: value,
     );
     final result = await _maintenanceRepository.saveMaintenance(maintenance);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(RegisterServiceError(message: failure.message)),
       (_) => emit(RegisterServiceSuccess()),

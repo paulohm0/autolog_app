@@ -19,6 +19,7 @@ class OilChangeCubit extends Cubit<OilChangeState> {
     emit(OilChangeLoading());
     final vehiclesResult = await _vehicleRepository.getVehicles();
     final oilChangesResult = await _oilChangeRepository.getOilChanges();
+    if (isClosed) return;
 
     vehiclesResult.fold((failure) => emit(OilChangeError(message: failure.message)), (
       vehicles,
@@ -46,6 +47,7 @@ class OilChangeCubit extends Cubit<OilChangeState> {
       date: date,
     );
     final result = await _oilChangeRepository.saveOilChange(oilChange);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(OilChangeError(message: failure.message)),
       (_) => emit(OilChangeSaveSuccess()),

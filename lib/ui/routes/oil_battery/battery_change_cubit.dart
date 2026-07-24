@@ -20,6 +20,7 @@ class BatteryChangeCubit extends Cubit<BatteryChangeState> {
     final vehiclesResult = await _vehicleRepository.getVehicles();
     final batteryChangesResult = await _batteryChangeRepository
         .getBatteryChanges();
+    if (isClosed) return;
 
     vehiclesResult.fold((failure) => emit(BatteryChangeError(message: failure.message)), (
       vehicles,
@@ -47,6 +48,7 @@ class BatteryChangeCubit extends Cubit<BatteryChangeState> {
     final result = await _batteryChangeRepository.saveBatteryChange(
       batteryChange,
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(BatteryChangeError(message: failure.message)),
       (_) => emit(BatteryChangeSaveSuccess()),

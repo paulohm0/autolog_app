@@ -30,6 +30,7 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
   Future<void> saveVehicle(VehicleEntity vehicle) async {
     emit(LoadingState());
     final result = await _repository.saveVehicle(vehicle);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ErrorState(message: failure.message)),
       (success) => emit(SuccessState()),
@@ -39,6 +40,7 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
   Future<void> getVehicles() async {
     emit(LoadingState());
     final result = await _repository.getVehicles();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ErrorState(message: failure.message)),
       (vehicles) => emit(VehicleListLoadedState(vehicles: vehicles)),

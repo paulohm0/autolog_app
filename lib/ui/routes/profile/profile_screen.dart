@@ -50,18 +50,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             builder: (context, state) {
-              if (state is ProfileLoaded) return _buildProfile(state.user);
-              if (state is ProfileError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ),
+              if (state is ProfileLoaded) {
+                return _ProfileContent(
+                  user: state.user,
+                  onSignOut: () => _cubit.signOut(),
                 );
+              }
+              if (state is ProfileError) {
+                return _ProfileErrorMessage(message: state.message);
               }
               return const Center(child: CircularProgressIndicator());
             },
@@ -70,14 +66,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+}
 
-  Widget _buildProfile(UserEntity user) {
+class _ProfileErrorMessage extends StatelessWidget {
+  final String message;
+
+  const _ProfileErrorMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileContent extends StatelessWidget {
+  final UserEntity user;
+  final VoidCallback onSignOut;
+
+  const _ProfileContent({required this.user, required this.onSignOut});
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.lg),
-          _buildAvatar(user),
+          _Avatar(user: user),
           const SizedBox(height: AppSpacing.lg),
           Text(user.name, style: AppTextStyles.headlineLarge),
           const SizedBox(height: AppSpacing.xs),
@@ -88,13 +112,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
-          _buildAppVersion(),
+          const _AppVersionCard(),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
             height: 56,
             child: OutlinedButton.icon(
-              onPressed: () => _cubit.signOut(),
+              onPressed: onSignOut,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
                 side: const BorderSide(color: AppColors.error),
@@ -116,8 +140,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+}
 
-  Widget _buildAvatar(UserEntity user) {
+class _Avatar extends StatelessWidget {
+  final UserEntity user;
+
+  const _Avatar({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 48,
       backgroundColor: AppColors.primaryLight,
@@ -129,8 +160,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : null,
     );
   }
+}
 
-  Widget _buildAppVersion() {
+class _AppVersionCard extends StatelessWidget {
+  const _AppVersionCard();
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<PackageInfo>(
       future: PackageInfo.fromPlatform(),
       builder: (context, snapshot) {
