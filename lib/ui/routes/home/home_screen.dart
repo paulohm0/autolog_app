@@ -10,6 +10,7 @@ import 'package:autolog_app/ui/routes/home/home_state.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_screen.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_screen.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
+import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeCubit _homeCubit;
+  VehicleEntity? _filterVehicle;
+  int? _filterYear;
 
   @override
   void initState() {
@@ -143,6 +146,31 @@ class _HomeScreenState extends State<HomeScreen> {
     _homeCubit.loadHomeData();
   }
 
+  Future<void> _openFilters(BuildContext context, HomeState state) async {
+    final vehicles = state is HomeLoaded
+        ? state.vehiclesById.values.toList()
+        : <VehicleEntity>[];
+    final years = state is HomeLoaded
+        ? state.maintenances.map((m) => m.date.year).toSet().toList()
+        : <int>[];
+    years.sort((a, b) => b.compareTo(a));
+
+    final result = await showFiltersSheet(
+      context,
+      vehicles: vehicles,
+      years: years,
+      selectedVehicle: _filterVehicle,
+      selectedYear: _filterYear,
+    );
+
+    if (result == null) return;
+    final (vehicle, year) = result;
+    setState(() {
+      _filterVehicle = vehicle;
+      _filterYear = year;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -164,8 +192,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         state: state,
                         onVehiclesTap: () => _openVehiclesDialog(context),
                       ),
-                      const _HistorySection(),
-                      _MaintenanceList(state: state),
+                      _HistorySection(
+                        filterVehicle: _filterVehicle,
+                        filterYear: _filterYear,
+                        onFilterTap: () => _openFilters(context, state),
+                        onClearFilters: () => setState(() {
+                          _filterVehicle = null;
+                          _filterYear = null;
+                        }),
+                      ),
+                      _MaintenanceList(
+                        state: state,
+                        filterVehicleId: _filterVehicle?.id,
+                        filterYear: _filterYear,
+                      ),
                     ],
                   ),
                 ),
@@ -217,10 +257,22 @@ class _QuickStats extends StatelessWidget {
 }
 
 class _HistorySection extends StatelessWidget {
-  const _HistorySection();
+  final VehicleEntity? filterVehicle;
+  final int? filterYear;
+  final VoidCallback onFilterTap;
+  final VoidCallback onClearFilters;
+
+  const _HistorySection({
+    required this.filterVehicle,
+    required this.filterYear,
+    required this.onFilterTap,
+    required this.onClearFilters,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final filterActive = filterVehicle != null || filterYear != null;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -240,60 +292,83 @@ class _HistorySection extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.filter_list_rounded),
-                color: AppColors.textSecondary,
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  builder: (_) => const _FiltersSheet(),
-                ),
+                color: filterActive
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+                onPressed: onFilterTap,
               ),
             ],
           ),
+          if (filterActive) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _ActiveFiltersRow(
+              filterVehicle: filterVehicle,
+              filterYear: filterYear,
+              onClear: onClearFilters,
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _FiltersSheet extends StatelessWidget {
-  const _FiltersSheet();
+class _ActiveFiltersRow extends StatelessWidget {
+  final VehicleEntity? filterVehicle;
+  final int? filterYear;
+  final VoidCallback onClear;
+
+  const _ActiveFiltersRow({
+    required this.filterVehicle,
+    required this.filterYear,
+    required this.onClear,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xxl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppStrings.filters, style: AppTextStyles.headlineLarge),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _FilterChip(
-                  label: AppStrings.vehicleFilter,
-                  value: AppStrings.allVehicles,
-                  trailing: const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 18,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+    final label = [
+      if (filterVehicle != null)
+        '${filterVehicle!.brand} ${filterVehicle!.model}',
+      if (filterYear != null) filterYear.toString(),
+    ].join(' • ');
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: 6,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.primaryLight,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.filter_list_rounded,
+              size: 14,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.primary,
               ),
-              const SizedBox(width: AppSpacing.md),
-              _FilterChip(
-                label: AppStrings.yearFilter,
-                value: '2024',
-                trailing: const Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: AppColors.textPrimary,
-                ),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onClear,
+              child: const Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: AppColors.primary,
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -301,8 +376,14 @@ class _FiltersSheet extends StatelessWidget {
 
 class _MaintenanceList extends StatelessWidget {
   final HomeState state;
+  final String? filterVehicleId;
+  final int? filterYear;
 
-  const _MaintenanceList({required this.state});
+  const _MaintenanceList({
+    required this.state,
+    this.filterVehicleId,
+    this.filterYear,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -324,8 +405,18 @@ class _MaintenanceList extends StatelessWidget {
     }
 
     final loaded = state as HomeLoaded;
+    final maintenances = loaded.maintenances.where((m) {
+      if (filterVehicleId != null && m.vehicleId != filterVehicleId) {
+        return false;
+      }
+      if (filterYear != null && m.date.year != filterYear) {
+        return false;
+      }
+      return true;
+    }).toList();
 
-    if (loaded.maintenances.isEmpty) {
+    if (maintenances.isEmpty) {
+      final hasFilter = filterVehicleId != null || filterYear != null;
       return Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -333,7 +424,9 @@ class _MaintenanceList extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            AppStrings.emptyMaintenanceHistory,
+            hasFilter
+                ? AppStrings.emptyFilteredHistory
+                : AppStrings.emptyMaintenanceHistory,
             style: AppTextStyles.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -345,7 +438,7 @@ class _MaintenanceList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         children: [
-          for (final maintenance in loaded.maintenances) ...[
+          for (final maintenance in maintenances) ...[
             _MaintenanceListItem(
               maintenance: maintenance,
               vehiclesById: loaded.vehiclesById,
@@ -770,46 +863,6 @@ class _StatRow extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Widget? trailing;
-
-  const _FilterChip({required this.label, required this.value, this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(label, style: AppTextStyles.labelMedium),
-              Text(value, style: AppTextStyles.titleMedium),
-            ],
-          ),
-          if (trailing != null) ...[
-            const SizedBox(width: AppSpacing.xs),
-            trailing!,
-          ],
-        ],
       ),
     );
   }

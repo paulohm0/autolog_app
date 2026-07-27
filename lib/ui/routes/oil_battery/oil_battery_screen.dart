@@ -13,6 +13,7 @@ import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_date_field.dart';
 import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
+import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/simple_history_card.dart';
 import 'package:autolog_app/ui/widgets/vehicle_picker_dialog.dart';
@@ -47,6 +48,8 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   late final OilChangeCubit _oilCubit;
   late final BatteryChangeCubit _batteryCubit;
   bool _showOil = true;
+  VehicleEntity? _filterVehicle;
+  int? _filterYear;
 
   @override
   void initState() {
@@ -64,7 +67,9 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
 
   Future<void> _openAddOilSheet() async {
     final state = _oilCubit.state;
-    final vehicles = state is OilChangeLoaded ? state.vehicles : <VehicleEntity>[];
+    final vehicles = state is OilChangeLoaded
+        ? state.vehicles
+        : <VehicleEntity>[];
 
     await showModalBottomSheet(
       context: context,
@@ -117,7 +122,47 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     );
   }
 
-  void _handleSaveResult({required Object? state, required String successMessage}) {
+  Future<void> _openFilters() async {
+    final oilState = _oilCubit.state;
+    final batteryState = _batteryCubit.state;
+    final vehicles = oilState is OilChangeLoaded
+        ? oilState.vehicles
+        : (batteryState is BatteryChangeLoaded
+              ? batteryState.vehicles
+              : <VehicleEntity>[]);
+
+    final years = _showOil
+        ? (oilState is OilChangeLoaded
+              ? oilState.oilChanges.map((o) => o.date.year).toSet().toList()
+              : <int>[])
+        : (batteryState is BatteryChangeLoaded
+              ? batteryState.batteryChanges
+                    .map((b) => b.date.year)
+                    .toSet()
+                    .toList()
+              : <int>[]);
+    years.sort((a, b) => b.compareTo(a));
+
+    final result = await showFiltersSheet(
+      context,
+      vehicles: vehicles,
+      years: years,
+      selectedVehicle: _filterVehicle,
+      selectedYear: _filterYear,
+    );
+
+    if (result == null) return;
+    final (vehicle, year) = result;
+    setState(() {
+      _filterVehicle = vehicle;
+      _filterYear = year;
+    });
+  }
+
+  void _handleSaveResult({
+    required Object? state,
+    required String successMessage,
+  }) {
     if (!mounted) return;
     final message = switch (state) {
       OilChangeError(:final message) => message,
@@ -149,10 +194,37 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
                 onChanged: (showOil) => setState(() => _showOil = showOil),
               ),
             ),
+            _ListHeader(
+              title: _showOil
+                  ? AppStrings.oilChangeHistoryTitle
+                  : AppStrings.batteryChangeHistoryTitle,
+              filterActive: _filterVehicle != null || _filterYear != null,
+              onFilterTap: _openFilters,
+            ),
+            if (_filterVehicle != null || _filterYear != null)
+              _ActiveFilterChip(
+                label: [
+                  if (_filterVehicle != null)
+                    '${_filterVehicle!.brand} ${_filterVehicle!.model}',
+                  if (_filterYear != null) _filterYear.toString(),
+                ].join(' • '),
+                onClear: () => setState(() {
+                  _filterVehicle = null;
+                  _filterYear = null;
+                }),
+              ),
             Expanded(
               child: _showOil
-                  ? _OilList(cubit: _oilCubit)
-                  : _BatteryList(cubit: _batteryCubit),
+                  ? _OilList(
+                      cubit: _oilCubit,
+                      filterVehicleId: _filterVehicle?.id,
+                      filterYear: _filterYear,
+                    )
+                  : _BatteryList(
+                      cubit: _batteryCubit,
+                      filterVehicleId: _filterVehicle?.id,
+                      filterYear: _filterYear,
+                    ),
             ),
           ],
         ),
@@ -172,8 +244,14 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
 
 class _OilList extends StatelessWidget {
   final OilChangeCubit cubit;
+  final String? filterVehicleId;
+  final int? filterYear;
 
-  const _OilList({required this.cubit});
+  const _OilList({
+    required this.cubit,
+    this.filterVehicleId,
+    this.filterYear,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -188,9 +266,22 @@ class _OilList extends StatelessWidget {
         }
 
         final loaded = state as OilChangeLoaded;
-        if (loaded.oilChanges.isEmpty) {
-          return const _EmptyMessage(
-            message: AppStrings.emptyOilChangeHistory,
+        final oilChanges = loaded.oilChanges.where((o) {
+          if (filterVehicleId != null && o.vehicleId != filterVehicleId) {
+            return false;
+          }
+          if (filterYear != null && o.date.year != filterYear) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (oilChanges.isEmpty) {
+          final hasFilter = filterVehicleId != null || filterYear != null;
+          return _EmptyMessage(
+            message: hasFilter
+                ? AppStrings.emptyFilteredHistory
+                : AppStrings.emptyOilChangeHistory,
           );
         }
 
@@ -202,7 +293,7 @@ class _OilList extends StatelessWidget {
             100,
           ),
           children: [
-            for (final oilChange in loaded.oilChanges) ...[
+            for (final oilChange in oilChanges) ...[
               _OilChangeListItem(
                 oilChange: oilChange,
                 vehiclesById: loaded.vehiclesById,
@@ -231,17 +322,22 @@ class _OilChangeListItem extends StatelessWidget {
     return SimpleHistoryCard(
       month: _monthAbbrev(oilChange.date),
       day: oilChange.date.day.toString().padLeft(2, '0'),
-      title: oilChange.brand,
-      subtitle: '${oilChange.liters} litros',
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
+      detail: '${oilChange.brand} • ${oilChange.liters} litros',
     );
   }
 }
 
 class _BatteryList extends StatelessWidget {
   final BatteryChangeCubit cubit;
+  final String? filterVehicleId;
+  final int? filterYear;
 
-  const _BatteryList({required this.cubit});
+  const _BatteryList({
+    required this.cubit,
+    this.filterVehicleId,
+    this.filterYear,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -256,9 +352,22 @@ class _BatteryList extends StatelessWidget {
         }
 
         final loaded = state as BatteryChangeLoaded;
-        if (loaded.batteryChanges.isEmpty) {
-          return const _EmptyMessage(
-            message: AppStrings.emptyBatteryChangeHistory,
+        final batteryChanges = loaded.batteryChanges.where((b) {
+          if (filterVehicleId != null && b.vehicleId != filterVehicleId) {
+            return false;
+          }
+          if (filterYear != null && b.date.year != filterYear) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (batteryChanges.isEmpty) {
+          final hasFilter = filterVehicleId != null || filterYear != null;
+          return _EmptyMessage(
+            message: hasFilter
+                ? AppStrings.emptyFilteredHistory
+                : AppStrings.emptyBatteryChangeHistory,
           );
         }
 
@@ -270,7 +379,7 @@ class _BatteryList extends StatelessWidget {
             100,
           ),
           children: [
-            for (final batteryChange in loaded.batteryChanges) ...[
+            for (final batteryChange in batteryChanges) ...[
               _BatteryChangeListItem(
                 batteryChange: batteryChange,
                 vehiclesById: loaded.vehiclesById,
@@ -299,9 +408,101 @@ class _BatteryChangeListItem extends StatelessWidget {
     return SimpleHistoryCard(
       month: _monthAbbrev(batteryChange.date),
       day: batteryChange.date.day.toString().padLeft(2, '0'),
-      title: batteryChange.model,
-      subtitle: formatDate(batteryChange.date),
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
+      detail: batteryChange.model,
+    );
+  }
+}
+
+class _ListHeader extends StatelessWidget {
+  final String title;
+  final bool filterActive;
+  final VoidCallback onFilterTap;
+
+  const _ListHeader({
+    required this.title,
+    required this.filterActive,
+    required this.onFilterTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: AppTextStyles.headlineLarge),
+          IconButton(
+            icon: const Icon(Icons.filter_list_rounded),
+            color: filterActive ? AppColors.primary : AppColors.textSecondary,
+            onPressed: onFilterTap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveFilterChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onClear;
+
+  const _ActiveFilterChip({required this.label, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(AppRadius.full),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.directions_car_outlined,
+                size: 14,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              GestureDetector(
+                onTap: onClear,
+                child: const Icon(
+                  Icons.close_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -419,7 +620,12 @@ class _EmptyMessage extends StatelessWidget {
 
 class _OilChangeFormSheet extends StatefulWidget {
   final List<VehicleEntity> vehicles;
-  final void Function(String vehicleId, String brand, double liters, DateTime date)
+  final void Function(
+    String vehicleId,
+    String brand,
+    double liters,
+    DateTime date,
+  )
   onSave;
 
   const _OilChangeFormSheet({required this.vehicles, required this.onSave});

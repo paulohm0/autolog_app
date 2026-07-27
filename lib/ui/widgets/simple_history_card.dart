@@ -4,17 +4,15 @@ import 'package:flutter/material.dart';
 class SimpleHistoryCard extends StatelessWidget {
   final String month;
   final String day;
-  final String title;
-  final String subtitle;
   final String vehicle;
+  final String detail;
 
   const SimpleHistoryCard({
     super.key,
     required this.month,
     required this.day,
-    required this.title,
-    required this.subtitle,
     required this.vehicle,
+    required this.detail,
   });
 
   @override
@@ -34,31 +32,30 @@ class SimpleHistoryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: AppTextStyles.titleLarge,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(subtitle, style: AppTextStyles.bodySmall),
-                const SizedBox(height: 4),
                 Row(
                   children: [
                     const Icon(
                       Icons.directions_car_outlined,
-                      size: 13,
+                      size: 15,
                       color: AppColors.primary,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      vehicle,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        vehicle,
+                        style: AppTextStyles.titleLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  detail,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),

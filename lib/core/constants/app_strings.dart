@@ -15,8 +15,10 @@ class AppStrings {
   static const String maintenanceHistory = 'Histórico de Manutenção';
   static const String filters = 'Filtros';
   static const String allVehicles = 'Todos os Veículos';
+  static const String allYears = 'Todos os Anos';
   static const String vehicleFilter = 'VEÍCULO';
   static const String yearFilter = 'ANO';
+  static const String applyFiltersButton = 'Aplicar Filtros';
   static const String emptyMaintenanceHistory =
       'Nenhuma manutenção registrada ainda.';
 
@@ -110,6 +112,8 @@ class AppStrings {
       'Troca de óleo salva com sucesso!';
   static const String saveBatteryChangeSnackBarMessage =
       'Troca de bateria salva com sucesso!';
+  static const String emptyFilteredHistory =
+      'Nenhum registro encontrado para esse filtro.';
 
   // Profile Screen
   static const String appVersionLabel = 'Versão do App';
