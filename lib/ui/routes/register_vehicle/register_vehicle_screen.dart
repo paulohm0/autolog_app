@@ -12,7 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterVehicleScreen extends StatefulWidget {
-  const RegisterVehicleScreen({super.key});
+  final bool isOnboarding;
+  final VoidCallback? onVehicleRegistered;
+
+  const RegisterVehicleScreen({
+    super.key,
+    this.isOnboarding = false,
+    this.onVehicleRegistered,
+  });
 
   @override
   State<RegisterVehicleScreen> createState() => _RegisterVehicleScreenState();
@@ -64,10 +71,13 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
         builder: (context) => Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            leading: widget.isOnboarding
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+            automaticallyImplyLeading: !widget.isOnboarding,
             title: const AppBrandTitle(),
             centerTitle: true,
           ),
@@ -80,7 +90,11 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                       content: Text(AppStrings.saveVehicleSnackBarMessage),
                     ),
                   );
-                  Navigator.of(context).pop();
+                  if (widget.isOnboarding) {
+                    widget.onVehicleRegistered?.call();
+                  } else {
+                    Navigator.of(context).pop();
+                  }
                 case ErrorState():
                   ScaffoldMessenger.of(
                     context,
@@ -95,6 +109,10 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.isOnboarding) ...[
+                      const _OnboardingBanner(),
+                      const SizedBox(height: AppSpacing.xxl),
+                    ],
                     _PageTitle(),
                     const SizedBox(height: AppSpacing.xxl),
                     _RequiredFields(
@@ -132,6 +150,41 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _OnboardingBanner extends StatelessWidget {
+  const _OnboardingBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.directions_car_filled_rounded,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              AppStrings.onboardingVehicleMessage,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

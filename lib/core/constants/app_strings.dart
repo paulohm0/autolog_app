@@ -103,4 +103,10 @@ class AppStrings {
   // Validação de formulários
   static const String missingRequiredFields =
       'Preencha todos os campos obrigatórios.';
+
+  // Onboarding (cadastro do primeiro veículo)
+  static const String onboardingVehicleTitle = 'Vamos começar!';
+  static const String onboardingVehicleMessage =
+      'Cadastre pelo menos um veículo para continuar usando o AutoLog.';
+  static const String retryButton = 'Tentar novamente';
 }
