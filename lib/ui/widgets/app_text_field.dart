@@ -10,6 +10,7 @@ class AppTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final TextEditingController? controller;
+  final String? errorText;
 
   const AppTextField({
     super.key,
@@ -21,10 +22,13 @@ class AppTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.controller,
+    this.errorText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasError = errorText != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -34,6 +38,7 @@ class AppTextField extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surfaceVariant,
             borderRadius: BorderRadius.circular(AppRadius.md),
+            border: hasError ? Border.all(color: AppColors.error) : null,
           ),
           child: TextField(
             controller: controller,
@@ -58,6 +63,13 @@ class AppTextField extends StatelessWidget {
             ),
           ),
         ),
+        if (hasError) ...[
+          const SizedBox(height: 4),
+          Text(
+            errorText!,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+          ),
+        ],
       ],
     );
   }

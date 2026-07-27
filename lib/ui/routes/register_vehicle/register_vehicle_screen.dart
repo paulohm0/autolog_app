@@ -1,6 +1,7 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
@@ -32,6 +33,10 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
   final _yearController = TextEditingController();
   final _colorController = TextEditingController();
 
+  String? _brandError;
+  String? _modelError;
+  String? _plateError;
+
   @override
   void dispose() {
     _brandController.dispose();
@@ -47,10 +52,13 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
     final model = _modelController.text.trim();
     final plate = _plateController.text.trim();
 
-    if (brand.isEmpty || model.isEmpty || plate.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
-      );
+    setState(() {
+      _brandError = brand.isEmpty ? AppStrings.requiredFieldError : null;
+      _modelError = model.isEmpty ? AppStrings.requiredFieldError : null;
+      _plateError = plate.isEmpty ? AppStrings.requiredFieldError : null;
+    });
+
+    if (_brandError != null || _modelError != null || _plateError != null) {
       return;
     }
 
@@ -61,6 +69,10 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
       year: _yearController.text.trim(),
       color: _colorController.text.trim(),
     );
+  }
+
+  Future<void> _signOut() async {
+    await getIt<IAuthRepository>().signOut();
   }
 
   @override
@@ -80,6 +92,17 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
             automaticallyImplyLeading: !widget.isOnboarding,
             title: const AppBrandTitle(),
             centerTitle: true,
+            actions: widget.isOnboarding
+                ? [
+                    TextButton(
+                      onPressed: _signOut,
+                      child: Text(
+                        AppStrings.signOutButton,
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    ),
+                  ]
+                : null,
           ),
           body: BlocListener<RegisterVehicleCubit, RegisterVehicleState>(
             listener: (context, state) {
@@ -119,6 +142,9 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                       _brandController,
                       _modelController,
                       _plateController,
+                      brandError: _brandError,
+                      modelError: _modelError,
+                      plateError: _plateError,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     _OptionalDetails(
@@ -219,12 +245,18 @@ class _RequiredFields extends StatelessWidget {
   final TextEditingController brandController;
   final TextEditingController modelController;
   final TextEditingController plateController;
+  final String? brandError;
+  final String? modelError;
+  final String? plateError;
 
   const _RequiredFields(
     this.brandController,
     this.modelController,
-    this.plateController,
-  );
+    this.plateController, {
+    this.brandError,
+    this.modelError,
+    this.plateError,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +267,7 @@ class _RequiredFields extends StatelessWidget {
           label: AppStrings.brandLabel,
           hintText: AppStrings.brandHint,
           prefixIcon: Icons.business_outlined,
+          errorText: brandError,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -242,6 +275,7 @@ class _RequiredFields extends StatelessWidget {
           label: AppStrings.modelLabel,
           hintText: AppStrings.modelHint,
           prefixIcon: Icons.directions_car_outlined,
+          errorText: modelError,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -249,6 +283,7 @@ class _RequiredFields extends StatelessWidget {
           label: AppStrings.plateLabel,
           hintText: AppStrings.plateHint,
           prefixIcon: Icons.tag_rounded,
+          errorText: plateError,
         ),
       ],
     );

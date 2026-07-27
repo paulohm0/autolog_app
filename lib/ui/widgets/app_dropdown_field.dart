@@ -4,19 +4,25 @@ import 'package:flutter/material.dart';
 class AppDropdownField extends StatelessWidget {
   final String label;
   final String hintText;
+  final String? value;
   final IconData? prefixIcon;
   final VoidCallback? onTap;
+  final String? errorText;
 
   const AppDropdownField({
     super.key,
     required this.label,
     required this.hintText,
+    this.value,
     this.prefixIcon,
     this.onTap,
+    this.errorText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasError = errorText != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,6 +38,7 @@ class AppDropdownField extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppRadius.md),
+              border: hasError ? Border.all(color: AppColors.error) : null,
             ),
             child: Row(
               children: [
@@ -41,9 +48,11 @@ class AppDropdownField extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(
-                    hintText,
+                    value ?? hintText,
                     style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textHint,
+                      color: value != null
+                          ? AppColors.textPrimary
+                          : AppColors.textHint,
                     ),
                   ),
                 ),
@@ -56,6 +65,13 @@ class AppDropdownField extends StatelessWidget {
             ),
           ),
         ),
+        if (hasError) ...[
+          const SizedBox(height: 4),
+          Text(
+            errorText!,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+          ),
+        ],
       ],
     );
   }

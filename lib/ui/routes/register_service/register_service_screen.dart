@@ -11,6 +11,7 @@ import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
+import 'package:autolog_app/ui/widgets/vehicle_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,6 +31,12 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   List<VehicleEntity> _vehicles = [];
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
+
+  String? _vehicleError;
+  String? _dateError;
+  String? _workshopError;
+  String? _descriptionError;
+  String? _valueError;
 
   @override
   void initState() {
@@ -59,28 +66,36 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   }
 
   Future<void> _pickVehicle() async {
-    final selected = await showModalBottomSheet<VehicleEntity>(
-      context: context,
-      builder: (_) => _VehiclePickerSheet(vehicles: _vehicles),
-    );
+    final selected = await showVehiclePicker(context, _vehicles);
     if (selected != null) setState(() => _selectedVehicle = selected);
   }
 
   void _save() {
-    if (_selectedVehicle == null || _selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingVehicleOrDate)),
-      );
-      return;
-    }
-
     final workshop = _workshopController.text.trim();
     final description = _descriptionController.text.trim();
+    final value = double.tryParse(
+      _valueController.text.trim().replaceAll(',', '.'),
+    );
 
-    if (workshop.isEmpty || description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
-      );
+    setState(() {
+      _vehicleError = _selectedVehicle == null
+          ? AppStrings.requiredFieldError
+          : null;
+      _dateError = _selectedDate == null ? AppStrings.requiredFieldError : null;
+      _workshopError = workshop.isEmpty ? AppStrings.requiredFieldError : null;
+      _descriptionError = description.isEmpty
+          ? AppStrings.requiredFieldError
+          : null;
+      _valueError = (value == null || value <= 0)
+          ? AppStrings.valueMustBePositive
+          : null;
+    });
+
+    if (_vehicleError != null ||
+        _dateError != null ||
+        _workshopError != null ||
+        _descriptionError != null ||
+        _valueError != null) {
       return;
     }
 
@@ -89,10 +104,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       date: _selectedDate!,
       workshop: workshop,
       description: description,
-      value: double.tryParse(
-            _valueController.text.trim().replaceAll(',', '.'),
-          ) ??
-          0,
+      value: value!,
     );
   }
 
@@ -145,9 +157,16 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                     onDateTap: _pickDate,
                     workshopController: _workshopController,
                     descriptionController: _descriptionController,
+                    vehicleError: _vehicleError,
+                    dateError: _dateError,
+                    workshopError: _workshopError,
+                    descriptionError: _descriptionError,
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  _FinancialSection(valueController: _valueController),
+                  _FinancialSection(
+                    valueController: _valueController,
+                    valueError: _valueError,
+                  ),
                   const SizedBox(height: AppSpacing.xxl),
                   PrimaryButton(
                     label: AppStrings.saveMaintenanceButton,
@@ -160,38 +179,6 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _VehiclePickerSheet extends StatelessWidget {
-  final List<VehicleEntity> vehicles;
-
-  const _VehiclePickerSheet({required this.vehicles});
-
-  @override
-  Widget build(BuildContext context) {
-    if (vehicles.isEmpty) {
-      return const SizedBox(
-        height: 150,
-        child: Center(child: Text(AppStrings.noVehiclesRegistered)),
-      );
-    }
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final vehicle in vehicles)
-            ListTile(
-              leading: const Icon(
-                Icons.directions_car_outlined,
-                color: AppColors.primary,
-              ),
-              title: Text('${vehicle.brand} ${vehicle.model}'),
-              onTap: () => Navigator.of(context).pop(vehicle),
-            ),
-        ],
       ),
     );
   }
@@ -229,6 +216,10 @@ class _Form extends StatelessWidget {
   final VoidCallback onDateTap;
   final TextEditingController workshopController;
   final TextEditingController descriptionController;
+  final String? vehicleError;
+  final String? dateError;
+  final String? workshopError;
+  final String? descriptionError;
 
   const _Form({
     required this.selectedVehicle,
@@ -237,6 +228,10 @@ class _Form extends StatelessWidget {
     required this.onDateTap,
     required this.workshopController,
     required this.descriptionController,
+    this.vehicleError,
+    this.dateError,
+    this.workshopError,
+    this.descriptionError,
   });
 
   @override
@@ -245,11 +240,13 @@ class _Form extends StatelessWidget {
       children: [
         AppDropdownField(
           label: AppStrings.vehicleLabel,
-          hintText: selectedVehicle != null
+          hintText: AppStrings.selectCarHint,
+          value: selectedVehicle != null
               ? '${selectedVehicle!.brand} ${selectedVehicle!.model}'
-              : AppStrings.selectCarHint,
+              : null,
           prefixIcon: Icons.directions_car_outlined,
           onTap: onVehicleTap,
+          errorText: vehicleError,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppDateField(
@@ -257,6 +254,7 @@ class _Form extends StatelessWidget {
           hintText: AppStrings.dateHint,
           displayText: selectedDate != null ? formatDate(selectedDate!) : null,
           onTap: onDateTap,
+          errorText: dateError,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -264,6 +262,7 @@ class _Form extends StatelessWidget {
           label: AppStrings.workshopLabel,
           hintText: AppStrings.workshopHint,
           prefixIcon: Icons.storefront_outlined,
+          errorText: workshopError,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -272,6 +271,7 @@ class _Form extends StatelessWidget {
           hintText: AppStrings.servicesDescriptionHint,
           prefixIcon: Icons.build_outlined,
           maxLines: 4,
+          errorText: descriptionError,
         ),
       ],
     );
@@ -280,11 +280,14 @@ class _Form extends StatelessWidget {
 
 class _FinancialSection extends StatelessWidget {
   final TextEditingController valueController;
+  final String? valueError;
 
-  const _FinancialSection({required this.valueController});
+  const _FinancialSection({required this.valueController, this.valueError});
 
   @override
   Widget build(BuildContext context) {
+    final hasError = valueError != null;
+
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,7 +315,9 @@ class _FinancialSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: hasError ? AppColors.error : AppColors.border,
+              ),
             ),
             child: Row(
               children: [
@@ -346,6 +351,13 @@ class _FinancialSection extends StatelessWidget {
               ],
             ),
           ),
+          if (hasError) ...[
+            const SizedBox(height: 4),
+            Text(
+              valueError!,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.valueWarning,

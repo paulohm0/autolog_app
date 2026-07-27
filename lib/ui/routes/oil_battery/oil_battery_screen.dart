@@ -15,6 +15,7 @@ import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/simple_history_card.dart';
+import 'package:autolog_app/ui/widgets/vehicle_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -416,48 +417,6 @@ class _EmptyMessage extends StatelessWidget {
   }
 }
 
-class _VehiclePickerSheet extends StatelessWidget {
-  final List<VehicleEntity> vehicles;
-
-  const _VehiclePickerSheet({required this.vehicles});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final vehicle in vehicles)
-            ListTile(
-              leading: const Icon(
-                Icons.directions_car_outlined,
-                color: AppColors.primary,
-              ),
-              title: Text('${vehicle.brand} ${vehicle.model}'),
-              onTap: () => Navigator.of(context).pop(vehicle),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-Future<VehicleEntity?> _pickVehicle(
-  BuildContext context,
-  List<VehicleEntity> vehicles,
-) {
-  if (vehicles.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(AppStrings.noVehiclesRegistered)),
-    );
-    return Future.value(null);
-  }
-  return showModalBottomSheet<VehicleEntity>(
-    context: context,
-    builder: (_) => _VehiclePickerSheet(vehicles: vehicles),
-  );
-}
-
 class _OilChangeFormSheet extends StatefulWidget {
   final List<VehicleEntity> vehicles;
   final void Function(String vehicleId, String brand, double liters, DateTime date)
@@ -474,6 +433,11 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
   final _litersController = TextEditingController();
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
+
+  String? _vehicleError;
+  String? _dateError;
+  String? _brandError;
+  String? _litersError;
 
   @override
   void dispose() {
@@ -494,31 +458,35 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
   }
 
   Future<void> _pickVehicleForForm() async {
-    final selected = await _pickVehicle(context, widget.vehicles);
+    final selected = await showVehiclePicker(context, widget.vehicles);
     if (selected != null) setState(() => _selectedVehicle = selected);
   }
 
   void _submit() {
-    if (_selectedVehicle == null || _selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingVehicleOrDate)),
-      );
-      return;
-    }
-
     final brand = _brandController.text.trim();
     final liters = double.tryParse(
       _litersController.text.trim().replaceAll(',', '.'),
     );
 
-    if (brand.isEmpty || liters == null || liters <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
-      );
+    setState(() {
+      _vehicleError = _selectedVehicle == null
+          ? AppStrings.requiredFieldError
+          : null;
+      _dateError = _selectedDate == null ? AppStrings.requiredFieldError : null;
+      _brandError = brand.isEmpty ? AppStrings.requiredFieldError : null;
+      _litersError = (liters == null || liters <= 0)
+          ? AppStrings.valueMustBePositive
+          : null;
+    });
+
+    if (_vehicleError != null ||
+        _dateError != null ||
+        _brandError != null ||
+        _litersError != null) {
       return;
     }
 
-    widget.onSave(_selectedVehicle!.id!, brand, liters, _selectedDate!);
+    widget.onSave(_selectedVehicle!.id!, brand, liters!, _selectedDate!);
   }
 
   @override
@@ -542,11 +510,13 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppDropdownField(
               label: AppStrings.vehicleLabel,
-              hintText: _selectedVehicle != null
+              hintText: AppStrings.selectCarHint,
+              value: _selectedVehicle != null
                   ? '${_selectedVehicle!.brand} ${_selectedVehicle!.model}'
-                  : AppStrings.selectCarHint,
+                  : null,
               prefixIcon: Icons.directions_car_outlined,
               onTap: _pickVehicleForForm,
+              errorText: _vehicleError,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
@@ -554,6 +524,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
               label: AppStrings.oilBrandLabel,
               hintText: AppStrings.oilBrandHint,
               prefixIcon: Icons.local_gas_station_outlined,
+              errorText: _brandError,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
@@ -563,6 +534,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+              errorText: _litersError,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppDateField(
@@ -572,6 +544,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
                   ? formatDate(_selectedDate!)
                   : null,
               onTap: _pickDate,
+              errorText: _dateError,
             ),
             const SizedBox(height: AppSpacing.xxl),
             PrimaryButton(
@@ -606,6 +579,10 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
 
+  String? _vehicleError;
+  String? _dateError;
+  String? _modelError;
+
   @override
   void dispose() {
     _modelController.dispose();
@@ -624,24 +601,22 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
   }
 
   Future<void> _pickVehicleForForm() async {
-    final selected = await _pickVehicle(context, widget.vehicles);
+    final selected = await showVehiclePicker(context, widget.vehicles);
     if (selected != null) setState(() => _selectedVehicle = selected);
   }
 
   void _submit() {
-    if (_selectedVehicle == null || _selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingVehicleOrDate)),
-      );
-      return;
-    }
-
     final model = _modelController.text.trim();
 
-    if (model.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.missingRequiredFields)),
-      );
+    setState(() {
+      _vehicleError = _selectedVehicle == null
+          ? AppStrings.requiredFieldError
+          : null;
+      _dateError = _selectedDate == null ? AppStrings.requiredFieldError : null;
+      _modelError = model.isEmpty ? AppStrings.requiredFieldError : null;
+    });
+
+    if (_vehicleError != null || _dateError != null || _modelError != null) {
       return;
     }
 
@@ -669,11 +644,13 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppDropdownField(
               label: AppStrings.vehicleLabel,
-              hintText: _selectedVehicle != null
+              hintText: AppStrings.selectCarHint,
+              value: _selectedVehicle != null
                   ? '${_selectedVehicle!.brand} ${_selectedVehicle!.model}'
-                  : AppStrings.selectCarHint,
+                  : null,
               prefixIcon: Icons.directions_car_outlined,
               onTap: _pickVehicleForForm,
+              errorText: _vehicleError,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
@@ -681,6 +658,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
               label: AppStrings.batteryModelLabel,
               hintText: AppStrings.batteryModelHint,
               prefixIcon: Icons.battery_charging_full_outlined,
+              errorText: _modelError,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppDateField(
@@ -690,6 +668,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
                   ? formatDate(_selectedDate!)
                   : null,
               onTap: _pickDate,
+              errorText: _dateError,
             ),
             const SizedBox(height: AppSpacing.xxl),
             PrimaryButton(

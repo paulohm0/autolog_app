@@ -62,8 +62,6 @@ class AppStrings {
       'Manutenção salva com sucesso!';
   static const String noVehiclesRegistered =
       'Nenhum veículo cadastrado. Cadastre um veículo primeiro.';
-  static const String missingVehicleOrDate =
-      'Selecione o veículo e a data da manutenção.';
 
   // Oil/Battery Screen
   static const String oilToggleLabel = 'Óleo';
@@ -101,8 +99,8 @@ class AppStrings {
   static const String navProfileLabel = 'Perfil';
 
   // Validação de formulários
-  static const String missingRequiredFields =
-      'Preencha todos os campos obrigatórios.';
+  static const String requiredFieldError = 'Campo obrigatório';
+  static const String valueMustBePositive = 'Informe um valor maior que zero';
 
   // Onboarding (cadastro do primeiro veículo)
   static const String onboardingVehicleTitle = 'Vamos começar!';

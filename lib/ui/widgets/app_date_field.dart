@@ -6,6 +6,7 @@ class AppDateField extends StatelessWidget {
   final String hintText;
   final String? displayText;
   final VoidCallback onTap;
+  final String? errorText;
 
   const AppDateField({
     super.key,
@@ -13,10 +14,13 @@ class AppDateField extends StatelessWidget {
     required this.hintText,
     required this.onTap,
     this.displayText,
+    this.errorText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasError = errorText != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,6 +36,7 @@ class AppDateField extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppRadius.md),
+              border: hasError ? Border.all(color: AppColors.error) : null,
             ),
             child: Row(
               children: [
@@ -60,6 +65,13 @@ class AppDateField extends StatelessWidget {
             ),
           ),
         ),
+        if (hasError) ...[
+          const SizedBox(height: 4),
+          Text(
+            errorText!,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+          ),
+        ],
       ],
     );
   }
