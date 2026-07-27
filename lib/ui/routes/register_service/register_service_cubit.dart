@@ -47,4 +47,31 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       (_) => emit(RegisterServiceSuccess()),
     );
   }
+
+  Future<void> updateMaintenance({
+    required String id,
+    required String vehicleId,
+    required DateTime date,
+    required String workshop,
+    required String description,
+    required double value,
+  }) async {
+    emit(RegisterServiceLoading());
+    final maintenance = MaintenanceEntity(
+      id: id,
+      vehicleId: vehicleId,
+      date: date,
+      workshop: workshop,
+      description: description,
+      value: value,
+    );
+    final result = await _maintenanceRepository.updateMaintenance(
+      maintenance,
+    );
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(RegisterServiceError(message: failure.message)),
+      (_) => emit(RegisterServiceSuccess()),
+    );
+  }
 }

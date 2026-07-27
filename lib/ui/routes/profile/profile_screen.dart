@@ -6,6 +6,7 @@ import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -121,7 +122,7 @@ class _ProfileContent extends StatelessWidget {
               onPressed: onSignOut,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error),
+                side: BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
@@ -149,15 +150,32 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 48,
-      backgroundColor: AppColors.primaryLight,
-      backgroundImage: user.photoUrl != null
-          ? NetworkImage(user.photoUrl!)
-          : null,
-      child: user.photoUrl == null
-          ? const Icon(Icons.person, size: 48, color: AppColors.primary)
-          : null,
+    final photoUrl = user.photoUrl;
+
+    if (photoUrl == null) {
+      return const CircleAvatar(
+        radius: 48,
+        backgroundColor: AppColors.primaryLight,
+        child: Icon(Icons.person, size: 48, color: AppColors.primary),
+      );
+    }
+
+    return ClipOval(
+      child: CachedNetworkImage(
+        imageUrl: photoUrl,
+        width: 96,
+        height: 96,
+        fit: BoxFit.cover,
+        fadeInDuration: Duration.zero,
+        placeholder: (context, url) => const ColoredBox(
+          color: AppColors.primaryLight,
+          child: Icon(Icons.person, size: 48, color: AppColors.primary),
+        ),
+        errorWidget: (context, url, error) => const ColoredBox(
+          color: AppColors.primaryLight,
+          child: Icon(Icons.person, size: 48, color: AppColors.primary),
+        ),
+      ),
     );
   }
 }

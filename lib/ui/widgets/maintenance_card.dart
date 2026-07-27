@@ -5,97 +5,92 @@ import 'package:flutter/material.dart';
 class MaintenanceCard extends StatelessWidget {
   final String month;
   final String day;
-  final String title;
   final String workshop;
   final String vehicle;
   final String amount;
+  final VoidCallback? onTap;
 
   const MaintenanceCard({
     super.key,
     required this.month,
     required this.day,
-    required this.title,
     required this.workshop,
     required this.vehicle,
     required this.amount,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date Badge
-              _DateBadge(month: month, day: day),
-              const SizedBox(width: AppSpacing.lg),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.titleLarge,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date Badge
+                  _DateBadge(month: month, day: day),
+                  const SizedBox(width: AppSpacing.lg),
+                  // Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.storefront_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(workshop, style: AppTextStyles.bodySmall),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.directions_car_outlined,
-                          size: 13,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 4),
                         Text(
-                          vehicle,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          workshop,
+                          style: AppTextStyles.titleLarge,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.directions_car_outlined,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              vehicle,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const Divider(color: AppColors.border, height: 1),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                AppStrings.serviceValueLabel,
+                style: AppTextStyles.labelMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                amount,
+                style: AppTextStyles.headlineMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          const Divider(color: AppColors.border, height: 1),
-          const SizedBox(height: AppSpacing.md),
-          Text(AppStrings.serviceValueLabel, style: AppTextStyles.labelMedium),
-          const SizedBox(height: 4),
-          Text(
-            amount,
-            style: AppTextStyles.headlineMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

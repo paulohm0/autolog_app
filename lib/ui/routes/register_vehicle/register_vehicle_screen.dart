@@ -1,6 +1,7 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
@@ -15,11 +16,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class RegisterVehicleScreen extends StatefulWidget {
   final bool isOnboarding;
   final VoidCallback? onVehicleRegistered;
+  final VehicleEntity? existingVehicle;
 
   const RegisterVehicleScreen({
     super.key,
     this.isOnboarding = false,
     this.onVehicleRegistered,
+    this.existingVehicle,
   });
 
   @override
@@ -27,15 +30,28 @@ class RegisterVehicleScreen extends StatefulWidget {
 }
 
 class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
-  final _brandController = TextEditingController();
-  final _modelController = TextEditingController();
-  final _plateController = TextEditingController();
-  final _yearController = TextEditingController();
-  final _colorController = TextEditingController();
+  late final TextEditingController _brandController;
+  late final TextEditingController _modelController;
+  late final TextEditingController _plateController;
+  late final TextEditingController _yearController;
+  late final TextEditingController _colorController;
 
   String? _brandError;
   String? _modelError;
   String? _plateError;
+
+  bool get _isEditing => widget.existingVehicle != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingVehicle;
+    _brandController = TextEditingController(text: existing?.brand);
+    _modelController = TextEditingController(text: existing?.model);
+    _plateController = TextEditingController(text: existing?.licensePlate);
+    _yearController = TextEditingController(text: existing?.year?.toString());
+    _colorController = TextEditingController(text: existing?.color);
+  }
 
   @override
   void dispose() {
@@ -62,13 +78,24 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
       return;
     }
 
-    context.read<RegisterVehicleCubit>().saveVehicleFromForm(
-      brand: brand,
-      model: model,
-      licensePlate: plate,
-      year: _yearController.text.trim(),
-      color: _colorController.text.trim(),
-    );
+    if (_isEditing) {
+      context.read<RegisterVehicleCubit>().updateVehicleFromForm(
+        id: widget.existingVehicle!.id!,
+        brand: brand,
+        model: model,
+        licensePlate: plate,
+        year: _yearController.text.trim(),
+        color: _colorController.text.trim(),
+      );
+    } else {
+      context.read<RegisterVehicleCubit>().saveVehicleFromForm(
+        brand: brand,
+        model: model,
+        licensePlate: plate,
+        year: _yearController.text.trim(),
+        color: _colorController.text.trim(),
+      );
+    }
   }
 
   Future<void> _signOut() async {
@@ -109,8 +136,12 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
               switch (state) {
                 case SuccessState():
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(AppStrings.saveVehicleSnackBarMessage),
+                    SnackBar(
+                      content: Text(
+                        _isEditing
+                            ? AppStrings.updateVehicleSnackBarMessage
+                            : AppStrings.saveVehicleSnackBarMessage,
+                      ),
                     ),
                   );
                   if (widget.isOnboarding) {
@@ -136,7 +167,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                       const _OnboardingBanner(),
                       const SizedBox(height: AppSpacing.xxl),
                     ],
-                    _PageTitle(),
+                    _PageTitle(isEditing: _isEditing),
                     const SizedBox(height: AppSpacing.xxl),
                     _RequiredFields(
                       _brandController,
@@ -155,7 +186,9 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                     Column(
                       children: [
                         PrimaryButton(
-                          label: AppStrings.saveVehicleButton,
+                          label: _isEditing
+                              ? AppStrings.updateVehicleButton
+                              : AppStrings.saveVehicleButton,
                           icon: Icons.save_alt_rounded,
                           onPressed: () => _save(context),
                         ),
@@ -217,7 +250,9 @@ class _OnboardingBanner extends StatelessWidget {
 }
 
 class _PageTitle extends StatelessWidget {
-  const _PageTitle();
+  final bool isEditing;
+
+  const _PageTitle({required this.isEditing});
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +268,9 @@ class _PageTitle extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          AppStrings.registerVehicleTitle,
+          isEditing
+              ? AppStrings.editVehicleTitle
+              : AppStrings.registerVehicleTitle,
           style: AppTextStyles.displayMedium,
         ),
       ],

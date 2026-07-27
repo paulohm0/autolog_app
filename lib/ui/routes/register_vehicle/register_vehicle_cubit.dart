@@ -46,4 +46,29 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
       (vehicles) => emit(VehicleListLoadedState(vehicles: vehicles)),
     );
   }
+
+  Future<void> updateVehicleFromForm({
+    required String id,
+    required String brand,
+    required String model,
+    required String licensePlate,
+    required String year,
+    required String color,
+  }) async {
+    final vehicle = VehicleEntity(
+      id: id,
+      brand: brand,
+      model: model,
+      licensePlate: licensePlate,
+      year: int.tryParse(year),
+      color: color,
+    );
+    emit(LoadingState());
+    final result = await _repository.updateVehicle(vehicle);
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(ErrorState(message: failure.message)),
+      (success) => emit(SuccessState()),
+    );
+  }
 }

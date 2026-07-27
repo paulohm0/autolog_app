@@ -2,12 +2,16 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/date_formatter.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/home/home_state.dart';
+import 'package:autolog_app/ui/routes/register_service/register_service_screen.dart';
+import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_screen.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
+import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -72,6 +76,68 @@ class _HomeScreenState extends State<HomeScreen> {
     _homeCubit.loadHomeData();
   }
 
+  Future<void> _openVehiclesDialog(BuildContext context) async {
+    final state = _homeCubit.state;
+    final vehicles = state is HomeLoaded
+        ? state.vehiclesById.values.toList()
+        : <VehicleEntity>[];
+
+    final result = await showDialog<(String, VehicleEntity?)>(
+      context: context,
+      builder: (_) => _VehicleListDialog(vehicles: vehicles),
+    );
+
+    if (!context.mounted || result == null) return;
+    final (action, vehicle) = result;
+
+    if (action == 'add') {
+      await _openRegisterVehicle(context);
+    } else if (action == 'edit' && vehicle != null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RegisterVehicleScreen(existingVehicle: vehicle),
+        ),
+      );
+      _homeCubit.loadHomeData();
+    } else if (action == 'delete' && vehicle != null) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text(AppStrings.deleteVehicleConfirmTitle),
+          content: const Text(AppStrings.deleteConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(AppStrings.cancelButton),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                AppStrings.deleteButton,
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      final deleteResult = await _homeCubit.deleteVehicle(vehicle.id!);
+      if (!context.mounted) return;
+      deleteResult.fold(
+        (failure) => ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(failure.message))),
+        (_) => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.deleteVehicleSnackBarMessage),
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _openRegisterService(BuildContext context) async {
     await Navigator.pushNamed(context, AppRoutes.registerService);
     _homeCubit.loadHomeData();
@@ -96,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       _QuickStats(
                         state: state,
-                        onVehiclesTap: () => _openRegisterVehicle(context),
+                        onVehiclesTap: () => _openVehiclesDialog(context),
                       ),
                       const _HistorySection(),
                       _MaintenanceList(state: state),
@@ -136,7 +202,7 @@ class _QuickStats extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.sm,
         AppSpacing.lg,
         0,
       ),
@@ -158,22 +224,22 @@ class _HistorySection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.xxl,
+        AppSpacing.xs,
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 AppStrings.maintenanceHistory,
                 style: AppTextStyles.headlineLarge,
               ),
               IconButton(
-                icon: const Icon(Icons.tune_rounded),
+                icon: const Icon(Icons.filter_list_rounded),
                 color: AppColors.textSecondary,
                 onPressed: () => showModalBottomSheet(
                   context: context,
@@ -284,7 +350,7 @@ class _MaintenanceList extends StatelessWidget {
               maintenance: maintenance,
               vehiclesById: loaded.vehiclesById,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
           ],
         ],
       ),
@@ -311,10 +377,354 @@ class _MaintenanceListItem extends StatelessWidget {
     return MaintenanceCard(
       month: _monthAbbrev(maintenance.date),
       day: maintenance.date.day.toString().padLeft(2, '0'),
-      title: maintenance.description,
       workshop: maintenance.workshop,
       vehicle: vehicleLabel,
       amount: _formatCurrency(maintenance.value),
+      onTap: () => _openDetail(context, vehicleLabel),
+    );
+  }
+
+  Future<void> _openDetail(BuildContext context, String vehicleLabel) async {
+    final homeCubit = context.read<HomeCubit>();
+
+    final action = await showDialog<String>(
+      context: context,
+      builder: (_) => _MaintenanceDetailDialog(
+        maintenance: maintenance,
+        vehicleLabel: vehicleLabel,
+      ),
+    );
+
+    if (!context.mounted) return;
+
+    if (action == 'edit') {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              RegisterServiceScreen(existingMaintenance: maintenance),
+        ),
+      );
+      homeCubit.loadHomeData();
+    } else if (action == 'delete') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text(AppStrings.deleteConfirmTitle),
+          content: const Text(AppStrings.deleteConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(AppStrings.cancelButton),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                AppStrings.deleteButton,
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      final result = await homeCubit.deleteMaintenance(maintenance.id!);
+      if (!context.mounted) return;
+      result.fold(
+        (failure) => ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(failure.message))),
+        (_) => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.deleteMaintenanceSnackBarMessage),
+          ),
+        ),
+      );
+    }
+  }
+}
+
+class _MaintenanceDetailDialog extends StatelessWidget {
+  final MaintenanceEntity maintenance;
+  final String vehicleLabel;
+
+  const _MaintenanceDetailDialog({
+    required this.maintenance,
+    required this.vehicleLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 500),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(maintenance.workshop, style: AppTextStyles.headlineMedium),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.directions_car_outlined,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    vehicleLabel,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              _DetailRow(
+                label: AppStrings.maintenanceDateLabel,
+                value: formatDate(maintenance.date),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _DescriptionDetailRow(description: maintenance.description),
+              const SizedBox(height: AppSpacing.md),
+              _DetailRow(
+                label: AppStrings.totalValueLabel,
+                value: _formatCurrency(maintenance.value),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).pop('delete'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: AppColors.error),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 20,
+                        ),
+                        label: const Text(AppStrings.deleteButton),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: PrimaryButton(
+                      label: AppStrings.editButton,
+                      icon: Icons.edit_outlined,
+                      onPressed: () => Navigator.of(context).pop('edit'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DescriptionDetailRow extends StatelessWidget {
+  final String description;
+
+  const _DescriptionDetailRow({required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = description
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppStrings.servicesDescriptionLabel.toUpperCase(),
+          style: AppTextStyles.labelLarge,
+        ),
+        const SizedBox(height: 4),
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '•  ',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Expanded(
+                  child: Text(item, style: AppTextStyles.bodyLarge),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: AppTextStyles.labelLarge),
+        const SizedBox(height: 4),
+        Text(value, style: AppTextStyles.bodyLarge),
+      ],
+    );
+  }
+}
+
+class _VehicleListDialog extends StatelessWidget {
+  final List<VehicleEntity> vehicles;
+
+  const _VehicleListDialog({required this.vehicles});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 450),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppStrings.myVehiclesTitle,
+                style: AppTextStyles.headlineMedium,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (vehicles.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  child: Text(
+                    AppStrings.noVehiclesRegistered,
+                    style: AppTextStyles.bodyMedium,
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: vehicles.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final vehicle = vehicles[index];
+                      return _VehicleRow(
+                        vehicle: vehicle,
+                        onEdit: () =>
+                            Navigator.of(context).pop(('edit', vehicle)),
+                        onDelete: () =>
+                            Navigator.of(context).pop(('delete', vehicle)),
+                      );
+                    },
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: AppStrings.addVehicleLabel,
+                icon: Icons.add,
+                onPressed: () => Navigator.of(context).pop(('add', null)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VehicleRow extends StatelessWidget {
+  final VehicleEntity vehicle;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _VehicleRow({
+    required this.vehicle,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.directions_car_outlined, color: AppColors.primary),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${vehicle.brand} ${vehicle.model}',
+                  style: AppTextStyles.titleMedium,
+                ),
+                if (vehicle.licensePlate.isNotEmpty)
+                  Text(vehicle.licensePlate, style: AppTextStyles.bodySmall),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.edit_outlined,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.error,
+              size: 20,
+            ),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -334,48 +744,31 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
+    return InkWell(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            border: Border.all(color: AppColors.border),
-          ),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Text(label, style: AppTextStyles.titleMedium),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              value,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: AppTextStyles.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              Spacer(),
-              Icon(Icons.edit_note, color: AppColors.textSecondary),
-            ],
-          ),
+            ),
+            const SizedBox(width: 2),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 18,
+            ),
+          ],
         ),
       ),
     );

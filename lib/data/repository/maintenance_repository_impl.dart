@@ -53,4 +53,38 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateMaintenance(
+    MaintenanceEntity maintenance,
+  ) async {
+    try {
+      final updated = MaintenanceModel(
+        userId: _firebaseAuth.currentUser!.uid,
+        vehicleId: maintenance.vehicleId,
+        date: maintenance.date,
+        workshop: maintenance.workshop,
+        description: maintenance.description,
+        value: maintenance.value,
+      );
+
+      await _firestoreDB
+          .collection('maintenances')
+          .doc(maintenance.id)
+          .update(updated.toJson());
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteMaintenance(String id) async {
+    try {
+      await _firestoreDB.collection('maintenances').doc(id).delete();
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }

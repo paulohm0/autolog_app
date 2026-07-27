@@ -38,6 +38,15 @@ class AppStrings {
   static const String saveVehicleSnackBarMessage = 'Veículo salvo com sucesso!';
   static const String saveVehicleDescription =
       'Ao salvar, este veículo será adicionado à sua\ngaragem digital e sincronizado com sua conta.';
+  static const String editVehicleTitle = 'Editar Veículo';
+  static const String updateVehicleButton = 'Salvar Alterações';
+  static const String updateVehicleSnackBarMessage =
+      'Veículo atualizado com sucesso!';
+  static const String deleteVehicleSnackBarMessage =
+      'Veículo excluído com sucesso!';
+  static const String deleteVehicleConfirmTitle = 'Excluir veículo?';
+  static const String myVehiclesTitle = 'Meus Veículos';
+  static const String addVehicleLabel = 'Adicionar Veículo';
 
   // Register Service Screen
   static const String maintenanceSection = 'MANUTENÇÃO';
@@ -52,7 +61,9 @@ class AppStrings {
   static const String servicesDescriptionLabel =
       'Descrição dos Serviços e Peças';
   static const String servicesDescriptionHint =
-      'Descreva os itens trocados e serviços realizados...';
+      'Ex: Troca de óleo\nTroca do filtro de ar\nAlinhamento e balanceamento';
+  static const String servicesDescriptionCaption =
+      'Dica: aperte Enter para separar cada item em uma linha.';
   static const String totalValueLabel = 'VALOR TOTAL';
   static const String moneySignLabel = 'R\$';
   static const String saveMaintenanceButton = 'Salvar Manutenção';
@@ -62,6 +73,17 @@ class AppStrings {
       'Manutenção salva com sucesso!';
   static const String noVehiclesRegistered =
       'Nenhum veículo cadastrado. Cadastre um veículo primeiro.';
+  static const String editMaintenanceTitle = 'Editar Manutenção';
+  static const String updateMaintenanceButton = 'Salvar Alterações';
+  static const String updateMaintenanceSnackBarMessage =
+      'Manutenção atualizada com sucesso!';
+  static const String deleteMaintenanceSnackBarMessage =
+      'Manutenção excluída com sucesso!';
+  static const String deleteConfirmTitle = 'Excluir manutenção?';
+  static const String deleteConfirmMessage = 'Essa ação não pode ser desfeita.';
+  static const String editButton = 'Editar';
+  static const String deleteButton = 'Excluir';
+  static const String cancelButton = 'Cancelar';
 
   // Oil/Battery Screen
   static const String oilToggleLabel = 'Óleo';

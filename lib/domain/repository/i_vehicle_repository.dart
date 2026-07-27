@@ -5,4 +5,6 @@ import 'package:dartz/dartz.dart';
 abstract class IVehicleRepository {
   Future<Either<Failure, void>> saveVehicle(VehicleEntity vehicle);
   Future<Either<Failure, List<VehicleEntity>>> getVehicles();
+  Future<Either<Failure, void>> updateVehicle(VehicleEntity vehicle);
+  Future<Either<Failure, void>> deleteVehicle(String id);
 }

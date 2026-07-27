@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
+import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_cubit.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_state.dart';
@@ -16,7 +17,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterServiceScreen extends StatefulWidget {
-  const RegisterServiceScreen({super.key});
+  final MaintenanceEntity? existingMaintenance;
+
+  const RegisterServiceScreen({super.key, this.existingMaintenance});
 
   @override
   State<RegisterServiceScreen> createState() => _RegisterServiceScreenState();
@@ -24,9 +27,9 @@ class RegisterServiceScreen extends StatefulWidget {
 
 class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   late final RegisterServiceCubit _cubit;
-  final _workshopController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _valueController = TextEditingController();
+  late final TextEditingController _workshopController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _valueController;
 
   List<VehicleEntity> _vehicles = [];
   VehicleEntity? _selectedVehicle;
@@ -38,9 +41,18 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   String? _descriptionError;
   String? _valueError;
 
+  bool get _isEditing => widget.existingMaintenance != null;
+
   @override
   void initState() {
     super.initState();
+    final existing = widget.existingMaintenance;
+    _workshopController = TextEditingController(text: existing?.workshop);
+    _descriptionController = TextEditingController(text: existing?.description);
+    _valueController = TextEditingController(
+      text: existing?.value.toStringAsFixed(2).replaceAll('.', ','),
+    );
+    _selectedDate = existing?.date;
     _cubit = getIt<RegisterServiceCubit>();
     _cubit.loadVehicles();
   }
@@ -99,13 +111,24 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       return;
     }
 
-    _cubit.saveMaintenance(
-      vehicleId: _selectedVehicle!.id!,
-      date: _selectedDate!,
-      workshop: workshop,
-      description: description,
-      value: value!,
-    );
+    if (_isEditing) {
+      _cubit.updateMaintenance(
+        id: widget.existingMaintenance!.id!,
+        vehicleId: _selectedVehicle!.id!,
+        date: _selectedDate!,
+        workshop: workshop,
+        description: description,
+        value: value!,
+      );
+    } else {
+      _cubit.saveMaintenance(
+        vehicleId: _selectedVehicle!.id!,
+        date: _selectedDate!,
+        workshop: workshop,
+        description: description,
+        value: value!,
+      );
+    }
   }
 
   @override
@@ -126,11 +149,24 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
           listener: (context, state) {
             switch (state) {
               case RegisterServiceVehiclesLoaded():
-                setState(() => _vehicles = state.vehicles);
+                setState(() {
+                  _vehicles = state.vehicles;
+                  final existing = widget.existingMaintenance;
+                  if (existing != null && _selectedVehicle == null) {
+                    final matches = state.vehicles.where(
+                      (v) => v.id == existing.vehicleId,
+                    );
+                    _selectedVehicle = matches.isEmpty ? null : matches.first;
+                  }
+                });
               case RegisterServiceSuccess():
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(AppStrings.saveMaintenanceSnackBarMessage),
+                  SnackBar(
+                    content: Text(
+                      _isEditing
+                          ? AppStrings.updateMaintenanceSnackBarMessage
+                          : AppStrings.saveMaintenanceSnackBarMessage,
+                    ),
                   ),
                 );
                 Navigator.of(context).pop();
@@ -148,7 +184,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _PageTitle(),
+                  _PageTitle(isEditing: _isEditing),
                   const SizedBox(height: AppSpacing.xxl),
                   _Form(
                     selectedVehicle: _selectedVehicle,
@@ -169,7 +205,9 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   PrimaryButton(
-                    label: AppStrings.saveMaintenanceButton,
+                    label: _isEditing
+                        ? AppStrings.updateMaintenanceButton
+                        : AppStrings.saveMaintenanceButton,
                     icon: Icons.save_alt_rounded,
                     onPressed: _save,
                   ),
@@ -185,7 +223,9 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
 }
 
 class _PageTitle extends StatelessWidget {
-  const _PageTitle();
+  final bool isEditing;
+
+  const _PageTitle({required this.isEditing});
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +241,9 @@ class _PageTitle extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          AppStrings.registerServiceTitle,
+          isEditing
+              ? AppStrings.editMaintenanceTitle
+              : AppStrings.registerServiceTitle,
           style: AppTextStyles.displayMedium,
         ),
       ],
@@ -270,8 +312,15 @@ class _Form extends StatelessWidget {
           label: AppStrings.servicesDescriptionLabel,
           hintText: AppStrings.servicesDescriptionHint,
           prefixIcon: Icons.build_outlined,
-          maxLines: 4,
+          maxLines: 6,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
           errorText: descriptionError,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          AppStrings.servicesDescriptionCaption,
+          style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
         ),
       ],
     );

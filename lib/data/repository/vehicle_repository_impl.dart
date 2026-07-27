@@ -50,4 +50,36 @@ class VehicleRepositoryImpl implements IVehicleRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateVehicle(VehicleEntity vehicle) async {
+    try {
+      final updated = VehicleModel(
+        userId: _firebaseAuth.currentUser!.uid,
+        brand: vehicle.brand,
+        model: vehicle.model,
+        licensePlate: vehicle.licensePlate,
+        year: vehicle.year,
+        color: vehicle.color,
+      );
+
+      await _firestoreDB
+          .collection('vehicles')
+          .doc(vehicle.id)
+          .update(updated.toJson());
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteVehicle(String id) async {
+    try {
+      await _firestoreDB.collection('vehicles').doc(id).delete();
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }
