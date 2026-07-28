@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_cubit.dart';
@@ -160,20 +161,15 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                   }
                 });
               case RegisterServiceSuccess():
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      _isEditing
-                          ? AppStrings.updateMaintenanceSnackBarMessage
-                          : AppStrings.saveMaintenanceSnackBarMessage,
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  _isEditing
+                      ? AppStrings.updateMaintenanceSnackBarMessage
+                      : AppStrings.saveMaintenanceSnackBarMessage,
                 );
                 Navigator.of(context).pop();
               case RegisterServiceError():
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
+                showAppSnackBar(context, state.message, isError: true);
               default:
                 break;
             }

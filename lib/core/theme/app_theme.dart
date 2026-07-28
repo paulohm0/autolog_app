@@ -19,6 +19,18 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.primary,
+        contentTextStyle: const TextStyle(
+          color: AppColors.textOnPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+      ),
     );
   }
 }

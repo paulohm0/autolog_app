@@ -1,6 +1,7 @@
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/ui/routes/login/google_sign_in_button.dart';
 import 'package:autolog_app/ui/routes/login/login_benefits.dart';
 import 'package:autolog_app/ui/routes/login/login_cubit.dart';
@@ -71,8 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 AppRoutes.home,
                               );
                             case LoginError():
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(state.message)),
+                              showAppSnackBar(
+                                context,
+                                state.message,
+                                isError: true,
                               );
                             default:
                               break;

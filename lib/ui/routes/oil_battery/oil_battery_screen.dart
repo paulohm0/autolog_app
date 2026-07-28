@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/battery_change_entity.dart';
 import 'package:autolog_app/domain/entity/oil_change_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
@@ -148,13 +149,11 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
           );
           if (!mounted) return;
           result.fold(
-            (failure) => ScaffoldMessenger.of(
+            (failure) =>
+                showAppSnackBar(context, failure.message, isError: true),
+            (_) => showAppSnackBar(
               context,
-            ).showSnackBar(SnackBar(content: Text(failure.message))),
-            (_) => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(AppStrings.updateOilChangeSnackBarMessage),
-              ),
+              AppStrings.updateOilChangeSnackBarMessage,
             ),
           );
         },
@@ -190,14 +189,9 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     final result = await _oilCubit.deleteOilChange(id);
     if (!mounted) return;
     result.fold(
-      (failure) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failure.message))),
-      (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.deleteOilChangeSnackBarMessage),
-        ),
-      ),
+      (failure) => showAppSnackBar(context, failure.message, isError: true),
+      (_) =>
+          showAppSnackBar(context, AppStrings.deleteOilChangeSnackBarMessage),
     );
   }
 
@@ -220,13 +214,11 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
           );
           if (!mounted) return;
           result.fold(
-            (failure) => ScaffoldMessenger.of(
+            (failure) =>
+                showAppSnackBar(context, failure.message, isError: true),
+            (_) => showAppSnackBar(
               context,
-            ).showSnackBar(SnackBar(content: Text(failure.message))),
-            (_) => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(AppStrings.updateBatteryChangeSnackBarMessage),
-              ),
+              AppStrings.updateBatteryChangeSnackBarMessage,
             ),
           );
         },
@@ -262,13 +254,10 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     final result = await _batteryCubit.deleteBatteryChange(id);
     if (!mounted) return;
     result.fold(
-      (failure) => ScaffoldMessenger.of(
+      (failure) => showAppSnackBar(context, failure.message, isError: true),
+      (_) => showAppSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(failure.message))),
-      (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.deleteBatteryChangeSnackBarMessage),
-        ),
+        AppStrings.deleteBatteryChangeSnackBarMessage,
       ),
     );
   }
@@ -311,14 +300,13 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     required String successMessage,
   }) {
     if (!mounted) return;
+    final isError = state is OilChangeError || state is BatteryChangeError;
     final message = switch (state) {
       OilChangeError(:final message) => message,
       BatteryChangeError(:final message) => message,
       _ => successMessage,
     };
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showAppSnackBar(context, message, isError: isError);
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
@@ -148,14 +149,11 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
               switch (state) {
                 case SuccessState():
                   getIt<VehicleListCubit>().loadVehicles();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        _isEditing
-                            ? AppStrings.updateVehicleSnackBarMessage
-                            : AppStrings.saveVehicleSnackBarMessage,
-                      ),
-                    ),
+                  showAppSnackBar(
+                    context,
+                    _isEditing
+                        ? AppStrings.updateVehicleSnackBarMessage
+                        : AppStrings.saveVehicleSnackBarMessage,
                   );
                   if (widget.isOnboarding) {
                     widget.onVehicleRegistered?.call();
@@ -163,9 +161,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                     Navigator.of(context).pop();
                   }
                 case ErrorState():
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
+                  showAppSnackBar(context, state.message, isError: true);
                 default:
                   break;
               }

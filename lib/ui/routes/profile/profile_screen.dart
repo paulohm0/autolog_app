@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/user_entity.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_state.dart';
@@ -46,9 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: BlocConsumer<ProfileCubit, ProfileState>(
             listener: (context, state) {
               if (state is ProfileError) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
+                showAppSnackBar(context, state.message, isError: true);
               }
               if (state is ProfileSignedOut) {
                 Navigator.pushNamedAndRemoveUntil(

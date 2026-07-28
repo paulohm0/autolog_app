@@ -6,7 +6,10 @@ abstract class Failure {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure([super.message = 'Erro ao comunicar com o servidor']);
+  const ServerFailure([
+    super.message =
+        'Sem conexão com o servidor agora. Tente novamente em instantes.',
+  ]);
 }
 
 class NetworkFailure extends Failure {
@@ -18,12 +21,14 @@ class NetworkFailure extends Failure {
 
 class PermissionFailure extends Failure {
   const PermissionFailure([
-    super.message = 'Você não tem permissão para acessar esses dados.',
+    super.message = 'Você não tem permissão pra fazer isso nessa conta.',
   ]);
 }
 
 class UnexpectedFailure extends Failure {
-  const UnexpectedFailure([super.message = 'Erro inesperado']);
+  const UnexpectedFailure([
+    super.message = 'Algo deu errado. Tente novamente.',
+  ]);
 }
 
 /// Traduz uma exceção capturada num repositório para um [Failure] especifico,

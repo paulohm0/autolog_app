@@ -3,6 +3,7 @@ import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
+import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
@@ -138,14 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final deleteResult = await _vehicleListCubit.deleteVehicle(vehicle.id!);
       if (!context.mounted) return;
       deleteResult.fold(
-        (failure) => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message))),
-        (_) => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.deleteVehicleSnackBarMessage),
-          ),
-        ),
+        (failure) => showAppSnackBar(context, failure.message, isError: true),
+        (_) =>
+            showAppSnackBar(context, AppStrings.deleteVehicleSnackBarMessage),
       );
     }
   }
@@ -615,13 +611,10 @@ class _MaintenanceListItem extends StatelessWidget {
     final result = await homeCubit.deleteMaintenance(maintenance.id!);
     if (!context.mounted) return;
     result.fold(
-      (failure) => ScaffoldMessenger.of(
+      (failure) => showAppSnackBar(context, failure.message, isError: true),
+      (_) => showAppSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(failure.message))),
-      (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.deleteMaintenanceSnackBarMessage),
-        ),
+        AppStrings.deleteMaintenanceSnackBarMessage,
       ),
     );
   }
