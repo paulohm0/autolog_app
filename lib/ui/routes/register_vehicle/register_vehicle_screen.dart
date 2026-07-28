@@ -4,6 +4,7 @@ import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
@@ -146,6 +147,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
             listener: (context, state) {
               switch (state) {
                 case SuccessState():
+                  getIt<VehicleListCubit>().loadVehicles();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(

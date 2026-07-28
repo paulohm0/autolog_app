@@ -5,6 +5,8 @@ import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_state.dart';
 import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/home/home_state.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_screen.dart';
@@ -13,6 +15,7 @@ import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
+import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -58,32 +61,37 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeCubit _homeCubit;
+  late final VehicleListCubit _vehicleListCubit;
   VehicleEntity? _filterVehicle;
   int? _filterYear;
   bool _checkedEmptyVehicles = false;
+  String? _expandedMaintenanceId;
 
   @override
   void initState() {
     super.initState();
     _homeCubit = getIt<HomeCubit>();
     _homeCubit.loadHomeData();
+    _vehicleListCubit = getIt<VehicleListCubit>()..ensureLoaded();
   }
 
   @override
   void dispose() {
     _homeCubit.close();
+    // _vehicleListCubit é um singleton compartilhado com outras telas —
+    // não deve ser fechado aqui.
     super.dispose();
   }
 
   Future<void> _openRegisterVehicle(BuildContext context) async {
     await Navigator.pushNamed(context, AppRoutes.registerVehicle);
-    _homeCubit.loadHomeData();
+    _vehicleListCubit.loadVehicles();
   }
 
   Future<void> _openVehiclesDialog(BuildContext context) async {
-    final state = _homeCubit.state;
-    final vehicles = state is HomeLoaded
-        ? state.vehiclesById.values.toList()
+    final state = _vehicleListCubit.state;
+    final vehicles = state is VehicleListLoaded
+        ? state.vehicles
         : <VehicleEntity>[];
 
     final result = await showDialog<(String, VehicleEntity?)>(
@@ -102,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_) => RegisterVehicleScreen(existingVehicle: vehicle),
         ),
       );
-      _homeCubit.loadHomeData();
+      _vehicleListCubit.loadVehicles();
     } else if (action == 'delete' && vehicle != null) {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -127,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (confirmed != true) return;
 
-      final deleteResult = await _homeCubit.deleteVehicle(vehicle.id!);
+      final deleteResult = await _vehicleListCubit.deleteVehicle(vehicle.id!);
       if (!context.mounted) return;
       deleteResult.fold(
         (failure) => ScaffoldMessenger.of(
@@ -172,8 +180,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openFilters(BuildContext context, HomeState state) async {
-    final vehicles = state is HomeLoaded
-        ? state.vehiclesById.values.toList()
+    final vehicleState = _vehicleListCubit.state;
+    final vehicles = vehicleState is VehicleListLoaded
+        ? vehicleState.vehicles
         : <VehicleEntity>[];
     final years = state is HomeLoaded
         ? state.maintenances.map((m) => m.date.year).toSet().toList()
@@ -204,46 +213,71 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
         body: SafeArea(
-          child: BlocConsumer<HomeCubit, HomeState>(
-            listener: (context, state) {
-              if (state is HomeLoaded && !_checkedEmptyVehicles) {
+          child: BlocListener<VehicleListCubit, VehicleListState>(
+            bloc: _vehicleListCubit,
+            listener: (context, vehicleState) {
+              if (vehicleState is VehicleListLoaded && !_checkedEmptyVehicles) {
                 _checkedEmptyVehicles = true;
-                if (state.vehicleCount == 0) {
+                if (vehicleState.vehicles.isEmpty) {
                   _showNoVehicleDialog(context);
                 }
               }
             },
-            builder: (context, state) {
-              return RefreshIndicator(
-                onRefresh: () => _homeCubit.loadHomeData(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 100),
-                  child: Column(
-                    children: [
-                      _QuickStats(
-                        state: state,
-                        onVehiclesTap: () => _openVehiclesDialog(context),
+            child: BlocBuilder<VehicleListCubit, VehicleListState>(
+              bloc: _vehicleListCubit,
+              builder: (context, vehicleState) {
+                final vehiclesById = vehicleState is VehicleListLoaded
+                    ? vehicleState.vehiclesById
+                    : <String, VehicleEntity>{};
+                final vehicleCount = vehicleState is VehicleListLoaded
+                    ? vehicleState.vehicles.length
+                    : null;
+
+                return BlocBuilder<HomeCubit, HomeState>(
+                  bloc: _homeCubit,
+                  builder: (context, state) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        await _homeCubit.loadHomeData();
+                        await _vehicleListCubit.loadVehicles();
+                      },
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 100),
+                        child: Column(
+                          children: [
+                            _QuickStats(
+                              vehicleCount: vehicleCount,
+                              onVehiclesTap: () => _openVehiclesDialog(context),
+                            ),
+                            _HistorySection(
+                              filterVehicle: _filterVehicle,
+                              filterYear: _filterYear,
+                              onFilterTap: () => _openFilters(context, state),
+                              onClearFilters: () => setState(() {
+                                _filterVehicle = null;
+                                _filterYear = null;
+                              }),
+                            ),
+                            _MaintenanceList(
+                              state: state,
+                              vehiclesById: vehiclesById,
+                              filterVehicleId: _filterVehicle?.id,
+                              filterYear: _filterYear,
+                              expandedId: _expandedMaintenanceId,
+                              onToggleExpand: (id) => setState(() {
+                                _expandedMaintenanceId =
+                                    _expandedMaintenanceId == id ? null : id;
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
-                      _HistorySection(
-                        filterVehicle: _filterVehicle,
-                        filterYear: _filterYear,
-                        onFilterTap: () => _openFilters(context, state),
-                        onClearFilters: () => setState(() {
-                          _filterVehicle = null;
-                          _filterYear = null;
-                        }),
-                      ),
-                      _MaintenanceList(
-                        state: state,
-                        filterVehicleId: _filterVehicle?.id,
-                        filterYear: _filterYear,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -261,15 +295,15 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _QuickStats extends StatelessWidget {
-  final HomeState state;
+  final int? vehicleCount;
   final VoidCallback onVehiclesTap;
 
-  const _QuickStats({required this.state, required this.onVehiclesTap});
+  const _QuickStats({required this.vehicleCount, required this.onVehiclesTap});
 
   @override
   Widget build(BuildContext context) {
-    final vehicleCount = state is HomeLoaded
-        ? (state as HomeLoaded).vehicleCount.toString().padLeft(2, '0')
+    final vehicleCountLabel = vehicleCount != null
+        ? vehicleCount.toString().padLeft(2, '0')
         : '--';
 
     return Padding(
@@ -282,7 +316,7 @@ class _QuickStats extends StatelessWidget {
       child: _StatRow(
         icon: Icons.directions_car,
         label: AppStrings.activeVehiclesLabel,
-        value: vehicleCount,
+        value: vehicleCountLabel,
         onTap: onVehiclesTap,
       ),
     );
@@ -409,11 +443,17 @@ class _ActiveFiltersRow extends StatelessWidget {
 
 class _MaintenanceList extends StatelessWidget {
   final HomeState state;
+  final Map<String, VehicleEntity> vehiclesById;
   final String? filterVehicleId;
   final int? filterYear;
+  final String? expandedId;
+  final ValueChanged<String> onToggleExpand;
 
   const _MaintenanceList({
     required this.state,
+    required this.vehiclesById,
+    required this.expandedId,
+    required this.onToggleExpand,
     this.filterVehicleId,
     this.filterYear,
   });
@@ -467,19 +507,35 @@ class _MaintenanceList extends StatelessWidget {
       );
     }
 
+    final showYearHeaders =
+        maintenances.map((m) => m.date.year).toSet().length > 1;
+    int? lastYear;
+    final children = <Widget>[];
+
+    for (final maintenance in maintenances) {
+      if (showYearHeaders && maintenance.date.year != lastYear) {
+        children.add(
+          YearSectionHeader(
+            year: maintenance.date.year,
+            isFirst: lastYear == null,
+          ),
+        );
+        lastYear = maintenance.date.year;
+      }
+      children.add(
+        _MaintenanceListItem(
+          maintenance: maintenance,
+          vehiclesById: vehiclesById,
+          expanded: expandedId == maintenance.id,
+          onToggleExpand: () => onToggleExpand(maintenance.id!),
+        ),
+      );
+      children.add(const SizedBox(height: AppSpacing.sm));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Column(
-        children: [
-          for (final maintenance in maintenances) ...[
-            _MaintenanceListItem(
-              maintenance: maintenance,
-              vehiclesById: loaded.vehiclesById,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-        ],
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -487,10 +543,14 @@ class _MaintenanceList extends StatelessWidget {
 class _MaintenanceListItem extends StatelessWidget {
   final MaintenanceEntity maintenance;
   final Map<String, VehicleEntity> vehiclesById;
+  final bool expanded;
+  final VoidCallback onToggleExpand;
 
   const _MaintenanceListItem({
     required this.maintenance,
     required this.vehiclesById,
+    required this.expanded,
+    required this.onToggleExpand,
   });
 
   @override
@@ -506,227 +566,63 @@ class _MaintenanceListItem extends StatelessWidget {
       workshop: maintenance.workshop,
       vehicle: vehicleLabel,
       amount: _formatCurrency(maintenance.value),
-      onTap: () => _openDetail(context, vehicleLabel),
+      expanded: expanded,
+      onToggleExpand: onToggleExpand,
+      dateLabel: formatDate(maintenance.date),
+      description: maintenance.description,
+      onEdit: () => _edit(context),
+      onDelete: () => _confirmAndDelete(context),
     );
   }
 
-  Future<void> _openDetail(BuildContext context, String vehicleLabel) async {
+  Future<void> _edit(BuildContext context) async {
+    final homeCubit = context.read<HomeCubit>();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RegisterServiceScreen(existingMaintenance: maintenance),
+      ),
+    );
+    homeCubit.loadHomeData();
+  }
+
+  Future<void> _confirmAndDelete(BuildContext context) async {
     final homeCubit = context.read<HomeCubit>();
 
-    final action = await showDialog<String>(
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => _MaintenanceDetailDialog(
-        maintenance: maintenance,
-        vehicleLabel: vehicleLabel,
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.deleteConfirmTitle),
+        content: const Text(AppStrings.deleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(AppStrings.cancelButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              AppStrings.deleteButton,
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
       ),
     );
 
+    if (confirmed != true) return;
     if (!context.mounted) return;
 
-    if (action == 'edit') {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) =>
-              RegisterServiceScreen(existingMaintenance: maintenance),
-        ),
-      );
-      homeCubit.loadHomeData();
-    } else if (action == 'delete') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text(AppStrings.deleteConfirmTitle),
-          content: const Text(AppStrings.deleteConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(AppStrings.cancelButton),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                AppStrings.deleteButton,
-                style: TextStyle(color: AppColors.error),
-              ),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmed != true) return;
-
-      final result = await homeCubit.deleteMaintenance(maintenance.id!);
-      if (!context.mounted) return;
-      result.fold(
-        (failure) => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message))),
-        (_) => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.deleteMaintenanceSnackBarMessage),
-          ),
-        ),
-      );
-    }
-  }
-}
-
-class _MaintenanceDetailDialog extends StatelessWidget {
-  final MaintenanceEntity maintenance;
-  final String vehicleLabel;
-
-  const _MaintenanceDetailDialog({
-    required this.maintenance,
-    required this.vehicleLabel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 500),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(maintenance.workshop, style: AppTextStyles.headlineMedium),
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.directions_car_outlined,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    vehicleLabel,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              _DetailRow(
-                label: AppStrings.maintenanceDateLabel,
-                value: formatDate(maintenance.date),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _DescriptionDetailRow(description: maintenance.description),
-              const SizedBox(height: AppSpacing.md),
-              _DetailRow(
-                label: AppStrings.totalValueLabel,
-                value: _formatCurrency(maintenance.value),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 52,
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.of(context).pop('delete'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.error,
-                          side: const BorderSide(color: AppColors.error),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                          ),
-                        ),
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 20,
-                        ),
-                        label: const Text(AppStrings.deleteButton),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: PrimaryButton(
-                      label: AppStrings.editButton,
-                      icon: Icons.edit_outlined,
-                      onPressed: () => Navigator.of(context).pop('edit'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final result = await homeCubit.deleteMaintenance(maintenance.id!);
+    if (!context.mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (_) => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.deleteMaintenanceSnackBarMessage),
         ),
       ),
-    );
-  }
-}
-
-class _DescriptionDetailRow extends StatelessWidget {
-  final String description;
-
-  const _DescriptionDetailRow({required this.description});
-
-  @override
-  Widget build(BuildContext context) {
-    final items = description
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppStrings.servicesDescriptionLabel.toUpperCase(),
-          style: AppTextStyles.labelLarge,
-        ),
-        const SizedBox(height: 4),
-        for (final item in items)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '•  ',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Expanded(
-                  child: Text(item, style: AppTextStyles.bodyLarge),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: AppTextStyles.labelLarge),
-        const SizedBox(height: 4),
-        Text(value, style: AppTextStyles.bodyLarge),
-      ],
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:autolog_app/core/utils/date_formatter.dart';
 import 'package:autolog_app/domain/entity/battery_change_entity.dart';
 import 'package:autolog_app/domain/entity/oil_change_entity.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_state.dart';
 import 'package:autolog_app/ui/routes/oil_battery/battery_change_cubit.dart';
 import 'package:autolog_app/ui/routes/oil_battery/battery_change_state.dart';
 import 'package:autolog_app/ui/routes/oil_battery/oil_change_cubit.dart';
@@ -17,6 +19,7 @@ import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/simple_history_card.dart';
 import 'package:autolog_app/ui/widgets/vehicle_picker_dialog.dart';
+import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,6 +50,7 @@ class OilBatteryScreen extends StatefulWidget {
 class _OilBatteryScreenState extends State<OilBatteryScreen> {
   late final OilChangeCubit _oilCubit;
   late final BatteryChangeCubit _batteryCubit;
+  late final VehicleListCubit _vehicleListCubit;
   bool _showOil = true;
   VehicleEntity? _filterVehicle;
   int? _filterYear;
@@ -56,20 +60,25 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     super.initState();
     _oilCubit = getIt<OilChangeCubit>()..loadData();
     _batteryCubit = getIt<BatteryChangeCubit>()..loadData();
+    _vehicleListCubit = getIt<VehicleListCubit>()..ensureLoaded();
   }
 
   @override
   void dispose() {
     _oilCubit.close();
     _batteryCubit.close();
+    // _vehicleListCubit é um singleton compartilhado com outras telas —
+    // não deve ser fechado aqui.
     super.dispose();
   }
 
+  List<VehicleEntity> get _currentVehicles {
+    final state = _vehicleListCubit.state;
+    return state is VehicleListLoaded ? state.vehicles : <VehicleEntity>[];
+  }
+
   Future<void> _openAddOilSheet() async {
-    final state = _oilCubit.state;
-    final vehicles = state is OilChangeLoaded
-        ? state.vehicles
-        : <VehicleEntity>[];
+    final vehicles = _currentVehicles;
 
     await showModalBottomSheet(
       context: context,
@@ -95,10 +104,7 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   }
 
   Future<void> _openAddBatterySheet() async {
-    final state = _batteryCubit.state;
-    final vehicles = state is BatteryChangeLoaded
-        ? state.vehicles
-        : <VehicleEntity>[];
+    final vehicles = _currentVehicles;
 
     await showModalBottomSheet(
       context: context,
@@ -122,14 +128,155 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
     );
   }
 
+  Future<void> _editOilChange(OilChangeEntity existing) async {
+    final vehicles = _currentVehicles;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _OilChangeFormSheet(
+        vehicles: vehicles,
+        existingOilChange: existing,
+        onSave: (vehicleId, brand, liters, date) async {
+          Navigator.of(context).pop();
+          final result = await _oilCubit.updateOilChange(
+            id: existing.id!,
+            vehicleId: vehicleId,
+            brand: brand,
+            liters: liters,
+            date: date,
+          );
+          if (!mounted) return;
+          result.fold(
+            (failure) => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(failure.message))),
+            (_) => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(AppStrings.updateOilChangeSnackBarMessage),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _deleteOilChange(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.deleteOilChangeConfirmTitle),
+        content: const Text(AppStrings.deleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(AppStrings.cancelButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              AppStrings.deleteButton,
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    final result = await _oilCubit.deleteOilChange(id);
+    if (!mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (_) => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.deleteOilChangeSnackBarMessage),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editBatteryChange(BatteryChangeEntity existing) async {
+    final vehicles = _currentVehicles;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _BatteryChangeFormSheet(
+        vehicles: vehicles,
+        existingBatteryChange: existing,
+        onSave: (vehicleId, model, date) async {
+          Navigator.of(context).pop();
+          final result = await _batteryCubit.updateBatteryChange(
+            id: existing.id!,
+            vehicleId: vehicleId,
+            model: model,
+            date: date,
+          );
+          if (!mounted) return;
+          result.fold(
+            (failure) => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(failure.message))),
+            (_) => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(AppStrings.updateBatteryChangeSnackBarMessage),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _deleteBatteryChange(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.deleteBatteryChangeConfirmTitle),
+        content: const Text(AppStrings.deleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(AppStrings.cancelButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              AppStrings.deleteButton,
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    final result = await _batteryCubit.deleteBatteryChange(id);
+    if (!mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (_) => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.deleteBatteryChangeSnackBarMessage),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openFilters() async {
     final oilState = _oilCubit.state;
     final batteryState = _batteryCubit.state;
-    final vehicles = oilState is OilChangeLoaded
-        ? oilState.vehicles
-        : (batteryState is BatteryChangeLoaded
-              ? batteryState.vehicles
-              : <VehicleEntity>[]);
+    final vehicles = _currentVehicles;
 
     final years = _showOil
         ? (oilState is OilChangeLoaded
@@ -214,17 +361,32 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
                 }),
               ),
             Expanded(
-              child: _showOil
-                  ? _OilList(
-                      cubit: _oilCubit,
-                      filterVehicleId: _filterVehicle?.id,
-                      filterYear: _filterYear,
-                    )
-                  : _BatteryList(
-                      cubit: _batteryCubit,
-                      filterVehicleId: _filterVehicle?.id,
-                      filterYear: _filterYear,
-                    ),
+              child: BlocBuilder<VehicleListCubit, VehicleListState>(
+                bloc: _vehicleListCubit,
+                builder: (context, vehicleState) {
+                  final vehiclesById = vehicleState is VehicleListLoaded
+                      ? vehicleState.vehiclesById
+                      : <String, VehicleEntity>{};
+
+                  return _showOil
+                      ? _OilList(
+                          cubit: _oilCubit,
+                          vehiclesById: vehiclesById,
+                          filterVehicleId: _filterVehicle?.id,
+                          filterYear: _filterYear,
+                          onEdit: _editOilChange,
+                          onDelete: _deleteOilChange,
+                        )
+                      : _BatteryList(
+                          cubit: _batteryCubit,
+                          vehiclesById: vehiclesById,
+                          filterVehicleId: _filterVehicle?.id,
+                          filterYear: _filterYear,
+                          onEdit: _editBatteryChange,
+                          onDelete: _deleteBatteryChange,
+                        );
+                },
+              ),
             ),
           ],
         ),
@@ -244,11 +406,17 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
 
 class _OilList extends StatelessWidget {
   final OilChangeCubit cubit;
+  final Map<String, VehicleEntity> vehiclesById;
   final String? filterVehicleId;
   final int? filterYear;
+  final ValueChanged<OilChangeEntity> onEdit;
+  final ValueChanged<String> onDelete;
 
   const _OilList({
     required this.cubit,
+    required this.vehiclesById,
+    required this.onEdit,
+    required this.onDelete,
     this.filterVehicleId,
     this.filterYear,
   });
@@ -285,6 +453,32 @@ class _OilList extends StatelessWidget {
           );
         }
 
+        final showYearHeaders =
+            oilChanges.map((o) => o.date.year).toSet().length > 1;
+        int? lastYear;
+        final children = <Widget>[];
+
+        for (final oilChange in oilChanges) {
+          if (showYearHeaders && oilChange.date.year != lastYear) {
+            children.add(
+              YearSectionHeader(
+                year: oilChange.date.year,
+                isFirst: lastYear == null,
+              ),
+            );
+            lastYear = oilChange.date.year;
+          }
+          children.add(
+            _OilChangeListItem(
+              oilChange: oilChange,
+              vehiclesById: vehiclesById,
+              onEdit: () => onEdit(oilChange),
+              onDelete: () => onDelete(oilChange.id!),
+            ),
+          );
+          children.add(const SizedBox(height: AppSpacing.md));
+        }
+
         return ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -292,15 +486,7 @@ class _OilList extends StatelessWidget {
             AppSpacing.lg,
             100,
           ),
-          children: [
-            for (final oilChange in oilChanges) ...[
-              _OilChangeListItem(
-                oilChange: oilChange,
-                vehiclesById: loaded.vehiclesById,
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
-          ],
+          children: children,
         );
       },
     );
@@ -310,10 +496,14 @@ class _OilList extends StatelessWidget {
 class _OilChangeListItem extends StatelessWidget {
   final OilChangeEntity oilChange;
   final Map<String, VehicleEntity> vehiclesById;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _OilChangeListItem({
     required this.oilChange,
     required this.vehiclesById,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -324,17 +514,25 @@ class _OilChangeListItem extends StatelessWidget {
       day: oilChange.date.day.toString().padLeft(2, '0'),
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
       detail: '${oilChange.brand} • ${oilChange.liters} litros',
+      onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 }
 
 class _BatteryList extends StatelessWidget {
   final BatteryChangeCubit cubit;
+  final Map<String, VehicleEntity> vehiclesById;
   final String? filterVehicleId;
   final int? filterYear;
+  final ValueChanged<BatteryChangeEntity> onEdit;
+  final ValueChanged<String> onDelete;
 
   const _BatteryList({
     required this.cubit,
+    required this.vehiclesById,
+    required this.onEdit,
+    required this.onDelete,
     this.filterVehicleId,
     this.filterYear,
   });
@@ -371,6 +569,32 @@ class _BatteryList extends StatelessWidget {
           );
         }
 
+        final showYearHeaders =
+            batteryChanges.map((b) => b.date.year).toSet().length > 1;
+        int? lastYear;
+        final children = <Widget>[];
+
+        for (final batteryChange in batteryChanges) {
+          if (showYearHeaders && batteryChange.date.year != lastYear) {
+            children.add(
+              YearSectionHeader(
+                year: batteryChange.date.year,
+                isFirst: lastYear == null,
+              ),
+            );
+            lastYear = batteryChange.date.year;
+          }
+          children.add(
+            _BatteryChangeListItem(
+              batteryChange: batteryChange,
+              vehiclesById: vehiclesById,
+              onEdit: () => onEdit(batteryChange),
+              onDelete: () => onDelete(batteryChange.id!),
+            ),
+          );
+          children.add(const SizedBox(height: AppSpacing.md));
+        }
+
         return ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -378,15 +602,7 @@ class _BatteryList extends StatelessWidget {
             AppSpacing.lg,
             100,
           ),
-          children: [
-            for (final batteryChange in batteryChanges) ...[
-              _BatteryChangeListItem(
-                batteryChange: batteryChange,
-                vehiclesById: loaded.vehiclesById,
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
-          ],
+          children: children,
         );
       },
     );
@@ -396,10 +612,14 @@ class _BatteryList extends StatelessWidget {
 class _BatteryChangeListItem extends StatelessWidget {
   final BatteryChangeEntity batteryChange;
   final Map<String, VehicleEntity> vehiclesById;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _BatteryChangeListItem({
     required this.batteryChange,
     required this.vehiclesById,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -410,6 +630,8 @@ class _BatteryChangeListItem extends StatelessWidget {
       day: batteryChange.date.day.toString().padLeft(2, '0'),
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
       detail: batteryChange.model,
+      onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 }
@@ -624,6 +846,7 @@ class _EmptyMessage extends StatelessWidget {
 
 class _OilChangeFormSheet extends StatefulWidget {
   final List<VehicleEntity> vehicles;
+  final OilChangeEntity? existingOilChange;
   final void Function(
     String vehicleId,
     String brand,
@@ -632,15 +855,19 @@ class _OilChangeFormSheet extends StatefulWidget {
   )
   onSave;
 
-  const _OilChangeFormSheet({required this.vehicles, required this.onSave});
+  const _OilChangeFormSheet({
+    required this.vehicles,
+    required this.onSave,
+    this.existingOilChange,
+  });
 
   @override
   State<_OilChangeFormSheet> createState() => _OilChangeFormSheetState();
 }
 
 class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
-  final _brandController = TextEditingController();
-  final _litersController = TextEditingController();
+  late final TextEditingController _brandController;
+  late final TextEditingController _litersController;
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
 
@@ -648,6 +875,27 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
   String? _dateError;
   String? _brandError;
   String? _litersError;
+
+  bool get _isEditing => widget.existingOilChange != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingOilChange;
+    _brandController = TextEditingController(text: existing?.brand);
+    _litersController = TextEditingController(
+      text: existing?.liters.toString(),
+    );
+    if (existing != null) {
+      for (final vehicle in widget.vehicles) {
+        if (vehicle.id == existing.vehicleId) {
+          _selectedVehicle = vehicle;
+          break;
+        }
+      }
+      _selectedDate = existing.date;
+    }
+  }
 
   @override
   void dispose() {
@@ -714,7 +962,9 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.addOilChangeTitle,
+              _isEditing
+                  ? AppStrings.editOilChangeTitle
+                  : AppStrings.addOilChangeTitle,
               style: AppTextStyles.headlineMedium,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -758,7 +1008,9 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
             ),
             const SizedBox(height: AppSpacing.xxl),
             PrimaryButton(
-              label: AppStrings.saveOilChangeButton,
+              label: _isEditing
+                  ? AppStrings.updateOilChangeButton
+                  : AppStrings.saveOilChangeButton,
               icon: Icons.save_alt_rounded,
               onPressed: _submit,
             ),
@@ -772,11 +1024,13 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
 
 class _BatteryChangeFormSheet extends StatefulWidget {
   final List<VehicleEntity> vehicles;
+  final BatteryChangeEntity? existingBatteryChange;
   final void Function(String vehicleId, String model, DateTime date) onSave;
 
   const _BatteryChangeFormSheet({
     required this.vehicles,
     required this.onSave,
+    this.existingBatteryChange,
   });
 
   @override
@@ -785,13 +1039,31 @@ class _BatteryChangeFormSheet extends StatefulWidget {
 }
 
 class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
-  final _modelController = TextEditingController();
+  late final TextEditingController _modelController;
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
 
   String? _vehicleError;
   String? _dateError;
   String? _modelError;
+
+  bool get _isEditing => widget.existingBatteryChange != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingBatteryChange;
+    _modelController = TextEditingController(text: existing?.model);
+    if (existing != null) {
+      for (final vehicle in widget.vehicles) {
+        if (vehicle.id == existing.vehicleId) {
+          _selectedVehicle = vehicle;
+          break;
+        }
+      }
+      _selectedDate = existing.date;
+    }
+  }
 
   @override
   void dispose() {
@@ -848,7 +1120,9 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.addBatteryChangeTitle,
+              _isEditing
+                  ? AppStrings.editBatteryChangeTitle
+                  : AppStrings.addBatteryChangeTitle,
               style: AppTextStyles.headlineMedium,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -882,7 +1156,9 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
             ),
             const SizedBox(height: AppSpacing.xxl),
             PrimaryButton(
-              label: AppStrings.saveBatteryChangeButton,
+              label: _isEditing
+                  ? AppStrings.updateBatteryChangeButton
+                  : AppStrings.saveBatteryChangeButton,
               icon: Icons.save_alt_rounded,
               onPressed: _submit,
             ),

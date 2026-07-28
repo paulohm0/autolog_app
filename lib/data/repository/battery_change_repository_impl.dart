@@ -53,4 +53,36 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateBatteryChange(
+    BatteryChangeEntity batteryChange,
+  ) async {
+    try {
+      final updated = BatteryChangeModel(
+        userId: _firebaseAuth.currentUser!.uid,
+        vehicleId: batteryChange.vehicleId,
+        model: batteryChange.model,
+        date: batteryChange.date,
+      );
+
+      await _firestoreDB
+          .collection('battery_changes')
+          .doc(batteryChange.id)
+          .update(updated.toJson());
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteBatteryChange(String id) async {
+    try {
+      await _firestoreDB.collection('battery_changes').doc(id).delete();
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }

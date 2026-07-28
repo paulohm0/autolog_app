@@ -7,4 +7,8 @@ abstract class IBatteryChangeRepository {
     BatteryChangeEntity batteryChange,
   );
   Future<Either<Failure, List<BatteryChangeEntity>>> getBatteryChanges();
+  Future<Either<Failure, void>> updateBatteryChange(
+    BatteryChangeEntity batteryChange,
+  );
+  Future<Either<Failure, void>> deleteBatteryChange(String id);
 }

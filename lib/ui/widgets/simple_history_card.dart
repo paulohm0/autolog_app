@@ -6,6 +6,8 @@ class SimpleHistoryCard extends StatelessWidget {
   final String day;
   final String vehicle;
   final String detail;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const SimpleHistoryCard({
     super.key,
@@ -13,6 +15,8 @@ class SimpleHistoryCard extends StatelessWidget {
     required this.day,
     required this.vehicle,
     required this.detail,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -24,13 +28,14 @@ class SimpleHistoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DateBadge(month: month, day: day),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
@@ -60,7 +65,44 @@ class SimpleHistoryCard extends StatelessWidget {
               ],
             ),
           ),
+          _IconAction(
+            icon: Icons.edit_outlined,
+            color: AppColors.textSecondary,
+            onTap: onEdit,
+          ),
+          _IconAction(
+            icon: Icons.delete_outline_rounded,
+            color: AppColors.error,
+            onTap: onDelete,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _IconAction extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _IconAction({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, size: 20, color: color),
+        ),
       ),
     );
   }

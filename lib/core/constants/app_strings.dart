@@ -122,6 +122,21 @@ class AppStrings {
       'Troca de bateria salva com sucesso!';
   static const String emptyFilteredHistory =
       'Nenhum registro encontrado para esse filtro.';
+  static const String editOilChangeTitle = 'Editar Troca de Óleo';
+  static const String editBatteryChangeTitle = 'Editar Troca de Bateria';
+  static const String updateOilChangeButton = 'Salvar Alterações';
+  static const String updateBatteryChangeButton = 'Salvar Alterações';
+  static const String updateOilChangeSnackBarMessage =
+      'Troca de óleo atualizada com sucesso!';
+  static const String updateBatteryChangeSnackBarMessage =
+      'Troca de bateria atualizada com sucesso!';
+  static const String deleteOilChangeSnackBarMessage =
+      'Troca de óleo excluída com sucesso!';
+  static const String deleteBatteryChangeSnackBarMessage =
+      'Troca de bateria excluída com sucesso!';
+  static const String deleteOilChangeConfirmTitle = 'Excluir troca de óleo?';
+  static const String deleteBatteryChangeConfirmTitle =
+      'Excluir troca de bateria?';
 
   // Profile Screen
   static const String appVersionLabel = 'Versão do App';

@@ -8,6 +8,7 @@ import 'package:autolog_app/domain/repository/i_battery_change_repository.dart';
 import 'package:autolog_app/domain/repository/i_maintenance_repository.dart';
 import 'package:autolog_app/domain/repository/i_oil_change_repository.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
+import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/login/login_cubit.dart';
 import 'package:autolog_app/ui/routes/main_navigation/vehicle_check_cubit.dart';
@@ -66,6 +67,11 @@ void setupDependencyInjection() {
     ),
   );
 
+  // Fonte única da lista de veículos, compartilhada por todas as telas.
+  getIt.registerLazySingleton<VehicleListCubit>(
+    () => VehicleListCubit(repository: getIt<IVehicleRepository>()),
+  );
+
   //
   getIt.registerFactory(
     () => LoginCubit(repository: getIt<IAuthRepository>()),
@@ -74,10 +80,7 @@ void setupDependencyInjection() {
     () => RegisterVehicleCubit(repository: getIt<IVehicleRepository>()),
   );
   getIt.registerFactory(
-    () => HomeCubit(
-      vehicleRepository: getIt<IVehicleRepository>(),
-      maintenanceRepository: getIt<IMaintenanceRepository>(),
-    ),
+    () => HomeCubit(maintenanceRepository: getIt<IMaintenanceRepository>()),
   );
   getIt.registerFactory(
     () => RegisterServiceCubit(
@@ -86,15 +89,11 @@ void setupDependencyInjection() {
     ),
   );
   getIt.registerFactory(
-    () => OilChangeCubit(
-      oilChangeRepository: getIt<IOilChangeRepository>(),
-      vehicleRepository: getIt<IVehicleRepository>(),
-    ),
+    () => OilChangeCubit(oilChangeRepository: getIt<IOilChangeRepository>()),
   );
   getIt.registerFactory(
     () => BatteryChangeCubit(
       batteryChangeRepository: getIt<IBatteryChangeRepository>(),
-      vehicleRepository: getIt<IVehicleRepository>(),
     ),
   );
   getIt.registerFactory(

@@ -5,4 +5,6 @@ import 'package:dartz/dartz.dart';
 abstract class IOilChangeRepository {
   Future<Either<Failure, void>> saveOilChange(OilChangeEntity oilChange);
   Future<Either<Failure, List<OilChangeEntity>>> getOilChanges();
+  Future<Either<Failure, void>> updateOilChange(OilChangeEntity oilChange);
+  Future<Either<Failure, void>> deleteOilChange(String id);
 }

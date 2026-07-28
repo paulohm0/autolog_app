@@ -50,4 +50,37 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateOilChange(
+    OilChangeEntity oilChange,
+  ) async {
+    try {
+      final updated = OilChangeModel(
+        userId: _firebaseAuth.currentUser!.uid,
+        vehicleId: oilChange.vehicleId,
+        brand: oilChange.brand,
+        liters: oilChange.liters,
+        date: oilChange.date,
+      );
+
+      await _firestoreDB
+          .collection('oil_changes')
+          .doc(oilChange.id)
+          .update(updated.toJson());
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteOilChange(String id) async {
+    try {
+      await _firestoreDB.collection('oil_changes').doc(id).delete();
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }
