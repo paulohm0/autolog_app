@@ -973,6 +973,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
               hintText: AppStrings.oilBrandHint,
               prefixIcon: Icons.local_gas_station_outlined,
               errorText: _brandError,
+              maxLength: 40,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
@@ -982,6 +983,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+              maxLength: 6,
               errorText: _litersError,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -1131,6 +1133,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
               hintText: AppStrings.batteryModelHint,
               prefixIcon: Icons.battery_charging_full_outlined,
               errorText: _modelError,
+              maxLength: 40,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppDateField(

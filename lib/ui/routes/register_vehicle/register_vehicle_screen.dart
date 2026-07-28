@@ -2,6 +2,7 @@ import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/license_plate_formatter.dart';
 import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
@@ -314,6 +315,7 @@ class _RequiredFields extends StatelessWidget {
           hintText: AppStrings.brandHint,
           prefixIcon: Icons.business_outlined,
           errorText: brandError,
+          maxLength: 30,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -322,6 +324,7 @@ class _RequiredFields extends StatelessWidget {
           hintText: AppStrings.modelHint,
           prefixIcon: Icons.directions_car_outlined,
           errorText: modelError,
+          maxLength: 30,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -330,6 +333,8 @@ class _RequiredFields extends StatelessWidget {
           hintText: AppStrings.plateHint,
           prefixIcon: Icons.tag_rounded,
           errorText: plateError,
+          maxLength: 8,
+          inputFormatters: [LicensePlateInputFormatter()],
         ),
       ],
     );
@@ -378,6 +383,8 @@ class _OptionalDetails extends StatelessWidget {
                   controller: yearController,
                   label: AppStrings.yearLabel,
                   hintText: AppStrings.yearHint,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -386,6 +393,7 @@ class _OptionalDetails extends StatelessWidget {
                   controller: colorController,
                   label: AppStrings.colorLabel,
                   hintText: AppStrings.colorHint,
+                  maxLength: 20,
                 ),
               ),
             ],

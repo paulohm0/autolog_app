@@ -38,7 +38,7 @@ class AppStrings {
   static const String modelLabel = 'Modelo';
   static const String modelHint = 'Ex: Uno, Camaro';
   static const String plateLabel = 'Placa';
-  static const String plateHint = 'ABC-1234 OU ABC1D23';
+  static const String plateHint = 'ABC 1234 ou ABC 1D23';
   static const String optionalDetails = 'Detalhes Opcionais';
   static const String yearLabel = 'ANO';
   static const String yearHint = '2024';

@@ -1,5 +1,6 @@
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppTextField extends StatelessWidget {
   final String label;
@@ -12,6 +13,8 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final TextEditingController? controller;
   final String? errorText;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -25,6 +28,8 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.controller,
     this.errorText,
+    this.maxLength,
+    this.inputFormatters,
   });
 
   @override
@@ -49,6 +54,8 @@ class AppTextField extends StatelessWidget {
             textInputAction: textInputAction,
             readOnly: readOnly,
             onTap: onTap,
+            maxLength: maxLength,
+            inputFormatters: inputFormatters,
             style: AppTextStyles.bodyLarge,
             decoration: InputDecoration(
               hintText: hintText,
@@ -59,6 +66,7 @@ class AppTextField extends StatelessWidget {
                   ? Icon(prefixIcon, color: AppColors.textHint, size: 20)
                   : null,
               border: InputBorder.none,
+              counterText: maxLength != null ? '' : null,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: prefixIcon != null ? AppSpacing.sm : AppSpacing.lg,
                 vertical: maxLines > 1 ? AppSpacing.lg : AppSpacing.md,

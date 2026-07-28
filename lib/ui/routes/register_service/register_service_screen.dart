@@ -301,6 +301,7 @@ class _Form extends StatelessWidget {
           hintText: AppStrings.workshopHint,
           prefixIcon: Icons.storefront_outlined,
           errorText: workshopError,
+          maxLength: 60,
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -312,6 +313,7 @@ class _Form extends StatelessWidget {
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
           errorText: descriptionError,
+          maxLength: 1000,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -379,6 +381,7 @@ class _FinancialSection extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
+                    maxLength: 10,
                     textAlign: TextAlign.right,
                     style: AppTextStyles.headlineMedium.copyWith(
                       color: AppColors.textSecondary,
@@ -389,6 +392,7 @@ class _FinancialSection extends StatelessWidget {
                         color: AppColors.textHint,
                       ),
                       border: InputBorder.none,
+                      counterText: '',
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
