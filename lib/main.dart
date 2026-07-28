@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseAuth.instance.setLanguageCode('pt-BR');
   setupDependencyInjection();
+  getIt<FirebaseAuth>().setLanguageCode('pt-BR');
   runApp(const AutoLogApp());
 }
 
@@ -46,7 +46,7 @@ class _AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<_AuthGate> {
-  late final Future<User?> _initialUser = FirebaseAuth.instance
+  late final Future<User?> _initialUser = getIt<FirebaseAuth>()
       .authStateChanges()
       .first;
 

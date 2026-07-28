@@ -22,6 +22,7 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> signOut() async {
     emit(LoginLoading());
     final result = await _repository.signOut();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(LoginError(message: failure.message)),
       (success) => emit(LoginInitial()),

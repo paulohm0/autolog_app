@@ -30,7 +30,9 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
         value: maintenance.value,
       );
 
-      await _firestoreDB.collection('maintenances').add(newMaintenance.toJson());
+      await _firestoreDB
+          .collection('maintenances')
+          .add(newMaintenance.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));

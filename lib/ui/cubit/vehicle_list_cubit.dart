@@ -42,4 +42,11 @@ class VehicleListCubit extends Cubit<VehicleListState> {
     }
     return result;
   }
+
+  /// Descarta a lista carregada. Chamado no logout — sem isso, o próximo
+  /// usuário a logar no mesmo aparelho veria os veículos da conta anterior,
+  /// já que este cubit é um singleton compartilhado entre todas as telas.
+  void reset() {
+    emit(VehicleListInitial());
+  }
 }

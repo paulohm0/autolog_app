@@ -33,7 +33,10 @@ class VehiclePickerDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppStrings.vehicleLabel, style: AppTextStyles.headlineMedium),
+              Text(
+                AppStrings.vehicleLabel,
+                style: AppTextStyles.headlineMedium,
+              ),
               const SizedBox(height: AppSpacing.md),
               if (vehicles.isEmpty)
                 Padding(

@@ -11,7 +11,6 @@ import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.da
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
-import 'package:autolog_app/ui/widgets/autolog_brand.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +105,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
 
   Future<void> _signOut() async {
     await getIt<IAuthRepository>().signOut();
+    getIt<VehicleListCubit>().reset();
     if (!mounted) return;
     Navigator.of(
       context,
@@ -148,7 +148,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
           body: BlocListener<RegisterVehicleCubit, RegisterVehicleState>(
             listener: (context, state) {
               switch (state) {
-                case SuccessState():
+                case RegisterVehicleSuccess():
                   getIt<VehicleListCubit>().loadVehicles();
                   showAppSnackBar(
                     context,
@@ -161,7 +161,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                   } else {
                     Navigator.of(context).pop();
                   }
-                case ErrorState():
+                case RegisterVehicleError():
                   showAppSnackBar(context, state.message, isError: true);
                 default:
                   break;
@@ -409,6 +409,38 @@ class _BrandFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: AutoLogBrand());
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            AppStrings.appBrandName,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondary,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: Text(
+              AppStrings.proBadge,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

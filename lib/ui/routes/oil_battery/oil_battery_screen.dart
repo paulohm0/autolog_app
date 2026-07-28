@@ -16,6 +16,7 @@ import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_date_field.dart';
 import 'package:autolog_app/ui/widgets/app_dropdown_field.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
+import 'package:autolog_app/ui/widgets/delete_confirm_dialog.dart';
 import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/simple_history_card.dart';
@@ -23,23 +24,6 @@ import 'package:autolog_app/ui/widgets/vehicle_picker_dialog.dart';
 import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-const _monthAbbreviations = [
-  'JAN',
-  'FEV',
-  'MAR',
-  'ABR',
-  'MAI',
-  'JUN',
-  'JUL',
-  'AGO',
-  'SET',
-  'OUT',
-  'NOV',
-  'DEZ',
-];
-
-String _monthAbbrev(DateTime date) => _monthAbbreviations[date.month - 1];
 
 class OilBatteryScreen extends StatefulWidget {
   const OilBatteryScreen({super.key});
@@ -162,28 +146,12 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   }
 
   Future<void> _deleteOilChange(String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.deleteOilChangeConfirmTitle),
-        content: const Text(AppStrings.deleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.cancelButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              AppStrings.deleteButton,
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      title: AppStrings.deleteOilChangeConfirmTitle,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed) return;
     if (!mounted) return;
 
     final result = await _oilCubit.deleteOilChange(id);
@@ -227,28 +195,12 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   }
 
   Future<void> _deleteBatteryChange(String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.deleteBatteryChangeConfirmTitle),
-        content: const Text(AppStrings.deleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.cancelButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              AppStrings.deleteButton,
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      title: AppStrings.deleteBatteryChangeConfirmTitle,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed) return;
     if (!mounted) return;
 
     final result = await _batteryCubit.deleteBatteryChange(id);
@@ -441,31 +393,17 @@ class _OilList extends StatelessWidget {
           );
         }
 
-        final showYearHeaders =
-            oilChanges.map((o) => o.date.year).toSet().length > 1;
-        int? lastYear;
-        final children = <Widget>[];
-
-        for (final oilChange in oilChanges) {
-          if (showYearHeaders && oilChange.date.year != lastYear) {
-            children.add(
-              YearSectionHeader(
-                year: oilChange.date.year,
-                isFirst: lastYear == null,
-              ),
-            );
-            lastYear = oilChange.date.year;
-          }
-          children.add(
-            _OilChangeListItem(
-              oilChange: oilChange,
-              vehiclesById: vehiclesById,
-              onEdit: () => onEdit(oilChange),
-              onDelete: () => onDelete(oilChange.id!),
-            ),
-          );
-          children.add(const SizedBox(height: AppSpacing.md));
-        }
+        final children = buildYearGroupedChildren(
+          items: oilChanges,
+          dateOf: (o) => o.date,
+          spacingAfterItem: AppSpacing.md,
+          itemBuilder: (oilChange) => _OilChangeListItem(
+            oilChange: oilChange,
+            vehiclesById: vehiclesById,
+            onEdit: () => onEdit(oilChange),
+            onDelete: () => onDelete(oilChange.id!),
+          ),
+        );
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -498,7 +436,7 @@ class _OilChangeListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final vehicle = vehiclesById[oilChange.vehicleId];
     return SimpleHistoryCard(
-      month: _monthAbbrev(oilChange.date),
+      month: formatMonthAbbrev(oilChange.date),
       day: oilChange.date.day.toString().padLeft(2, '0'),
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
       detail: '${oilChange.brand} • ${oilChange.liters} litros',
@@ -557,31 +495,17 @@ class _BatteryList extends StatelessWidget {
           );
         }
 
-        final showYearHeaders =
-            batteryChanges.map((b) => b.date.year).toSet().length > 1;
-        int? lastYear;
-        final children = <Widget>[];
-
-        for (final batteryChange in batteryChanges) {
-          if (showYearHeaders && batteryChange.date.year != lastYear) {
-            children.add(
-              YearSectionHeader(
-                year: batteryChange.date.year,
-                isFirst: lastYear == null,
-              ),
-            );
-            lastYear = batteryChange.date.year;
-          }
-          children.add(
-            _BatteryChangeListItem(
-              batteryChange: batteryChange,
-              vehiclesById: vehiclesById,
-              onEdit: () => onEdit(batteryChange),
-              onDelete: () => onDelete(batteryChange.id!),
-            ),
-          );
-          children.add(const SizedBox(height: AppSpacing.md));
-        }
+        final children = buildYearGroupedChildren(
+          items: batteryChanges,
+          dateOf: (b) => b.date,
+          spacingAfterItem: AppSpacing.md,
+          itemBuilder: (batteryChange) => _BatteryChangeListItem(
+            batteryChange: batteryChange,
+            vehiclesById: vehiclesById,
+            onEdit: () => onEdit(batteryChange),
+            onDelete: () => onDelete(batteryChange.id!),
+          ),
+        );
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -614,7 +538,7 @@ class _BatteryChangeListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final vehicle = vehiclesById[batteryChange.vehicleId];
     return SimpleHistoryCard(
-      month: _monthAbbrev(batteryChange.date),
+      month: formatMonthAbbrev(batteryChange.date),
       day: batteryChange.date.day.toString().padLeft(2, '0'),
       vehicle: vehicle != null ? '${vehicle.brand} ${vehicle.model}' : '',
       detail: batteryChange.model,
@@ -693,14 +617,18 @@ class _ActiveFilterChip extends StatelessWidget {
                 size: 14,
                 color: AppColors.primary,
               ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.primary,
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               GestureDetector(
                 onTap: onClear,
                 child: const Icon(

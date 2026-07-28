@@ -13,29 +13,13 @@ import 'package:autolog_app/ui/routes/home/home_state.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_screen.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_screen.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
+import 'package:autolog_app/ui/widgets/delete_confirm_dialog.dart';
 import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-const _monthAbbreviations = [
-  'JAN',
-  'FEV',
-  'MAR',
-  'ABR',
-  'MAI',
-  'JUN',
-  'JUL',
-  'AGO',
-  'SET',
-  'OUT',
-  'NOV',
-  'DEZ',
-];
-
-String _monthAbbrev(DateTime date) => _monthAbbreviations[date.month - 1];
 
 String _formatCurrency(double value) {
   final fixed = value.toStringAsFixed(2);
@@ -113,28 +97,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       _vehicleListCubit.loadVehicles();
     } else if (action == 'delete' && vehicle != null) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text(AppStrings.deleteVehicleConfirmTitle),
-          content: const Text(AppStrings.deleteConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(AppStrings.cancelButton),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                AppStrings.deleteButton,
-                style: TextStyle(color: AppColors.error),
-              ),
-            ),
-          ],
-        ),
+      final confirmed = await showDeleteConfirmDialog(
+        context,
+        title: AppStrings.deleteVehicleConfirmTitle,
       );
 
-      if (confirmed != true) return;
+      if (!confirmed) return;
 
       final deleteResult = await _vehicleListCubit.deleteVehicle(vehicle.id!);
       if (!context.mounted) return;
@@ -414,14 +382,18 @@ class _ActiveFiltersRow extends StatelessWidget {
               size: 14,
               color: AppColors.primary,
             ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.primary,
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.primary,
+                ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             GestureDetector(
               onTap: onClear,
               child: const Icon(
@@ -503,31 +475,17 @@ class _MaintenanceList extends StatelessWidget {
       );
     }
 
-    final showYearHeaders =
-        maintenances.map((m) => m.date.year).toSet().length > 1;
-    int? lastYear;
-    final children = <Widget>[];
-
-    for (final maintenance in maintenances) {
-      if (showYearHeaders && maintenance.date.year != lastYear) {
-        children.add(
-          YearSectionHeader(
-            year: maintenance.date.year,
-            isFirst: lastYear == null,
-          ),
-        );
-        lastYear = maintenance.date.year;
-      }
-      children.add(
-        _MaintenanceListItem(
-          maintenance: maintenance,
-          vehiclesById: vehiclesById,
-          expanded: expandedId == maintenance.id,
-          onToggleExpand: () => onToggleExpand(maintenance.id!),
-        ),
-      );
-      children.add(const SizedBox(height: AppSpacing.sm));
-    }
+    final children = buildYearGroupedChildren(
+      items: maintenances,
+      dateOf: (m) => m.date,
+      spacingAfterItem: AppSpacing.sm,
+      itemBuilder: (maintenance) => _MaintenanceListItem(
+        maintenance: maintenance,
+        vehiclesById: vehiclesById,
+        expanded: expandedId == maintenance.id,
+        onToggleExpand: () => onToggleExpand(maintenance.id!),
+      ),
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -557,7 +515,7 @@ class _MaintenanceListItem extends StatelessWidget {
         : '';
 
     return MaintenanceCard(
-      month: _monthAbbrev(maintenance.date),
+      month: formatMonthAbbrev(maintenance.date),
       day: maintenance.date.day.toString().padLeft(2, '0'),
       workshop: maintenance.workshop,
       vehicle: vehicleLabel,
@@ -584,28 +542,12 @@ class _MaintenanceListItem extends StatelessWidget {
   Future<void> _confirmAndDelete(BuildContext context) async {
     final homeCubit = context.read<HomeCubit>();
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.deleteConfirmTitle),
-        content: const Text(AppStrings.deleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.cancelButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              AppStrings.deleteButton,
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      title: AppStrings.deleteConfirmTitle,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed) return;
     if (!context.mounted) return;
 
     final result = await homeCubit.deleteMaintenance(maintenance.id!);

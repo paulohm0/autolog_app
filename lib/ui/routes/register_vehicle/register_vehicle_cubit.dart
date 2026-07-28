@@ -8,7 +8,7 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
 
   RegisterVehicleCubit({required IVehicleRepository repository})
     : _repository = repository,
-      super(InitialState());
+      super(RegisterVehicleInitial());
 
   Future<void> saveVehicleFromForm({
     required String brand,
@@ -28,22 +28,12 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
   }
 
   Future<void> saveVehicle(VehicleEntity vehicle) async {
-    emit(LoadingState());
+    emit(RegisterVehicleLoading());
     final result = await _repository.saveVehicle(vehicle);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(ErrorState(message: failure.message)),
-      (success) => emit(SuccessState()),
-    );
-  }
-
-  Future<void> getVehicles() async {
-    emit(LoadingState());
-    final result = await _repository.getVehicles();
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(ErrorState(message: failure.message)),
-      (vehicles) => emit(VehicleListLoadedState(vehicles: vehicles)),
+      (failure) => emit(RegisterVehicleError(message: failure.message)),
+      (success) => emit(RegisterVehicleSuccess()),
     );
   }
 
@@ -63,12 +53,12 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
       year: int.tryParse(year),
       color: color,
     );
-    emit(LoadingState());
+    emit(RegisterVehicleLoading());
     final result = await _repository.updateVehicle(vehicle);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(ErrorState(message: failure.message)),
-      (success) => emit(SuccessState()),
+      (failure) => emit(RegisterVehicleError(message: failure.message)),
+      (success) => emit(RegisterVehicleSuccess()),
     );
   }
 }
