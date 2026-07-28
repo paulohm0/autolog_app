@@ -48,6 +48,7 @@ flutter:
     - assets/fonts/
     - assets/images/autolog-logo.png
     - assets/images/google-logo.png
+    - assets/images/image-top-login.png
   fonts:
     - family: Inter
       fonts:

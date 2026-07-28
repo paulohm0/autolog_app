@@ -1,5 +1,6 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
+import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/domain/entity/user_entity.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
@@ -48,6 +49,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text(state.message)));
+              }
+              if (state is ProfileSignedOut) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.login,
+                  (route) => false,
+                );
               }
             },
             builder: (context, state) {

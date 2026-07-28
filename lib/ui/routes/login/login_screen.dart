@@ -1,8 +1,12 @@
-import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
+import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/ui/routes/login/google_sign_in_button.dart';
+import 'package:autolog_app/ui/routes/login/login_benefits.dart';
 import 'package:autolog_app/ui/routes/login/login_cubit.dart';
+import 'package:autolog_app/ui/routes/login/login_header.dart';
 import 'package:autolog_app/ui/routes/login/login_state.dart';
+import 'package:autolog_app/ui/routes/login/login_top_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,36 +35,69 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: BlocConsumer<LoginCubit, LoginState>(
-          bloc: _cubit,
-          listener: (context, state) {
-            switch (state) {
-              case LoginSuccess():
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
-              case LoginError():
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
-              default:
-                break;
-            }
-          },
-          builder: (context, state) {
-            return switch (state) {
-              LoginLoading() => const CircularProgressIndicator(),
-              LoginSuccess() => const SizedBox.shrink(),
-              LoginInitial() || LoginError() => ElevatedButton.icon(
-                onPressed: () => _cubit.signIn(),
-                icon: Image.asset(
-                  'assets/images/google-logo.png',
-                  width: 30,
-                  height: 30,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.primaryLight, AppColors.background],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const LoginTopImage(),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: AppSpacing.lg),
+                      const LoginHeader(),
+                      SizedBox(height: AppSpacing.lg),
+                      const LoginBenefits(),
+                      SizedBox(height: AppSpacing.xxxxl),
+                      BlocConsumer<LoginCubit, LoginState>(
+                        bloc: _cubit,
+                        listener: (context, state) {
+                          switch (state) {
+                            case LoginSuccess():
+                              Navigator.pushReplacementNamed(
+                                context,
+                                AppRoutes.home,
+                              );
+                            case LoginError():
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(state.message)),
+                              );
+                            default:
+                              break;
+                          }
+                        },
+                        builder: (context, state) {
+                          return switch (state) {
+                            LoginLoading() => const CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
+                            LoginSuccess() => const SizedBox.shrink(),
+                            LoginInitial() ||
+                            LoginError() => GoogleSignInButton(
+                              onPressed: () => _cubit.signIn(),
+                            ),
+                          };
+                        },
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
                 ),
-                label: Text(AppStrings.signInGoogleLabel),
               ),
-            };
-          },
+            ],
+          ),
         ),
       ),
     );

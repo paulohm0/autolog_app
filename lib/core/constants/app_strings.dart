@@ -9,6 +9,14 @@ class AppStrings {
 
   // Login Screen
   static const String signInGoogleLabel = 'Entrar com o Google';
+  static const String loginSubtitle =
+      'Controle a manutenção do seu veículo em um só lugar.';
+  static const String loginBenefitMaintenance =
+      'Histórico completo de manutenções';
+  static const String loginBenefitOilBattery =
+      'Controle de troca de óleo e bateria';
+  static const String loginBenefitMultiVehicle =
+      'Gerencie todos os seus veículos em um só lugar';
 
   // Home Screen
   static const String activeVehiclesLabel = 'Veículos Ativos';
@@ -131,6 +139,13 @@ class AppStrings {
   // Onboarding (cadastro do primeiro veículo)
   static const String onboardingVehicleTitle = 'Vamos começar!';
   static const String onboardingVehicleMessage =
-      'Cadastre pelo menos um veículo para continuar usando o AutoLog.';
+      'Cadastre seu primeiro veículo para começar, ou pule por enquanto e cadastre depois.';
   static const String retryButton = 'Tentar novamente';
+  static const String skipButton = 'Pular';
+
+  // Popup de veículo ausente na Home
+  static const String noVehicleDialogTitle = 'Nenhum veículo cadastrado';
+  static const String noVehicleDialogMessage =
+      'Cadastre um veículo para começar a registrar suas manutenções, trocas de óleo e bateria.';
+  static const String laterButton = 'Agora não';
 }

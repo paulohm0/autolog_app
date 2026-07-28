@@ -9,8 +9,9 @@ import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Garante que o usuário tenha ao menos um veículo cadastrado antes de
-/// liberar o acesso ao [MainNavigationScreen].
+/// Exibido logo após um login bem-sucedido: convida o usuário a cadastrar
+/// seu primeiro veículo antes de liberar o [MainNavigationScreen], mas
+/// permite pular essa etapa (ver [RegisterVehicleScreen.onSkip]).
 class MainGate extends StatefulWidget {
   const MainGate({super.key});
 
@@ -47,6 +48,9 @@ class _MainGateState extends State<MainGate> {
             return RegisterVehicleScreen(
               isOnboarding: true,
               onVehicleRegistered: () => _cubit.checkVehicles(),
+              onSkip: () => Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+              ),
             );
           }
           if (state is VehicleCheckError) {

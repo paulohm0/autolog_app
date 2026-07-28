@@ -1,5 +1,6 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
+import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
@@ -16,12 +17,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class RegisterVehicleScreen extends StatefulWidget {
   final bool isOnboarding;
   final VoidCallback? onVehicleRegistered;
+  final VoidCallback? onSkip;
   final VehicleEntity? existingVehicle;
 
   const RegisterVehicleScreen({
     super.key,
     this.isOnboarding = false,
     this.onVehicleRegistered,
+    this.onSkip,
     this.existingVehicle,
   });
 
@@ -100,6 +103,10 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
 
   Future<void> _signOut() async {
     await getIt<IAuthRepository>().signOut();
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
   }
 
   @override
@@ -121,6 +128,10 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
             centerTitle: true,
             actions: widget.isOnboarding
                 ? [
+                    TextButton(
+                      onPressed: widget.onSkip,
+                      child: const Text(AppStrings.skipButton),
+                    ),
                     TextButton(
                       onPressed: _signOut,
                       child: Text(

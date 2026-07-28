@@ -60,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final HomeCubit _homeCubit;
   VehicleEntity? _filterVehicle;
   int? _filterYear;
+  bool _checkedEmptyVehicles = false;
 
   @override
   void initState() {
@@ -146,6 +147,30 @@ class _HomeScreenState extends State<HomeScreen> {
     _homeCubit.loadHomeData();
   }
 
+  Future<void> _showNoVehicleDialog(BuildContext context) async {
+    final action = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text(AppStrings.noVehicleDialogTitle),
+        content: const Text(AppStrings.noVehicleDialogMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(AppStrings.laterButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(AppStrings.addVehicleLabel),
+          ),
+        ],
+      ),
+    );
+
+    if (action == true && context.mounted) {
+      await _openRegisterVehicle(context);
+    }
+  }
+
   Future<void> _openFilters(BuildContext context, HomeState state) async {
     final vehicles = state is HomeLoaded
         ? state.vehiclesById.values.toList()
@@ -179,7 +204,15 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
         body: SafeArea(
-          child: BlocBuilder<HomeCubit, HomeState>(
+          child: BlocConsumer<HomeCubit, HomeState>(
+            listener: (context, state) {
+              if (state is HomeLoaded && !_checkedEmptyVehicles) {
+                _checkedEmptyVehicles = true;
+                if (state.vehicleCount == 0) {
+                  _showNoVehicleDialog(context);
+                }
+              }
+            },
             builder: (context, state) {
               return RefreshIndicator(
                 onRefresh: () => _homeCubit.loadHomeData(),
