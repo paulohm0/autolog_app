@@ -1,6 +1,7 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/core/utils/currency_input_formatter.dart';
 import 'package:autolog_app/core/utils/date_formatter.dart';
 import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
@@ -51,7 +52,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     _workshopController = TextEditingController(text: existing?.workshop);
     _descriptionController = TextEditingController(text: existing?.description);
     _valueController = TextEditingController(
-      text: existing?.value.toStringAsFixed(2).replaceAll('.', ','),
+      text: existing != null ? formatCurrencyInputValue(existing.value) : null,
     );
     _selectedDate = existing?.date;
     _cubit = getIt<RegisterServiceCubit>();
@@ -86,9 +87,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   void _save() {
     final workshop = _workshopController.text.trim();
     final description = _descriptionController.text.trim();
-    final value = double.tryParse(
-      _valueController.text.trim().replaceAll(',', '.'),
-    );
+    final value = parseCurrencyInput(_valueController.text);
 
     setState(() {
       _vehicleError = _selectedVehicle == null
@@ -378,10 +377,9 @@ class _FinancialSection extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: valueController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    maxLength: 10,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    maxLength: 15,
                     textAlign: TextAlign.right,
                     style: AppTextStyles.headlineMedium.copyWith(
                       color: AppColors.textSecondary,
