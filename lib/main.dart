@@ -7,6 +7,8 @@ import 'package:autolog_app/ui/routes/login/login_screen.dart';
 import 'package:autolog_app/ui/routes/main_navigation/main_navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -14,6 +16,18 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupDependencyInjection();
   getIt<FirebaseAuth>().setLanguageCode('pt-BR');
+
+  // Config de report de crash da versões de release para o painel do Crashlytics.
+  // Crashs em desenvolvimento local não são enviados
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    !kDebugMode,
+  );
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   runApp(const AutoLogApp());
 }
 
@@ -32,12 +46,7 @@ class AutoLogApp extends StatelessWidget {
   }
 }
 
-/// Decide, uma única vez na inicialização do app, se existe uma sessão
-/// já persistida (usuário continua logado ao reabrir o app). A partir
-/// daí, toda navegação entre login/home é feita explicitamente pelas
-/// telas (LoginScreen, ProfileScreen) via rotas nomeadas — este widget
-/// não fica escutando o stream de auth continuamente, pra evitar
-/// disputar a navegação com essas rotas.
+// Verifica se existe uma sessão já persistida (usuário continua logado ao reabrir o app).
 class _AuthGate extends StatefulWidget {
   const _AuthGate({super.key});
 

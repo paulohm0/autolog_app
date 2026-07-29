@@ -16,6 +16,12 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   }) : _firestoreDB = firestoreDB,
        _firebaseAuth = firebaseAuth;
 
+  CollectionReference<Map<String, dynamic>> get _batteryChangesCollection =>
+      _firestoreDB
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('battery_changes');
+
   @override
   Future<Either<Failure, void>> saveBatteryChange(
     BatteryChangeEntity batteryChange,
@@ -28,9 +34,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
         date: batteryChange.date,
       );
 
-      await _firestoreDB
-          .collection('battery_changes')
-          .add(newBatteryChange.toJson());
+      await _batteryChangesCollection.add(newBatteryChange.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -40,9 +44,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   @override
   Future<Either<Failure, List<BatteryChangeEntity>>> getBatteryChanges() async {
     try {
-      final snapshot = await _firestoreDB
-          .collection('battery_changes')
-          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
+      final snapshot = await _batteryChangesCollection
           .orderBy('date', descending: true)
           .get();
       final batteryChanges = snapshot.docs
@@ -66,8 +68,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
         date: batteryChange.date,
       );
 
-      await _firestoreDB
-          .collection('battery_changes')
+      await _batteryChangesCollection
           .doc(batteryChange.id)
           .update(updated.toJson());
       return Right(null);
@@ -79,7 +80,7 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   @override
   Future<Either<Failure, void>> deleteBatteryChange(String id) async {
     try {
-      await _firestoreDB.collection('battery_changes').doc(id).delete();
+      await _batteryChangesCollection.doc(id).delete();
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));

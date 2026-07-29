@@ -16,6 +16,12 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
   }) : _firestoreDB = firestoreDB,
        _firebaseAuth = firebaseAuth;
 
+  CollectionReference<Map<String, dynamic>> get _oilChangesCollection =>
+      _firestoreDB
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('oil_changes');
+
   @override
   Future<Either<Failure, void>> saveOilChange(OilChangeEntity oilChange) async {
     try {
@@ -27,7 +33,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
         date: oilChange.date,
       );
 
-      await _firestoreDB.collection('oil_changes').add(newOilChange.toJson());
+      await _oilChangesCollection.add(newOilChange.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -37,9 +43,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
   @override
   Future<Either<Failure, List<OilChangeEntity>>> getOilChanges() async {
     try {
-      final snapshot = await _firestoreDB
-          .collection('oil_changes')
-          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
+      final snapshot = await _oilChangesCollection
           .orderBy('date', descending: true)
           .get();
       final oilChanges = snapshot.docs
@@ -64,10 +68,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
         date: oilChange.date,
       );
 
-      await _firestoreDB
-          .collection('oil_changes')
-          .doc(oilChange.id)
-          .update(updated.toJson());
+      await _oilChangesCollection.doc(oilChange.id).update(updated.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -77,7 +78,7 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
   @override
   Future<Either<Failure, void>> deleteOilChange(String id) async {
     try {
-      await _firestoreDB.collection('oil_changes').doc(id).delete();
+      await _oilChangesCollection.doc(id).delete();
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));

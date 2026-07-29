@@ -20,6 +20,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   package_info_plus: ^10.2.0
   cached_network_image: ^3.4.1
+  firebase_crashlytics: ^5.2.6
 
 flutter_native_splash:
   image: assets/images/autolog-logo.png

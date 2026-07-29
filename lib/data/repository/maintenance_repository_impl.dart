@@ -16,6 +16,12 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   }) : _firestoreDB = firestoreDB,
        _firebaseAuth = firebaseAuth;
 
+  CollectionReference<Map<String, dynamic>> get _maintenancesCollection =>
+      _firestoreDB
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('maintenances');
+
   @override
   Future<Either<Failure, void>> saveMaintenance(
     MaintenanceEntity maintenance,
@@ -30,9 +36,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
         value: maintenance.value,
       );
 
-      await _firestoreDB
-          .collection('maintenances')
-          .add(newMaintenance.toJson());
+      await _maintenancesCollection.add(newMaintenance.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -42,9 +46,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenances() async {
     try {
-      final snapshot = await _firestoreDB
-          .collection('maintenances')
-          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
+      final snapshot = await _maintenancesCollection
           .orderBy('date', descending: true)
           .get();
       final maintenances = snapshot.docs
@@ -70,8 +72,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
         value: maintenance.value,
       );
 
-      await _firestoreDB
-          .collection('maintenances')
+      await _maintenancesCollection
           .doc(maintenance.id)
           .update(updated.toJson());
       return Right(null);
@@ -83,7 +84,7 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   @override
   Future<Either<Failure, void>> deleteMaintenance(String id) async {
     try {
-      await _firestoreDB.collection('maintenances').doc(id).delete();
+      await _maintenancesCollection.doc(id).delete();
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));

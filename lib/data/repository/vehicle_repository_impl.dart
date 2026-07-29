@@ -16,6 +16,12 @@ class VehicleRepositoryImpl implements IVehicleRepository {
   }) : _firestoreDB = firestoreDB,
        _firebaseAuth = firebaseAuth;
 
+  CollectionReference<Map<String, dynamic>> get _vehiclesCollection =>
+      _firestoreDB
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('vehicles');
+
   @override
   Future<Either<Failure, void>> saveVehicle(VehicleEntity vehicle) async {
     try {
@@ -28,7 +34,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
         color: vehicle.color,
       );
 
-      await _firestoreDB.collection('vehicles').add(newVehicle.toJson());
+      await _vehiclesCollection.add(newVehicle.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -38,10 +44,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
   @override
   Future<Either<Failure, List<VehicleEntity>>> getVehicles() async {
     try {
-      final snapshot = await _firestoreDB
-          .collection('vehicles')
-          .where('userId', isEqualTo: _firebaseAuth.currentUser!.uid)
-          .get();
+      final snapshot = await _vehiclesCollection.get();
       final vehicles = snapshot.docs
           .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
           .toList();
@@ -63,10 +66,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
         color: vehicle.color,
       );
 
-      await _firestoreDB
-          .collection('vehicles')
-          .doc(vehicle.id)
-          .update(updated.toJson());
+      await _vehiclesCollection.doc(vehicle.id).update(updated.toJson());
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
@@ -76,7 +76,7 @@ class VehicleRepositoryImpl implements IVehicleRepository {
   @override
   Future<Either<Failure, void>> deleteVehicle(String id) async {
     try {
-      await _firestoreDB.collection('vehicles').doc(id).delete();
+      await _vehiclesCollection.doc(id).delete();
       return Right(null);
     } catch (e) {
       return Left(mapExceptionToFailure(e));
