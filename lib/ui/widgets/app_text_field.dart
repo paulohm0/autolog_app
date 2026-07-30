@@ -1,4 +1,5 @@
 import 'package:autolog_app/core/theme/app_theme.dart';
+import 'package:autolog_app/ui/widgets/app_field_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -42,11 +43,7 @@ class AppTextField extends StatelessWidget {
         Text(label.toUpperCase(), style: AppTextStyles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
         Container(
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: hasError ? Border.all(color: AppColors.error) : null,
-          ),
+          decoration: appFieldBoxDecoration(hasError: hasError),
           child: TextField(
             controller: controller,
             maxLines: maxLines,
@@ -57,30 +54,15 @@ class AppTextField extends StatelessWidget {
             maxLength: maxLength,
             inputFormatters: inputFormatters,
             style: AppTextStyles.bodyLarge,
-            decoration: InputDecoration(
+            decoration: appFieldInputDecoration(
               hintText: hintText,
-              hintStyle: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textHint,
-              ),
-              prefixIcon: prefixIcon != null
-                  ? Icon(prefixIcon, color: AppColors.textHint, size: 20)
-                  : null,
-              border: InputBorder.none,
-              counterText: maxLength != null ? '' : null,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: prefixIcon != null ? AppSpacing.sm : AppSpacing.lg,
-                vertical: maxLines > 1 ? AppSpacing.lg : AppSpacing.md,
-              ),
+              prefixIcon: prefixIcon,
+              maxLength: maxLength,
+              multiline: maxLines > 1,
             ),
           ),
         ),
-        if (hasError) ...[
-          const SizedBox(height: 4),
-          Text(
-            errorText!,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
-          ),
-        ],
+        if (hasError) appFieldErrorText(errorText!),
       ],
     );
   }

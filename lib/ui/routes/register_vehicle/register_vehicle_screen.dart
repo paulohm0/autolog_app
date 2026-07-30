@@ -1,4 +1,5 @@
 import 'package:autolog_app/core/constants/app_strings.dart';
+import 'package:autolog_app/core/constants/vehicle_catalog.dart';
 import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
@@ -9,6 +10,7 @@ import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
+import 'package:autolog_app/ui/widgets/app_autocomplete_field.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
@@ -44,6 +46,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
   String? _brandError;
   String? _modelError;
   String? _plateError;
+  List<String> _modelOptions = const [];
 
   bool get _isEditing => widget.existingVehicle != null;
 
@@ -56,16 +59,23 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
     _plateController = TextEditingController(text: existing?.licensePlate);
     _yearController = TextEditingController(text: existing?.year?.toString());
     _colorController = TextEditingController(text: existing?.color);
+    _modelOptions = modelsForBrand(_brandController.text);
+    _brandController.addListener(_updateModelOptions);
   }
 
   @override
   void dispose() {
+    _brandController.removeListener(_updateModelOptions);
     _brandController.dispose();
     _modelController.dispose();
     _plateController.dispose();
     _yearController.dispose();
     _colorController.dispose();
     super.dispose();
+  }
+
+  void _updateModelOptions() {
+    setState(() => _modelOptions = modelsForBrand(_brandController.text));
   }
 
   void _save(BuildContext context) {
@@ -183,6 +193,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                       _brandController,
                       _modelController,
                       _plateController,
+                      modelOptions: _modelOptions,
                       brandError: _brandError,
                       modelError: _modelError,
                       plateError: _plateError,
@@ -292,6 +303,7 @@ class _RequiredFields extends StatelessWidget {
   final TextEditingController brandController;
   final TextEditingController modelController;
   final TextEditingController plateController;
+  final List<String> modelOptions;
   final String? brandError;
   final String? modelError;
   final String? plateError;
@@ -300,6 +312,7 @@ class _RequiredFields extends StatelessWidget {
     this.brandController,
     this.modelController,
     this.plateController, {
+    required this.modelOptions,
     this.brandError,
     this.modelError,
     this.plateError,
@@ -309,22 +322,24 @@ class _RequiredFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        AppTextField(
+        AppAutocompleteField(
           controller: brandController,
           label: AppStrings.brandLabel,
           hintText: AppStrings.brandHint,
           prefixIcon: Icons.business_outlined,
           errorText: brandError,
           maxLength: 30,
+          options: vehicleBrands,
         ),
         SizedBox(height: AppSpacing.lg),
-        AppTextField(
+        AppAutocompleteField(
           controller: modelController,
           label: AppStrings.modelLabel,
           hintText: AppStrings.modelHint,
           prefixIcon: Icons.directions_car_outlined,
           errorText: modelError,
           maxLength: 30,
+          options: modelOptions,
         ),
         SizedBox(height: AppSpacing.lg),
         AppTextField(
@@ -389,11 +404,12 @@ class _OptionalDetails extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: AppTextField(
+                child: AppAutocompleteField(
                   controller: colorController,
                   label: AppStrings.colorLabel,
                   hintText: AppStrings.colorHint,
                   maxLength: 20,
+                  options: vehicleColors,
                 ),
               ),
             ],
