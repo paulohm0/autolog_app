@@ -7,7 +7,7 @@ import 'package:autolog_app/core/utils/license_plate_formatter.dart';
 import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
-import 'package:autolog_app/ui/cubit/vehicle_list_cubit.dart';
+import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
 import 'package:autolog_app/ui/widgets/app_autocomplete_field.dart';

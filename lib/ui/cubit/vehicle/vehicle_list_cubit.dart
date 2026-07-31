@@ -1,14 +1,14 @@
 import 'package:autolog_app/core/error/failure.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
-import 'package:autolog_app/ui/cubit/vehicle_list_state.dart';
+import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_state.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Fonte única da lista de veículos do usuário, compartilhada por todas as
-/// telas (registrado como lazy singleton, não factory). Sempre que um
-/// veículo é criado/editado/excluído em qualquer tela, quem fez a alteração
-/// chama [loadVehicles] aqui pra manter as outras telas atualizadas, sem
-/// que cada uma precise buscar os veículos por conta própria.
+// Fonte única da lista de veículos do usuário, compartilhada por todas as
+// telas (registrado como lazy singleton, não factory). Sempre que um
+// veículo é criado/editado/excluído em qualquer tela, quem fez a alteração
+// chama [loadVehicles] aqui pra manter as outras telas atualizadas, sem
+// que cada uma precise buscar os veículos por conta própria.
 class VehicleListCubit extends Cubit<VehicleListState> {
   final IVehicleRepository _repository;
 
