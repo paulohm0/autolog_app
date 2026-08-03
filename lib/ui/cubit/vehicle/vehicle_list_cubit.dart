@@ -51,7 +51,22 @@ class VehicleListCubit extends Cubit<VehicleListState> {
        super(VehicleListInitial());
 
   Future<void> loadVehicles() async {
-    emit(VehicleListLoading());
+    // Na primeira carga (app acabou de abrir), mostra o que já tinha em
+    // cache local instantaneamente, sem esperar rede — evita o spinner
+    // grande quando já existem dados de uma sessão anterior.
+    if (state is VehicleListInitial) {
+      final cachedResult = await _repository.getCachedVehicles();
+      if (isClosed) return;
+      cachedResult.fold((_) {}, (cached) {
+        if (cached.isNotEmpty) emit(VehicleListLoaded(vehicles: cached));
+      });
+    }
+    // Só mostra o spinner se ainda não tem nada na tela (nem cache). Em
+    // recargas seguintes (pull-to-refresh, após criar/editar/excluir), a
+    // lista anterior continua visível enquanto atualiza por trás.
+    if (state is VehicleListInitial) {
+      emit(VehicleListLoading());
+    }
     final result = await _repository.getVehicles();
     if (isClosed) return;
     result.fold(

@@ -56,6 +56,21 @@ class OilChangeRepositoryImpl implements IOilChangeRepository {
   }
 
   @override
+  Future<Either<Failure, List<OilChangeEntity>>> getCachedOilChanges() async {
+    try {
+      final snapshot = await _oilChangesCollection
+          .orderBy('date', descending: true)
+          .get(const GetOptions(source: Source.cache));
+      final oilChanges = snapshot.docs
+          .map((doc) => OilChangeModel.fromMap(doc.data(), doc.id))
+          .toList();
+      return Right(oilChanges);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> updateOilChange(
     OilChangeEntity oilChange,
   ) async {

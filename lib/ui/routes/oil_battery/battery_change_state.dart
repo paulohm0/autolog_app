@@ -12,8 +12,6 @@ class BatteryChangeLoaded extends BatteryChangeState {
   BatteryChangeLoaded({required this.batteryChanges});
 }
 
-class BatteryChangeSaveSuccess extends BatteryChangeState {}
-
 class BatteryChangeError extends BatteryChangeState {
   final String message;
   BatteryChangeError({required this.message});

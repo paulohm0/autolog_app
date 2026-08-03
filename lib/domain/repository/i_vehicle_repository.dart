@@ -5,6 +5,11 @@ import 'package:dartz/dartz.dart';
 abstract class IVehicleRepository {
   Future<Either<Failure, void>> saveVehicle(VehicleEntity vehicle);
   Future<Either<Failure, List<VehicleEntity>>> getVehicles();
+
+  /// Lê só do cache local (sem esperar rede) — usado pra mostrar dados da
+  /// última sessão instantaneamente enquanto [getVehicles] busca no servidor
+  /// por trás. Retorna [Failure] se não houver nada em cache ainda.
+  Future<Either<Failure, List<VehicleEntity>>> getCachedVehicles();
   Future<Either<Failure, void>> updateVehicle(VehicleEntity vehicle);
   Future<Either<Failure, void>> deleteVehicle(String id);
 }

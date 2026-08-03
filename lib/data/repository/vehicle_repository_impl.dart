@@ -55,6 +55,21 @@ class VehicleRepositoryImpl implements IVehicleRepository {
   }
 
   @override
+  Future<Either<Failure, List<VehicleEntity>>> getCachedVehicles() async {
+    try {
+      final snapshot = await _vehiclesCollection.get(
+        const GetOptions(source: Source.cache),
+      );
+      final vehicles = snapshot.docs
+          .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
+          .toList();
+      return Right(vehicles);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> updateVehicle(VehicleEntity vehicle) async {
     try {
       final updated = VehicleModel(

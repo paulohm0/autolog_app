@@ -59,6 +59,22 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
   }
 
   @override
+  Future<Either<Failure, List<MaintenanceEntity>>>
+  getCachedMaintenances() async {
+    try {
+      final snapshot = await _maintenancesCollection
+          .orderBy('date', descending: true)
+          .get(const GetOptions(source: Source.cache));
+      final maintenances = snapshot.docs
+          .map((doc) => MaintenanceModel.fromMap(doc.data(), doc.id))
+          .toList();
+      return Right(maintenances);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> updateMaintenance(
     MaintenanceEntity maintenance,
   ) async {

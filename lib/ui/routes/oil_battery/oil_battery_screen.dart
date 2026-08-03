@@ -73,17 +73,21 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
         vehicles: vehicles,
         onSave: (vehicleId, brand, liters, date) async {
           Navigator.of(context).pop();
-          await _oilCubit.saveOilChange(
+          final result = await _oilCubit.saveOilChange(
             vehicleId: vehicleId,
             brand: brand,
             liters: liters,
             date: date,
           );
-          _handleSaveResult(
-            state: _oilCubit.state,
-            successMessage: AppStrings.saveOilChangeSnackBarMessage,
+          if (!mounted) return;
+          result.fold(
+            (failure) =>
+                showAppSnackBar(context, failure.message, isError: true),
+            (_) => showAppSnackBar(
+              context,
+              AppStrings.saveOilChangeSnackBarMessage,
+            ),
           );
-          _oilCubit.loadData();
         },
       ),
     );
@@ -99,16 +103,20 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
         vehicles: vehicles,
         onSave: (vehicleId, model, date) async {
           Navigator.of(context).pop();
-          await _batteryCubit.saveBatteryChange(
+          final result = await _batteryCubit.saveBatteryChange(
             vehicleId: vehicleId,
             model: model,
             date: date,
           );
-          _handleSaveResult(
-            state: _batteryCubit.state,
-            successMessage: AppStrings.saveBatteryChangeSnackBarMessage,
+          if (!mounted) return;
+          result.fold(
+            (failure) =>
+                showAppSnackBar(context, failure.message, isError: true),
+            (_) => showAppSnackBar(
+              context,
+              AppStrings.saveBatteryChangeSnackBarMessage,
+            ),
           );
-          _batteryCubit.loadData();
         },
       ),
     );
@@ -246,20 +254,6 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
       _filterVehicle = vehicle;
       _filterYear = year;
     });
-  }
-
-  void _handleSaveResult({
-    required Object? state,
-    required String successMessage,
-  }) {
-    if (!mounted) return;
-    final isError = state is OilChangeError || state is BatteryChangeError;
-    final message = switch (state) {
-      OilChangeError(:final message) => message,
-      BatteryChangeError(:final message) => message,
-      _ => successMessage,
-    };
-    showAppSnackBar(context, message, isError: isError);
   }
 
   @override

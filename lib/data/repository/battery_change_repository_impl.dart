@@ -57,6 +57,22 @@ class BatteryChangeRepositoryImpl implements IBatteryChangeRepository {
   }
 
   @override
+  Future<Either<Failure, List<BatteryChangeEntity>>>
+  getCachedBatteryChanges() async {
+    try {
+      final snapshot = await _batteryChangesCollection
+          .orderBy('date', descending: true)
+          .get(const GetOptions(source: Source.cache));
+      final batteryChanges = snapshot.docs
+          .map((doc) => BatteryChangeModel.fromMap(doc.data(), doc.id))
+          .toList();
+      return Right(batteryChanges);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> updateBatteryChange(
     BatteryChangeEntity batteryChange,
   ) async {

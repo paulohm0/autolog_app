@@ -12,8 +12,6 @@ class OilChangeLoaded extends OilChangeState {
   OilChangeLoaded({required this.oilChanges});
 }
 
-class OilChangeSaveSuccess extends OilChangeState {}
-
 class OilChangeError extends OilChangeState {
   final String message;
   OilChangeError({required this.message});

@@ -7,6 +7,11 @@ abstract class IBatteryChangeRepository {
     BatteryChangeEntity batteryChange,
   );
   Future<Either<Failure, List<BatteryChangeEntity>>> getBatteryChanges();
+
+  /// Lê só do cache local (sem esperar rede) — usado pra mostrar dados da
+  /// última sessão instantaneamente enquanto [getBatteryChanges] busca no
+  /// servidor por trás. Retorna [Failure] se não houver nada em cache ainda.
+  Future<Either<Failure, List<BatteryChangeEntity>>> getCachedBatteryChanges();
   Future<Either<Failure, void>> updateBatteryChange(
     BatteryChangeEntity batteryChange,
   );

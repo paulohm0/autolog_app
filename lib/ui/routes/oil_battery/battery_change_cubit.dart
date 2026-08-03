@@ -14,7 +14,25 @@ class BatteryChangeCubit extends Cubit<BatteryChangeState> {
        super(BatteryChangeInitial());
 
   Future<void> loadData() async {
-    emit(BatteryChangeLoading());
+    // Na primeira carga (app acabou de abrir), mostra o que já tinha em
+    // cache local instantaneamente, sem esperar rede — evita o spinner
+    // grande quando já existem dados de uma sessão anterior.
+    if (state is BatteryChangeInitial) {
+      final cachedResult = await _batteryChangeRepository
+          .getCachedBatteryChanges();
+      if (isClosed) return;
+      cachedResult.fold((_) {}, (cached) {
+        if (cached.isNotEmpty) {
+          emit(BatteryChangeLoaded(batteryChanges: cached));
+        }
+      });
+    }
+    // Só mostra o spinner se ainda não tem nada na tela (nem cache). Em
+    // recargas seguintes (pull-to-refresh, após criar/editar/excluir), a
+    // lista anterior continua visível enquanto atualiza por trás.
+    if (state is BatteryChangeInitial) {
+      emit(BatteryChangeLoading());
+    }
     final result = await _batteryChangeRepository.getBatteryChanges();
     if (isClosed) return;
     result.fold(
@@ -24,12 +42,11 @@ class BatteryChangeCubit extends Cubit<BatteryChangeState> {
     );
   }
 
-  Future<void> saveBatteryChange({
+  Future<Either<Failure, void>> saveBatteryChange({
     required String vehicleId,
     required String model,
     required DateTime date,
   }) async {
-    emit(BatteryChangeLoading());
     final batteryChange = BatteryChangeEntity(
       vehicleId: vehicleId,
       model: model,
@@ -38,11 +55,11 @@ class BatteryChangeCubit extends Cubit<BatteryChangeState> {
     final result = await _batteryChangeRepository.saveBatteryChange(
       batteryChange,
     );
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(BatteryChangeError(message: failure.message)),
-      (_) => emit(BatteryChangeSaveSuccess()),
-    );
+    if (isClosed) return result;
+    if (result.isRight()) {
+      await loadData();
+    }
+    return result;
   }
 
   Future<Either<Failure, void>> updateBatteryChange({
