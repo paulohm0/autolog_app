@@ -76,7 +76,12 @@ void setupDependencyInjection(SharedPreferences prefs) {
 
   // Fonte única da lista de veículos, compartilhada por todas as telas.
   getIt.registerLazySingleton<VehicleListCubit>(
-    () => VehicleListCubit(repository: getIt<IVehicleRepository>()),
+    () => VehicleListCubit(
+      repository: getIt<IVehicleRepository>(),
+      maintenanceRepository: getIt<IMaintenanceRepository>(),
+      oilChangeRepository: getIt<IOilChangeRepository>(),
+      batteryChangeRepository: getIt<IBatteryChangeRepository>(),
+    ),
   );
 
   //

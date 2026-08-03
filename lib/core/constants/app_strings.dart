@@ -57,6 +57,11 @@ class AppStrings {
   static const String deleteVehicleConfirmTitle = 'Excluir veículo?';
   static const String myVehiclesTitle = 'Meus Veículos';
   static const String addVehicleLabel = 'Adicionar Veículo';
+  static const String deleteVehicleWithRecordsTitle =
+      'Este veículo possui registros vinculados';
+  static const String deleteVehicleWithRecordsWarning =
+      'Ao excluir, todos os registros abaixo também serão excluídos permanentemente:';
+  static const String deleteVehicleWithRecordsConfirmButton = 'Excluir tudo';
 
   // Register Service Screen
   static const String maintenanceSection = 'MANUTENÇÃO';

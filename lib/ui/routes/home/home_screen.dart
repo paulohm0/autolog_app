@@ -17,6 +17,7 @@ import 'package:autolog_app/ui/widgets/delete_confirm_dialog.dart';
 import 'package:autolog_app/ui/widgets/filters_sheet.dart';
 import 'package:autolog_app/ui/widgets/maintenance_card.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
+import 'package:autolog_app/ui/widgets/vehicle_has_records_dialog.dart';
 import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,21 +98,52 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       _vehicleListCubit.loadVehicles();
     } else if (action == 'delete' && vehicle != null) {
-      final confirmed = await showDeleteConfirmDialog(
+      await _confirmAndDeleteVehicle(context, vehicle);
+    }
+  }
+
+  Future<void> _confirmAndDeleteVehicle(
+    BuildContext context,
+    VehicleEntity vehicle,
+  ) async {
+    final linkedResult = await _vehicleListCubit.getLinkedRecords(
+      vehicle.id!,
+    );
+    if (!context.mounted) return;
+
+    final linkedRecords = linkedResult.fold((failure) {
+      showAppSnackBar(context, failure.message, isError: true);
+      return null;
+    }, (records) => records);
+
+    if (linkedRecords == null) return;
+
+    bool confirmed;
+    if (linkedRecords.isEmpty) {
+      confirmed = await showDeleteConfirmDialog(
         context,
         title: AppStrings.deleteVehicleConfirmTitle,
       );
-
-      if (!confirmed) return;
-
-      final deleteResult = await _vehicleListCubit.deleteVehicle(vehicle.id!);
-      if (!context.mounted) return;
-      deleteResult.fold(
-        (failure) => showAppSnackBar(context, failure.message, isError: true),
-        (_) =>
-            showAppSnackBar(context, AppStrings.deleteVehicleSnackBarMessage),
+    } else {
+      confirmed = await showVehicleHasRecordsDialog(
+        context,
+        linkedRecords: linkedRecords,
       );
     }
+
+    if (!confirmed) return;
+    if (!context.mounted) return;
+
+    final deleteResult = await _vehicleListCubit.deleteVehicleCascade(
+      vehicle.id!,
+      linkedRecords,
+    );
+    if (!context.mounted) return;
+    deleteResult.fold(
+      (failure) => showAppSnackBar(context, failure.message, isError: true),
+      (_) => showAppSnackBar(context, AppStrings.deleteVehicleSnackBarMessage),
+    );
+    await _homeCubit.loadHomeData();
   }
 
   Future<void> _openRegisterService(BuildContext context) async {

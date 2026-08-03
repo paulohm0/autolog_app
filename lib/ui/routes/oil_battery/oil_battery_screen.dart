@@ -39,6 +39,7 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   bool _showOil = true;
   VehicleEntity? _filterVehicle;
   int? _filterYear;
+  bool _skippedInitialVehicleLoad = false;
 
   @override
   void initState() {
@@ -267,7 +268,23 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
       body: SafeArea(
-        child: Column(
+        child: BlocListener<VehicleListCubit, VehicleListState>(
+          bloc: _vehicleListCubit,
+          listener: (context, vehicleState) {
+            // Ignora a primeira emissão: o initState já dispara loadData()
+            // pra óleo/bateria em paralelo com o primeiro load de veículos.
+            // A partir da segunda emissão (veículo criado/editado/excluído
+            // em qualquer tela), recarrega pra refletir a mudança — cobre
+            // o caso de exclusão em cascata de um veículo com histórico.
+            if (vehicleState is! VehicleListLoaded) return;
+            if (!_skippedInitialVehicleLoad) {
+              _skippedInitialVehicleLoad = true;
+              return;
+            }
+            _oilCubit.loadData();
+            _batteryCubit.loadData();
+          },
+          child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -329,6 +346,7 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
               ),
             ),
           ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
