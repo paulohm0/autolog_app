@@ -15,8 +15,8 @@ class GoogleSignInButton extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.surface,
-          foregroundColor: AppColors.textPrimary,
+          backgroundColor: context.colors.surface,
+          foregroundColor: context.colors.textPrimary,
           elevation: 2,
           shadowColor: Colors.black.withValues(alpha: 0.15),
           shape: RoundedRectangleBorder(
@@ -30,7 +30,7 @@ class GoogleSignInButton extends StatelessWidget {
         ),
         label: Text(
           AppStrings.signInGoogleLabel,
-          style: AppTextStyles.titleMedium,
+          style: AppTextStyles.titleMedium(context),
         ),
       ),
     );

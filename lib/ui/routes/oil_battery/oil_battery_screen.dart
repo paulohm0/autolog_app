@@ -259,7 +259,7 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
       body: SafeArea(
         child: BlocListener<VehicleListCubit, VehicleListState>(
@@ -346,8 +346,8 @@ class _OilBatteryScreenState extends State<OilBatteryScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'oil_battery_fab',
         onPressed: _showOil ? _openAddOilSheet : _openAddBatterySheet,
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
+        backgroundColor: context.colors.primary,
+        foregroundColor: context.colors.textOnPrimary,
         elevation: 4,
         shape: const CircleBorder(),
         child: const Icon(Icons.add, size: 28),
@@ -583,10 +583,10 @@ class _ListHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: AppTextStyles.headlineLarge),
+          Text(title, style: AppTextStyles.headlineLarge(context)),
           IconButton(
             icon: const Icon(Icons.filter_list_rounded),
-            color: filterActive ? AppColors.primary : AppColors.textSecondary,
+            color: filterActive ? context.colors.primary : context.colors.textSecondary,
             onPressed: onFilterTap,
           ),
         ],
@@ -618,16 +618,16 @@ class _ActiveFilterChip extends StatelessWidget {
             vertical: 6,
           ),
           decoration: BoxDecoration(
-            color: AppColors.primaryLight,
+            color: context.colors.primaryLight,
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.directions_car_outlined,
                 size: 14,
-                color: AppColors.primary,
+                color: context.colors.primary,
               ),
               const SizedBox(width: AppSpacing.xs),
               Flexible(
@@ -635,18 +635,18 @@ class _ActiveFilterChip extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+                  style: AppTextStyles.labelMedium(context).copyWith(
+                    color: context.colors.primary,
                   ),
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
               GestureDetector(
                 onTap: onClear,
-                child: const Icon(
+                child: Icon(
                   Icons.close_rounded,
                   size: 14,
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                 ),
               ),
             ],
@@ -671,7 +671,7 @@ class _MaintenanceTypeToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: context.colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
@@ -715,14 +715,14 @@ class _ToggleOption extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: selected ? AppColors.surface : Colors.transparent,
+          color: selected ? context.colors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: AppTextStyles.titleMedium.copyWith(
-            color: selected ? AppColors.primary : AppColors.textSecondary,
+          style: AppTextStyles.titleMedium(context).copyWith(
+            color: selected ? context.colors.primary : context.colors.textSecondary,
           ),
         ),
       ),
@@ -741,7 +741,7 @@ class _ErrorMessage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Text(
           message,
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
+          style: AppTextStyles.bodyMedium(context).copyWith(color: context.colors.error),
           textAlign: TextAlign.center,
         ),
       ),
@@ -764,7 +764,7 @@ class _EmptyMessage extends StatelessWidget {
         ),
         child: Text(
           message,
-          style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium(context),
           textAlign: TextAlign.center,
         ),
       ),
@@ -893,7 +893,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
               _isEditing
                   ? AppStrings.editOilChangeTitle
                   : AppStrings.addOilChangeTitle,
-              style: AppTextStyles.headlineMedium,
+              style: AppTextStyles.headlineMedium(context),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppDropdownField(
@@ -1053,7 +1053,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
               _isEditing
                   ? AppStrings.editBatteryChangeTitle
                   : AppStrings.addBatteryChangeTitle,
-              style: AppTextStyles.headlineMedium,
+              style: AppTextStyles.headlineMedium(context),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppDropdownField(

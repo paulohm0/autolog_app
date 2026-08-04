@@ -11,7 +11,7 @@ void showAppSnackBar(
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(message),
-      backgroundColor: isError ? AppColors.error : null,
+      backgroundColor: isError ? context.colors.error : null,
     ),
   );
 }

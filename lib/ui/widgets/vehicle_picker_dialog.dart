@@ -21,7 +21,7 @@ class VehiclePickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
@@ -35,7 +35,7 @@ class VehiclePickerDialog extends StatelessWidget {
             children: [
               Text(
                 AppStrings.vehicleLabel,
-                style: AppTextStyles.headlineMedium,
+                style: AppTextStyles.headlineMedium(context),
               ),
               const SizedBox(height: AppSpacing.md),
               if (vehicles.isEmpty)
@@ -43,7 +43,7 @@ class VehiclePickerDialog extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                   child: Text(
                     AppStrings.noVehiclesRegistered,
-                    style: AppTextStyles.bodyMedium,
+                    style: AppTextStyles.bodyMedium(context),
                     textAlign: TextAlign.center,
                   ),
                 )
@@ -54,9 +54,9 @@ class VehiclePickerDialog extends StatelessWidget {
                     children: [
                       for (final vehicle in vehicles)
                         ListTile(
-                          leading: const Icon(
+                          leading: Icon(
                             Icons.directions_car_outlined,
-                            color: AppColors.primary,
+                            color: context.colors.primary,
                           ),
                           title: Text('${vehicle.brand} ${vehicle.model}'),
                           onTap: () => Navigator.of(context).pop(vehicle),

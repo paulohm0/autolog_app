@@ -26,7 +26,7 @@ class AppDropdownField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: AppTextStyles.labelLarge),
+        Text(label.toUpperCase(), style: AppTextStyles.labelLarge(context)),
         const SizedBox(height: AppSpacing.sm),
         GestureDetector(
           onTap: onTap,
@@ -36,29 +36,29 @@ class AppDropdownField extends StatelessWidget {
               vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: hasError ? Border.all(color: AppColors.error) : null,
+              border: hasError ? Border.all(color: context.colors.error) : null,
             ),
             child: Row(
               children: [
                 if (prefixIcon != null) ...[
-                  Icon(prefixIcon, color: AppColors.textHint, size: 20),
+                  Icon(prefixIcon, color: context.colors.textHint, size: 20),
                   const SizedBox(width: AppSpacing.md),
                 ],
                 Expanded(
                   child: Text(
                     value ?? hintText,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: AppTextStyles.bodyLarge(context).copyWith(
                       color: value != null
-                          ? AppColors.textPrimary
-                          : AppColors.textHint,
+                          ? context.colors.textPrimary
+                          : context.colors.textHint,
                     ),
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   size: 22,
                 ),
               ],
@@ -69,7 +69,7 @@ class AppDropdownField extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             errorText!,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+            style: AppTextStyles.bodySmall(context).copyWith(color: context.colors.error),
           ),
         ],
       ],

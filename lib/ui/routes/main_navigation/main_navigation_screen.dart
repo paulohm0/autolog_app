@@ -29,9 +29,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
         type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
+        backgroundColor: context.colors.surface,
+        selectedItemColor: context.colors.primary,
+        unselectedItemColor: context.colors.textSecondary,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.history_rounded),

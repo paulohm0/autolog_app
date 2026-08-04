@@ -92,7 +92,7 @@ class _FiltersSheetState extends State<FiltersSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppStrings.filters, style: AppTextStyles.headlineLarge),
+          Text(AppStrings.filters, style: AppTextStyles.headlineLarge(context)),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
@@ -102,10 +102,10 @@ class _FiltersSheetState extends State<FiltersSheet> {
                   value: _vehicle != null
                       ? '${_vehicle!.brand} ${_vehicle!.model}'
                       : AppStrings.allVehicles,
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     size: 18,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                   onTap: _pickVehicle,
                 ),
@@ -115,10 +115,10 @@ class _FiltersSheetState extends State<FiltersSheet> {
                 child: _FilterChip(
                   label: AppStrings.yearFilter,
                   value: _year?.toString() ?? AppStrings.allYears,
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.calendar_today_outlined,
                     size: 16,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                   onTap: _pickYear,
                 ),
@@ -162,9 +162,9 @@ class _FilterChip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -174,10 +174,10 @@ class _FilterChip extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label, style: AppTextStyles.labelMedium),
+                  Text(label, style: AppTextStyles.labelMedium(context)),
                   Text(
                     value,
-                    style: AppTextStyles.titleMedium,
+                    style: AppTextStyles.titleMedium(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -213,7 +213,7 @@ class _OptionsDialog<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
@@ -225,7 +225,7 @@ class _OptionsDialog<T> extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTextStyles.headlineMedium),
+              Text(title, style: AppTextStyles.headlineMedium(context)),
               const SizedBox(height: AppSpacing.md),
               Flexible(
                 child: ListView(
@@ -269,7 +269,7 @@ class _OptionTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-        color: AppColors.primary,
+        color: context.colors.primary,
       ),
       title: Text(label),
       onTap: onTap,

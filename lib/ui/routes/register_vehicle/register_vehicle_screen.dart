@@ -128,7 +128,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
       create: (context) => getIt<RegisterVehicleCubit>(),
       child: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: context.colors.background,
           appBar: AppBar(
             leading: widget.isOnboarding
                 ? null
@@ -149,7 +149,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                       onPressed: _signOut,
                       child: Text(
                         AppStrings.signOutButton,
-                        style: const TextStyle(color: AppColors.error),
+                        style: TextStyle(color: context.colors.error),
                       ),
                     ),
                   ]
@@ -217,7 +217,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                         Text(
                           AppStrings.saveVehicleDescription,
                           textAlign: TextAlign.center,
-                          style: AppTextStyles.bodySmall.copyWith(fontSize: 12),
+                          style: AppTextStyles.bodySmall(context).copyWith(fontSize: 12),
                         ),
                       ],
                     ),
@@ -244,22 +244,22 @@ class _OnboardingBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: context.colors.primaryLight,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.directions_car_filled_rounded,
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               AppStrings.onboardingVehicleMessage,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.primary,
+              style: AppTextStyles.bodyMedium(context).copyWith(
+                color: context.colors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -282,8 +282,8 @@ class _PageTitle extends StatelessWidget {
       children: [
         Text(
           AppStrings.vehicleSection,
-          style: AppTextStyles.labelLarge.copyWith(
-            color: AppColors.primary,
+          style: AppTextStyles.labelLarge(context).copyWith(
+            color: context.colors.primary,
             letterSpacing: 1.2,
           ),
         ),
@@ -292,7 +292,7 @@ class _PageTitle extends StatelessWidget {
           isEditing
               ? AppStrings.editVehicleTitle
               : AppStrings.registerVehicleTitle,
-          style: AppTextStyles.displayMedium,
+          style: AppTextStyles.displayMedium(context),
         ),
       ],
     );
@@ -376,8 +376,8 @@ class _OptionalDetails extends StatelessWidget {
               Container(
                 width: 24,
                 height: 24,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: context.colors.primary,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -387,7 +387,7 @@ class _OptionalDetails extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(AppStrings.optionalDetails, style: AppTextStyles.titleLarge),
+              Text(AppStrings.optionalDetails, style: AppTextStyles.titleLarge(context)),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -434,7 +434,7 @@ class _BrandFooter extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               letterSpacing: -0.2,
             ),
           ),
@@ -442,7 +442,7 @@ class _BrandFooter extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Text(
@@ -450,7 +450,7 @@ class _BrandFooter extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
                 letterSpacing: 0.8,
               ),
             ),

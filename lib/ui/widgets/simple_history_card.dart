@@ -24,7 +24,7 @@ class SimpleHistoryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
@@ -39,16 +39,16 @@ class SimpleHistoryCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.directions_car_outlined,
                       size: 15,
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         vehicle,
-                        style: AppTextStyles.titleLarge,
+                        style: AppTextStyles.titleLarge(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -58,8 +58,8 @@ class SimpleHistoryCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   detail,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                  style: AppTextStyles.bodySmall(context).copyWith(
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -67,12 +67,12 @@ class SimpleHistoryCard extends StatelessWidget {
           ),
           _IconAction(
             icon: Icons.edit_outlined,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             onTap: onEdit,
           ),
           _IconAction(
             icon: Icons.delete_outline_rounded,
-            color: AppColors.error,
+            color: context.colors.error,
             onTap: onDelete,
           ),
         ],
@@ -120,7 +120,7 @@ class _DateBadge extends StatelessWidget {
       width: 48,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: context.colors.primaryLight,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Column(
@@ -128,19 +128,19 @@ class _DateBadge extends StatelessWidget {
         children: [
           Text(
             month.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: context.colors.primary,
               letterSpacing: 0.5,
             ),
           ),
           Text(
             day,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: context.colors.primary,
               height: 1.1,
             ),
           ),

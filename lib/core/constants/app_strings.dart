@@ -146,6 +146,7 @@ class AppStrings {
   // Profile Screen
   static const String appVersionLabel = 'Versão do App';
   static const String signOutButton = 'Sair';
+  static const String themeSectionLabel = 'Modo Dark';
 
   // Main Navigation
   static const String navHistoryLabel = 'Histórico';

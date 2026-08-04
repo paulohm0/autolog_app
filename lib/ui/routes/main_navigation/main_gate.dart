@@ -71,9 +71,9 @@ class _GateLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(child: CircularProgressIndicator()),
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -87,7 +87,7 @@ class _GateErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -97,7 +97,7 @@ class _GateErrorView extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodyMedium,
+                style: AppTextStyles.bodyMedium(context),
               ),
               const SizedBox(height: AppSpacing.lg),
               PrimaryButton(

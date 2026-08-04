@@ -3,6 +3,7 @@ import 'package:autolog_app/core/di/injector.dart';
 import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/firebase_options.dart';
+import 'package:autolog_app/ui/cubit/theme/theme_cubit.dart';
 import 'package:autolog_app/ui/routes/login/login_screen.dart';
 import 'package:autolog_app/ui/routes/main_navigation/main_navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -38,12 +40,21 @@ class AutoLogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: AppStrings.appBrandName,
-      theme: AppTheme.theme,
-      home: _AuthGate(),
-      routes: AppRoutes.routes,
+    return BlocProvider<ThemeCubit>(
+      create: (_) => getIt<ThemeCubit>(),
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: AppStrings.appBrandName,
+            theme: AppTheme.theme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            home: _AuthGate(),
+            routes: AppRoutes.routes,
+          );
+        },
+      ),
     );
   }
 }
@@ -68,7 +79,7 @@ class _AuthGateState extends State<_AuthGate> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: context.colors.primary,
             body: Center(
               child: Image.asset('assets/images/autolog-logo.png', width: 150),
             ),

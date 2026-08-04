@@ -16,8 +16,8 @@ class LoginHeader extends StatelessWidget {
         Text(
           AppStrings.loginSubtitle,
           textAlign: TextAlign.center,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
+          style: AppTextStyles.bodyMedium(context).copyWith(
+            color: context.colors.textSecondary,
           ),
         ),
       ],

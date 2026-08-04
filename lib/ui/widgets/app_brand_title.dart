@@ -9,6 +9,7 @@ class AppBrandTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return RichText(
       text: TextSpan(
         children: [
@@ -17,7 +18,7 @@ class AppBrandTitle extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           TextSpan(
@@ -25,7 +26,7 @@ class AppBrandTitle extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w900,
-              color: AppColors.primary,
+              color: colors.primary,
             ),
           ),
         ],

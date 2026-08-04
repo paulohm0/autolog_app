@@ -31,8 +31,189 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
       ),
+      extensions: const [AppColorsExtension.light],
     );
   }
+
+  static ThemeData get darkTheme {
+    const colors = AppColorsExtension.dark;
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: colors.primary,
+        brightness: Brightness.dark,
+      ),
+      scaffoldBackgroundColor: colors.background,
+      fontFamily: AppTextStyles.fontFamily,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: IconThemeData(color: colors.textPrimary),
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: colors.textPrimary,
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: colors.primary,
+        contentTextStyle: TextStyle(
+          color: colors.textOnPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+      ),
+      extensions: const [AppColorsExtension.dark],
+    );
+  }
+}
+
+/// Cores que mudam entre os temas claro/escuro. Acesse via `context.colors`
+/// em vez de `AppColors` direto — [AppColors] guarda só os valores fixos do
+/// tema claro (usados como default e nas constantes de [AppColorsExtension.light]).
+@immutable
+class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
+  final Color primary;
+  final Color primaryDark;
+  final Color primaryLight;
+  final Color background;
+  final Color surface;
+  final Color surfaceVariant;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textHint;
+  final Color textOnPrimary;
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color border;
+  final Color borderFocused;
+
+  const AppColorsExtension({
+    required this.primary,
+    required this.primaryDark,
+    required this.primaryLight,
+    required this.background,
+    required this.surface,
+    required this.surfaceVariant,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textHint,
+    required this.textOnPrimary,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.border,
+    required this.borderFocused,
+  });
+
+  static const light = AppColorsExtension(
+    primary: AppColors.primary,
+    primaryDark: AppColors.primaryDark,
+    primaryLight: AppColors.primaryLight,
+    background: AppColors.background,
+    surface: AppColors.surface,
+    surfaceVariant: AppColors.surfaceVariant,
+    textPrimary: AppColors.textPrimary,
+    textSecondary: AppColors.textSecondary,
+    textHint: AppColors.textHint,
+    textOnPrimary: AppColors.textOnPrimary,
+    success: AppColors.success,
+    warning: AppColors.warning,
+    error: AppColors.error,
+    border: AppColors.border,
+    borderFocused: AppColors.borderFocused,
+  );
+
+  static const dark = AppColorsExtension(
+    primary: Color(0xFF5B7FFF),
+    primaryDark: Color(0xFF3D5FE0),
+    primaryLight: Color(0xFF1E2A4A),
+    background: Color(0xFF0D1117),
+    surface: Color(0xFF161B22),
+    surfaceVariant: Color(0xFF21262D),
+    textPrimary: Color(0xFFE6EDF3),
+    textSecondary: Color(0xFF8B949E),
+    textHint: Color(0xFF6E7681),
+    textOnPrimary: Color(0xFFFFFFFF),
+    success: Color(0xFF3FB950),
+    warning: Color(0xFFD29922),
+    error: Color(0xFFF85149),
+    border: Color(0xFF30363D),
+    borderFocused: Color(0xFF5B7FFF),
+  );
+
+  @override
+  AppColorsExtension copyWith({
+    Color? primary,
+    Color? primaryDark,
+    Color? primaryLight,
+    Color? background,
+    Color? surface,
+    Color? surfaceVariant,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textHint,
+    Color? textOnPrimary,
+    Color? success,
+    Color? warning,
+    Color? error,
+    Color? border,
+    Color? borderFocused,
+  }) {
+    return AppColorsExtension(
+      primary: primary ?? this.primary,
+      primaryDark: primaryDark ?? this.primaryDark,
+      primaryLight: primaryLight ?? this.primaryLight,
+      background: background ?? this.background,
+      surface: surface ?? this.surface,
+      surfaceVariant: surfaceVariant ?? this.surfaceVariant,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textHint: textHint ?? this.textHint,
+      textOnPrimary: textOnPrimary ?? this.textOnPrimary,
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      error: error ?? this.error,
+      border: border ?? this.border,
+      borderFocused: borderFocused ?? this.borderFocused,
+    );
+  }
+
+  @override
+  AppColorsExtension lerp(ThemeExtension<AppColorsExtension>? other, double t) {
+    if (other is! AppColorsExtension) return this;
+    return AppColorsExtension(
+      primary: Color.lerp(primary, other.primary, t)!,
+      primaryDark: Color.lerp(primaryDark, other.primaryDark, t)!,
+      primaryLight: Color.lerp(primaryLight, other.primaryLight, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      surfaceVariant: Color.lerp(surfaceVariant, other.surfaceVariant, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textHint: Color.lerp(textHint, other.textHint, t)!,
+      textOnPrimary: Color.lerp(textOnPrimary, other.textOnPrimary, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      borderFocused: Color.lerp(borderFocused, other.borderFocused, t)!,
+    );
+  }
+}
+
+/// Acesso rápido à paleta do tema atual: `context.colors.primary` em vez de
+/// `AppColors.primary`. Troca sozinho entre claro/escuro.
+extension AppColorsContext on BuildContext {
+  AppColorsExtension get colors =>
+      Theme.of(this).extension<AppColorsExtension>()!;
 }
 
 class AppColors {
@@ -63,79 +244,83 @@ class AppColors {
   static const Color borderFocused = Color(0xFF2D54E8);
 }
 
+/// Estilos de texto do app. Cada um é um método (não mais `static const`)
+/// porque a cor depende do tema ativo (`context.colors`) — precisa do
+/// [BuildContext] pra resolver certo em claro/escuro. Uso: `AppTextStyles.
+/// bodyMedium(context)`, igual antes só que com `(context)` no final.
 class AppTextStyles {
   AppTextStyles._();
   static const String fontFamily = 'Inter';
 
-  static const TextStyle displayLarge = TextStyle(
+  static TextStyle displayLarge(BuildContext context) => TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
     letterSpacing: -0.5,
   );
 
-  static const TextStyle displayMedium = TextStyle(
+  static TextStyle displayMedium(BuildContext context) => TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
     letterSpacing: -0.3,
   );
 
-  static const TextStyle headlineLarge = TextStyle(
+  static TextStyle headlineLarge(BuildContext context) => TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
     letterSpacing: -0.2,
   );
 
-  static const TextStyle headlineMedium = TextStyle(
+  static TextStyle headlineMedium(BuildContext context) => TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
   );
 
-  static const TextStyle titleLarge = TextStyle(
+  static TextStyle titleLarge(BuildContext context) => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
   );
 
-  static const TextStyle titleMedium = TextStyle(
+  static TextStyle titleMedium(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
     letterSpacing: 0.1,
   );
 
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle bodyLarge(BuildContext context) => TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle bodyMedium(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
+    color: context.colors.textPrimary,
   );
 
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle bodySmall(BuildContext context) => TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
+    color: context.colors.textSecondary,
   );
 
-  static const TextStyle labelLarge = TextStyle(
+  static TextStyle labelLarge(BuildContext context) => TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w700,
-    color: AppColors.textSecondary,
+    color: context.colors.textSecondary,
     letterSpacing: 1.0,
   );
 
-  static const TextStyle labelMedium = TextStyle(
+  static TextStyle labelMedium(BuildContext context) => TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary,
+    color: context.colors.textSecondary,
     letterSpacing: 0.8,
   );
 }

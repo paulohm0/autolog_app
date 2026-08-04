@@ -33,7 +33,7 @@ class MaintenanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -52,24 +52,24 @@ class MaintenanceCard extends StatelessWidget {
                     children: [
                       Text(
                         workshop,
-                        style: AppTextStyles.titleLarge,
+                        style: AppTextStyles.titleLarge(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.directions_car_outlined,
                             size: 13,
-                            color: AppColors.primary,
+                            color: context.colors.primary,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               vehicle,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.primary,
+                              style: AppTextStyles.bodySmall(context).copyWith(
+                                color: context.colors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                               maxLines: 1,
@@ -84,8 +84,8 @@ class MaintenanceCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   amount,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    color: AppColors.primary,
+                  style: AppTextStyles.titleLarge(context).copyWith(
+                    color: context.colors.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -131,9 +131,9 @@ class _ExpandButton extends StatelessWidget {
           child: AnimatedRotation(
             turns: expanded ? 0.5 : 0,
             duration: const Duration(milliseconds: 200),
-            child: const Icon(
+            child: Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
         ),
@@ -168,18 +168,18 @@ class _ExpandedDetails extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: AppSpacing.md),
-        const Divider(color: AppColors.border, height: 1),
+        Divider(color: context.colors.border, height: 1),
         const SizedBox(height: AppSpacing.md),
         Text(
           AppStrings.maintenanceDateLabel.toUpperCase(),
-          style: AppTextStyles.labelLarge,
+          style: AppTextStyles.labelLarge(context),
         ),
         const SizedBox(height: 4),
-        Text(dateLabel, style: AppTextStyles.bodyLarge),
+        Text(dateLabel, style: AppTextStyles.bodyLarge(context)),
         const SizedBox(height: AppSpacing.md),
         Text(
           AppStrings.servicesDescriptionLabel.toUpperCase(),
-          style: AppTextStyles.labelLarge,
+          style: AppTextStyles.labelLarge(context),
         ),
         const SizedBox(height: 4),
         for (final item in items)
@@ -190,13 +190,13 @@ class _ExpandedDetails extends StatelessWidget {
               children: [
                 Text(
                   '•  ',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.primary,
+                  style: AppTextStyles.bodyLarge(context).copyWith(
+                    color: context.colors.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Expanded(
-                  child: Text(item, style: AppTextStyles.bodyLarge),
+                  child: Text(item, style: AppTextStyles.bodyLarge(context)),
                 ),
               ],
             ),
@@ -210,8 +210,8 @@ class _ExpandedDetails extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onDelete,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
+                    foregroundColor: context.colors.error,
+                    side: BorderSide(color: context.colors.error),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
@@ -228,8 +228,8 @@ class _ExpandedDetails extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onEdit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textOnPrimary,
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.textOnPrimary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -259,7 +259,7 @@ class _DateBadge extends StatelessWidget {
       width: 48,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: context.colors.primaryLight,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Column(
@@ -267,19 +267,19 @@ class _DateBadge extends StatelessWidget {
         children: [
           Text(
             month.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: context.colors.primary,
               letterSpacing: 0.5,
             ),
           ),
           Text(
             day,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: context.colors.primary,
               height: 1.1,
             ),
           ),

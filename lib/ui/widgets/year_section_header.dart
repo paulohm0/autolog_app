@@ -48,8 +48,8 @@ class YearSectionHeader extends StatelessWidget {
       ),
       child: Text(
         year.toString(),
-        style: AppTextStyles.labelLarge.copyWith(
-          color: AppColors.textSecondary,
+        style: AppTextStyles.labelLarge(context).copyWith(
+          color: context.colors.textSecondary,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),

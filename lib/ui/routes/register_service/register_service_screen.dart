@@ -136,7 +136,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
@@ -229,8 +229,8 @@ class _PageTitle extends StatelessWidget {
       children: [
         Text(
           AppStrings.maintenanceSection,
-          style: AppTextStyles.labelLarge.copyWith(
-            color: AppColors.primary,
+          style: AppTextStyles.labelLarge(context).copyWith(
+            color: context.colors.primary,
             letterSpacing: 1.2,
           ),
         ),
@@ -239,7 +239,7 @@ class _PageTitle extends StatelessWidget {
           isEditing
               ? AppStrings.editMaintenanceTitle
               : AppStrings.registerServiceTitle,
-          style: AppTextStyles.displayMedium,
+          style: AppTextStyles.displayMedium(context),
         ),
       ],
     );
@@ -317,7 +317,7 @@ class _Form extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           AppStrings.servicesDescriptionCaption,
-          style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
+          style: AppTextStyles.bodySmall(context).copyWith(fontSize: 11),
         ),
       ],
     );
@@ -340,15 +340,15 @@ class _FinancialSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.payments_outlined,
-                color: AppColors.primary,
+                color: context.colors.primary,
                 size: 18,
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 AppStrings.totalValueLabel,
-                style: AppTextStyles.titleMedium,
+                style: AppTextStyles.titleMedium(context),
               ),
             ],
           ),
@@ -359,18 +359,18 @@ class _FinancialSection extends StatelessWidget {
               vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.colors.surface,
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
-                color: hasError ? AppColors.error : AppColors.border,
+                color: hasError ? context.colors.error : context.colors.border,
               ),
             ),
             child: Row(
               children: [
                 Text(
                   AppStrings.moneySignLabel,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.primary,
+                  style: AppTextStyles.titleMedium(context).copyWith(
+                    color: context.colors.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -381,13 +381,13 @@ class _FinancialSection extends StatelessWidget {
                     inputFormatters: [CurrencyInputFormatter()],
                     maxLength: 15,
                     textAlign: TextAlign.right,
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      color: AppColors.textSecondary,
+                    style: AppTextStyles.headlineMedium(context).copyWith(
+                      color: context.colors.textSecondary,
                     ),
                     decoration: InputDecoration(
                       hintText: '0,00',
-                      hintStyle: AppTextStyles.headlineMedium.copyWith(
-                        color: AppColors.textHint,
+                      hintStyle: AppTextStyles.headlineMedium(context).copyWith(
+                        color: context.colors.textHint,
                       ),
                       border: InputBorder.none,
                       counterText: '',
@@ -402,13 +402,13 @@ class _FinancialSection extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               valueError!,
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+              style: AppTextStyles.bodySmall(context).copyWith(color: context.colors.error),
             ),
           ],
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.valueWarning,
-            style: AppTextStyles.bodySmall.copyWith(
+            style: AppTextStyles.bodySmall(context).copyWith(
               fontSize: 11,
               fontStyle: FontStyle.italic,
             ),

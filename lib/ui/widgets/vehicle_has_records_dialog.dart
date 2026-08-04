@@ -42,13 +42,13 @@ Future<bool> showVehicleHasRecordsDialog(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.circle,
                     size: 6,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(label, style: AppTextStyles.bodyMedium),
+                  Text(label, style: AppTextStyles.bodyMedium(context)),
                 ],
               ),
             ),
@@ -62,9 +62,9 @@ Future<bool> showVehicleHasRecordsDialog(
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text(
+          child: Text(
             AppStrings.deleteVehicleWithRecordsConfirmButton,
-            style: TextStyle(color: AppColors.error),
+            style: TextStyle(color: context.colors.error),
           ),
         ),
       ],

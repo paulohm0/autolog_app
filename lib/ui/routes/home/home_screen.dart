@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocProvider.value(
       value: _homeCubit,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
         body: SafeArea(
           child: BlocListener<VehicleListCubit, VehicleListState>(
@@ -279,8 +279,8 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(
           heroTag: 'home_fab',
           onPressed: () => _openRegisterService(context),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
+          backgroundColor: context.colors.primary,
+          foregroundColor: context.colors.textOnPrimary,
           elevation: 4,
           shape: const CircleBorder(),
           child: const Icon(Icons.add, size: 28),
@@ -351,13 +351,13 @@ class _HistorySection extends StatelessWidget {
             children: [
               Text(
                 AppStrings.maintenanceHistory,
-                style: AppTextStyles.headlineLarge,
+                style: AppTextStyles.headlineLarge(context),
               ),
               IconButton(
                 icon: const Icon(Icons.filter_list_rounded),
                 color: filterActive
-                    ? AppColors.primary
-                    : AppColors.textSecondary,
+                    ? context.colors.primary
+                    : context.colors.textSecondary,
                 onPressed: onFilterTap,
               ),
             ],
@@ -403,16 +403,16 @@ class _ActiveFiltersRow extends StatelessWidget {
           vertical: 6,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primaryLight,
+          color: context.colors.primaryLight,
           borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.filter_list_rounded,
               size: 14,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
             const SizedBox(width: AppSpacing.xs),
             Flexible(
@@ -420,18 +420,18 @@ class _ActiveFiltersRow extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.primary,
+                style: AppTextStyles.labelMedium(context).copyWith(
+                  color: context.colors.primary,
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             GestureDetector(
               onTap: onClear,
-              child: const Icon(
+              child: Icon(
                 Icons.close_rounded,
                 size: 14,
-                color: AppColors.primary,
+                color: context.colors.primary,
               ),
             ),
           ],
@@ -472,7 +472,7 @@ class _MaintenanceList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Text(
           (state as HomeError).message,
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
+          style: AppTextStyles.bodyMedium(context).copyWith(color: context.colors.error),
         ),
       );
     }
@@ -500,7 +500,7 @@ class _MaintenanceList extends StatelessWidget {
             hasFilter
                 ? AppStrings.emptyFilteredHistory
                 : AppStrings.emptyMaintenanceHistory,
-            style: AppTextStyles.bodyMedium,
+            style: AppTextStyles.bodyMedium(context),
             textAlign: TextAlign.center,
           ),
         ),
@@ -602,7 +602,7 @@ class _VehicleListDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
@@ -616,7 +616,7 @@ class _VehicleListDialog extends StatelessWidget {
             children: [
               Text(
                 AppStrings.myVehiclesTitle,
-                style: AppTextStyles.headlineMedium,
+                style: AppTextStyles.headlineMedium(context),
               ),
               const SizedBox(height: AppSpacing.md),
               if (vehicles.isEmpty)
@@ -624,7 +624,7 @@ class _VehicleListDialog extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   child: Text(
                     AppStrings.noVehiclesRegistered,
-                    style: AppTextStyles.bodyMedium,
+                    style: AppTextStyles.bodyMedium(context),
                   ),
                 )
               else
@@ -676,12 +676,12 @@ class _VehicleRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: context.colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         children: [
-          const Icon(Icons.directions_car_outlined, color: AppColors.primary),
+          Icon(Icons.directions_car_outlined, color: context.colors.primary),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -689,25 +689,25 @@ class _VehicleRow extends StatelessWidget {
               children: [
                 Text(
                   '${vehicle.brand} ${vehicle.model}',
-                  style: AppTextStyles.titleMedium,
+                  style: AppTextStyles.titleMedium(context),
                 ),
                 if (vehicle.licensePlate.isNotEmpty)
-                  Text(vehicle.licensePlate, style: AppTextStyles.bodySmall),
+                  Text(vehicle.licensePlate, style: AppTextStyles.bodySmall(context)),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.delete_outline_rounded,
-              color: AppColors.error,
+              color: context.colors.error,
               size: 20,
             ),
             onPressed: onDelete,
@@ -740,21 +740,21 @@ class _StatRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primary, size: 20),
+            Icon(icon, color: context.colors.primary, size: 20),
             const SizedBox(width: AppSpacing.sm),
-            Text(label, style: AppTextStyles.titleMedium),
+            Text(label, style: AppTextStyles.titleMedium(context)),
             const SizedBox(width: AppSpacing.sm),
             Text(
               value,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.primary,
+              style: AppTextStyles.bodyMedium(context).copyWith(
+                color: context.colors.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 18,
             ),
           ],

@@ -40,10 +40,10 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: AppTextStyles.labelLarge),
+        Text(label.toUpperCase(), style: AppTextStyles.labelLarge(context)),
         const SizedBox(height: AppSpacing.sm),
         Container(
-          decoration: appFieldBoxDecoration(hasError: hasError),
+          decoration: appFieldBoxDecoration(context, hasError: hasError),
           child: TextField(
             controller: controller,
             maxLines: maxLines,
@@ -53,8 +53,9 @@ class AppTextField extends StatelessWidget {
             onTap: onTap,
             maxLength: maxLength,
             inputFormatters: inputFormatters,
-            style: AppTextStyles.bodyLarge,
+            style: AppTextStyles.bodyLarge(context),
             decoration: appFieldInputDecoration(
+              context,
               hintText: hintText,
               prefixIcon: prefixIcon,
               maxLength: maxLength,
@@ -62,7 +63,7 @@ class AppTextField extends StatelessWidget {
             ),
           ),
         ),
-        if (hasError) appFieldErrorText(errorText!),
+        if (hasError) appFieldErrorText(context, errorText!),
       ],
     );
   }

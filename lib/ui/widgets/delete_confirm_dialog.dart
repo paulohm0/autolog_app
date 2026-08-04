@@ -21,9 +21,9 @@ Future<bool> showDeleteConfirmDialog(
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text(
+          child: Text(
             AppStrings.deleteButton,
-            style: TextStyle(color: AppColors.error),
+            style: TextStyle(color: context.colors.error),
           ),
         ),
       ],

@@ -39,11 +39,11 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.primaryLight, AppColors.background],
+            colors: [context.colors.primaryLight, context.colors.background],
           ),
         ),
         child: SafeArea(
@@ -83,8 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         builder: (context, state) {
                           return switch (state) {
-                            LoginLoading() => const CircularProgressIndicator(
-                              color: AppColors.primary,
+                            LoginLoading() => CircularProgressIndicator(
+                              color: context.colors.primary,
                             ),
                             LoginSuccess() => const SizedBox.shrink(),
                             LoginInitial() ||

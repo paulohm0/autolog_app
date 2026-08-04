@@ -14,14 +14,14 @@ class LoginBenefitItem extends StatelessWidget {
         Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
-            color: AppColors.primaryLight,
+          decoration: BoxDecoration(
+            color: context.colors.primaryLight,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: AppColors.primary, size: 20),
+          child: Icon(icon, color: context.colors.primary, size: 20),
         ),
 
-        Expanded(child: Text(label, style: AppTextStyles.bodyMedium)),
+        Expanded(child: Text(label, style: AppTextStyles.bodyMedium(context))),
       ],
     );
   }

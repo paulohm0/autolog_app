@@ -24,7 +24,7 @@ class AppDateField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.labelLarge),
+        Text(label, style: AppTextStyles.labelLarge(context)),
         const SizedBox(height: AppSpacing.sm),
         GestureDetector(
           onTap: onTap,
@@ -34,31 +34,31 @@ class AppDateField extends StatelessWidget {
               vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: hasError ? Border.all(color: AppColors.error) : null,
+              border: hasError ? Border.all(color: context.colors.error) : null,
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.calendar_today_outlined,
-                  color: AppColors.textHint,
+                  color: context.colors.textHint,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     displayText ?? hintText,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: AppTextStyles.bodyLarge(context).copyWith(
                       color: displayText != null
-                          ? AppColors.textPrimary
-                          : AppColors.textHint,
+                          ? context.colors.textPrimary
+                          : context.colors.textHint,
                     ),
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.calendar_month_outlined,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   size: 20,
                 ),
               ],
@@ -69,7 +69,7 @@ class AppDateField extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             errorText!,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+            style: AppTextStyles.bodySmall(context).copyWith(color: context.colors.error),
           ),
         ],
       ],

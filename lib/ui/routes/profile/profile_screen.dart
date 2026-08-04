@@ -4,6 +4,7 @@ import 'package:autolog_app/core/routes/app_routes.dart';
 import 'package:autolog_app/core/theme/app_theme.dart';
 import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/user_entity.dart';
+import 'package:autolog_app/ui/cubit/theme/theme_cubit.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_state.dart';
@@ -42,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         appBar: AppBar(title: const AppBrandTitle(), centerTitle: true),
         body: SafeArea(
           child: BlocConsumer<ProfileCubit, ProfileState>(
@@ -91,7 +92,7 @@ class _ProfileErrorMessage extends StatelessWidget {
         child: Text(
           message,
           textAlign: TextAlign.center,
-          style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium(context),
         ),
       ),
     );
@@ -113,16 +114,18 @@ class _ProfileContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           _Avatar(user: user),
           const SizedBox(height: AppSpacing.lg),
-          Text(user.name, style: AppTextStyles.headlineLarge),
+          Text(user.name, style: AppTextStyles.headlineLarge(context)),
           const SizedBox(height: AppSpacing.xs),
           Text(
             user.email,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+            style: AppTextStyles.bodyMedium(context).copyWith(
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           const _AppVersionCard(),
+          const SizedBox(height: AppSpacing.lg),
+          const _ThemeModeCard(),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
@@ -130,7 +133,7 @@ class _ProfileContent extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onSignOut,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
+                foregroundColor: context.colors.error,
                 side: BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -162,10 +165,10 @@ class _Avatar extends StatelessWidget {
     final photoUrl = user.photoUrl;
 
     if (photoUrl == null) {
-      return const CircleAvatar(
+      return CircleAvatar(
         radius: 48,
-        backgroundColor: AppColors.primaryLight,
-        child: Icon(Icons.person, size: 48, color: AppColors.primary),
+        backgroundColor: context.colors.primaryLight,
+        child: Icon(Icons.person, size: 48, color: context.colors.primary),
       );
     }
 
@@ -176,14 +179,44 @@ class _Avatar extends StatelessWidget {
         height: 96,
         fit: BoxFit.cover,
         fadeInDuration: Duration.zero,
-        placeholder: (context, url) => const ColoredBox(
-          color: AppColors.primaryLight,
-          child: Icon(Icons.person, size: 48, color: AppColors.primary),
+        placeholder: (context, url) => ColoredBox(
+          color: context.colors.primaryLight,
+          child: Icon(Icons.person, size: 48, color: context.colors.primary),
         ),
-        errorWidget: (context, url, error) => const ColoredBox(
-          color: AppColors.primaryLight,
-          child: Icon(Icons.person, size: 48, color: AppColors.primary),
+        errorWidget: (context, url, error) => ColoredBox(
+          color: context.colors.primaryLight,
+          child: Icon(Icons.person, size: 48, color: context.colors.primary),
         ),
+      ),
+    );
+  }
+}
+
+/// Linha padrão das configurações do Perfil: ícone + label à esquerda,
+/// algum controle (texto, switch etc.) à direita. Usada por [_AppVersionCard]
+/// e [_ThemeModeCard], que só diferem no [trailing].
+class _ProfileSettingRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Widget trailing;
+
+  const _ProfileSettingRow({
+    required this.icon,
+    required this.label,
+    required this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      child: Row(
+        children: [
+          Icon(icon, color: context.colors.primary, size: 18),
+          const SizedBox(width: AppSpacing.sm),
+          Text(label, style: AppTextStyles.titleMedium(context)),
+          const Spacer(),
+          trailing,
+        ],
       ),
     );
   }
@@ -200,27 +233,46 @@ class _AppVersionCard extends StatelessWidget {
         final version = snapshot.hasData
             ? 'v${snapshot.data!.version} (${snapshot.data!.buildNumber})'
             : '...';
-        return SectionCard(
-          child: Row(
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                color: AppColors.primary,
-                size: 18,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                AppStrings.appVersionLabel,
-                style: AppTextStyles.titleMedium,
-              ),
-              const Spacer(),
-              Text(
-                version,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+        return _ProfileSettingRow(
+          icon: Icons.info_outline_rounded,
+          label: AppStrings.appVersionLabel,
+          trailing: Text(
+            version,
+            style: AppTextStyles.bodySmall(context).copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ThemeModeCard extends StatelessWidget {
+  const _ThemeModeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      bloc: getIt<ThemeCubit>(),
+      builder: (context, themeMode) {
+        final isDark = themeMode == ThemeMode.dark;
+        return _ProfileSettingRow(
+          icon: Icons.dark_mode_outlined,
+          label: AppStrings.themeSectionLabel,
+          trailing: SizedBox(
+            height: 24,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Switch(
+                value: isDark,
+                activeThumbColor: context.colors.primary,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onChanged: (value) => getIt<ThemeCubit>().changeThemeMode(
+                  value ? ThemeMode.dark : ThemeMode.light,
                 ),
               ),
-            ],
+            ),
           ),
         );
       },

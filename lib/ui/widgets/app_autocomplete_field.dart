@@ -55,7 +55,7 @@ class _AppAutocompleteFieldState extends State<AppAutocompleteField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label.toUpperCase(), style: AppTextStyles.labelLarge),
+        Text(widget.label.toUpperCase(), style: AppTextStyles.labelLarge(context)),
         const SizedBox(height: AppSpacing.sm),
         RawAutocomplete<String>(
           textEditingController: widget.controller,
@@ -69,13 +69,14 @@ class _AppAutocompleteFieldState extends State<AppAutocompleteField> {
           onSelected: (_) {},
           fieldViewBuilder: (context, textController, focusNode, onSubmitted) {
             return Container(
-              decoration: appFieldBoxDecoration(hasError: hasError),
+              decoration: appFieldBoxDecoration(context, hasError: hasError),
               child: TextField(
                 controller: textController,
                 focusNode: focusNode,
                 maxLength: widget.maxLength,
-                style: AppTextStyles.bodyLarge,
+                style: AppTextStyles.bodyLarge(context),
                 decoration: appFieldInputDecoration(
+                  context,
                   hintText: widget.hintText,
                   prefixIcon: widget.prefixIcon,
                   maxLength: widget.maxLength,
@@ -100,7 +101,7 @@ class _AppAutocompleteFieldState extends State<AppAutocompleteField> {
                       final option = list[index];
                       return ListTile(
                         dense: true,
-                        title: Text(option, style: AppTextStyles.bodyMedium),
+                        title: Text(option, style: AppTextStyles.bodyMedium(context)),
                         onTap: () => onSelected(option),
                       );
                     },
@@ -110,7 +111,7 @@ class _AppAutocompleteFieldState extends State<AppAutocompleteField> {
             );
           },
         ),
-        if (hasError) appFieldErrorText(widget.errorText!),
+        if (hasError) appFieldErrorText(context, widget.errorText!),
       ],
     );
   }
