@@ -70,8 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openRegisterVehicle(BuildContext context) async {
+    // Não precisa recarregar aqui: RegisterVehicleCubit já recarrega o
+    // VehicleListCubit (singleton) sozinho assim que a gravação confirma.
     await Navigator.pushNamed(context, AppRoutes.registerVehicle);
-    _vehicleListCubit.loadVehicles();
   }
 
   Future<void> _openVehiclesDialog(BuildContext context) async {
@@ -96,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_) => RegisterVehicleScreen(existingVehicle: vehicle),
         ),
       );
-      _vehicleListCubit.loadVehicles();
     } else if (action == 'delete' && vehicle != null) {
       await _confirmAndDeleteVehicle(context, vehicle);
     }
@@ -147,8 +147,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openRegisterService(BuildContext context) async {
-    await Navigator.pushNamed(context, AppRoutes.registerService);
-    _homeCubit.loadHomeData();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RegisterServiceScreen(onSaved: _homeCubit.loadHomeData),
+      ),
+    );
   }
 
   Future<void> _showNoVehicleDialog(BuildContext context) async {
@@ -565,10 +568,12 @@ class _MaintenanceListItem extends StatelessWidget {
     final homeCubit = context.read<HomeCubit>();
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => RegisterServiceScreen(existingMaintenance: maintenance),
+        builder: (_) => RegisterServiceScreen(
+          existingMaintenance: maintenance,
+          onSaved: homeCubit.loadHomeData,
+        ),
       ),
     );
-    homeCubit.loadHomeData();
   }
 
   Future<void> _confirmAndDelete(BuildContext context) async {

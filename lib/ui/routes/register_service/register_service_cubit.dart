@@ -1,7 +1,9 @@
+import 'package:autolog_app/core/error/failure.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
 import 'package:autolog_app/domain/repository/i_maintenance_repository.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_state.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterServiceCubit extends Cubit<RegisterServiceState> {
@@ -25,14 +27,16 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
     );
   }
 
-  Future<void> saveMaintenance({
+  /// Não emite estado de loading/sucesso — a tela sai otimisticamente assim
+  /// que o usuário toca em salvar (ver [RegisterServiceScreen._save]), então
+  /// só o resultado (sucesso ou erro) importa aqui.
+  Future<Either<Failure, void>> saveMaintenance({
     required String vehicleId,
     required DateTime date,
     required String workshop,
     required String description,
     required double value,
-  }) async {
-    emit(RegisterServiceLoading());
+  }) {
     final maintenance = MaintenanceEntity(
       vehicleId: vehicleId,
       date: date,
@@ -40,23 +44,17 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       description: description,
       value: value,
     );
-    final result = await _maintenanceRepository.saveMaintenance(maintenance);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(RegisterServiceError(message: failure.message)),
-      (_) => emit(RegisterServiceSuccess()),
-    );
+    return _maintenanceRepository.saveMaintenance(maintenance);
   }
 
-  Future<void> updateMaintenance({
+  Future<Either<Failure, void>> updateMaintenance({
     required String id,
     required String vehicleId,
     required DateTime date,
     required String workshop,
     required String description,
     required double value,
-  }) async {
-    emit(RegisterServiceLoading());
+  }) {
     final maintenance = MaintenanceEntity(
       id: id,
       vehicleId: vehicleId,
@@ -65,13 +63,6 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       description: description,
       value: value,
     );
-    final result = await _maintenanceRepository.updateMaintenance(
-      maintenance,
-    );
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(RegisterServiceError(message: failure.message)),
-      (_) => emit(RegisterServiceSuccess()),
-    );
+    return _maintenanceRepository.updateMaintenance(maintenance);
   }
 }

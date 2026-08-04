@@ -803,6 +803,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
   String? _dateError;
   String? _brandError;
   String? _litersError;
+  bool _submitted = false;
 
   bool get _isEditing => widget.existingOilChange != null;
 
@@ -849,6 +850,8 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
   }
 
   void _submit() {
+    if (_submitted) return;
+
     final brand = _brandController.text.trim();
     final liters = double.tryParse(
       _litersController.text.trim().replaceAll(',', '.'),
@@ -872,6 +875,7 @@ class _OilChangeFormSheetState extends State<_OilChangeFormSheet> {
       return;
     }
 
+    _submitted = true;
     widget.onSave(_selectedVehicle!.id!, brand, liters!, _selectedDate!);
   }
 
@@ -976,6 +980,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
   String? _vehicleError;
   String? _dateError;
   String? _modelError;
+  bool _submitted = false;
 
   bool get _isEditing => widget.existingBatteryChange != null;
 
@@ -1018,6 +1023,8 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
   }
 
   void _submit() {
+    if (_submitted) return;
+
     final model = _modelController.text.trim();
 
     setState(() {
@@ -1032,6 +1039,7 @@ class _BatteryChangeFormSheetState extends State<_BatteryChangeFormSheet> {
       return;
     }
 
+    _submitted = true;
     widget.onSave(_selectedVehicle!.id!, model, _selectedDate!);
   }
 

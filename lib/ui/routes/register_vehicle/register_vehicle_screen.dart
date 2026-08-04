@@ -9,14 +9,12 @@ import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
-import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
 import 'package:autolog_app/ui/widgets/app_autocomplete_field.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
 import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterVehicleScreen extends StatefulWidget {
   final bool isOnboarding;
@@ -37,6 +35,7 @@ class RegisterVehicleScreen extends StatefulWidget {
 }
 
 class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
+  late final RegisterVehicleCubit _cubit;
   late final TextEditingController _brandController;
   late final TextEditingController _modelController;
   late final TextEditingController _plateController;
@@ -47,12 +46,14 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
   String? _modelError;
   String? _plateError;
   List<String> _modelOptions = const [];
+  bool _submitted = false;
 
   bool get _isEditing => widget.existingVehicle != null;
 
   @override
   void initState() {
     super.initState();
+    _cubit = getIt<RegisterVehicleCubit>();
     final existing = widget.existingVehicle;
     _brandController = TextEditingController(text: existing?.brand);
     _modelController = TextEditingController(text: existing?.model);
@@ -78,7 +79,14 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
     setState(() => _modelOptions = modelsForBrand(_brandController.text));
   }
 
-  void _save(BuildContext context) {
+  // Padrão otimista (ver RegisterServiceScreen._save): fora do onboarding,
+  // sai da tela na hora do toque e só avisa depois se der erro. No
+  // onboarding não tem like pra "descurtir" se falhar — o MainGate troca de
+  // tela com base nisso, então ali espera a gravação confirmar antes de
+  // avançar.
+  void _save() {
+    if (_submitted) return;
+
     final brand = _brandController.text.trim();
     final model = _modelController.text.trim();
     final plate = _plateController.text.trim();
@@ -93,24 +101,68 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
       return;
     }
 
-    if (_isEditing) {
-      context.read<RegisterVehicleCubit>().updateVehicleFromForm(
-        id: widget.existingVehicle!.id!,
-        brand: brand,
-        model: model,
-        licensePlate: plate,
-        year: _yearController.text.trim(),
-        color: _colorController.text.trim(),
-      );
-    } else {
-      context.read<RegisterVehicleCubit>().saveVehicleFromForm(
-        brand: brand,
-        model: model,
-        licensePlate: plate,
-        year: _yearController.text.trim(),
-        color: _colorController.text.trim(),
-      );
+    final year = _yearController.text.trim();
+    final color = _colorController.text.trim();
+    final isEditing = _isEditing;
+
+    final future = isEditing
+        ? _cubit.updateVehicleFromForm(
+            id: widget.existingVehicle!.id!,
+            brand: brand,
+            model: model,
+            licensePlate: plate,
+            year: year,
+            color: color,
+          )
+        : _cubit.saveVehicleFromForm(
+            brand: brand,
+            model: model,
+            licensePlate: plate,
+            year: year,
+            color: color,
+          );
+
+    if (widget.isOnboarding) {
+      _submitted = true;
+      future.then((result) {
+        if (!mounted) return;
+        result.fold(
+          (failure) {
+            _submitted = false;
+            showAppSnackBar(context, failure.message, isError: true);
+          },
+          (_) {
+            getIt<VehicleListCubit>().loadVehicles();
+            showAppSnackBar(context, AppStrings.saveVehicleSnackBarMessage);
+            widget.onVehicleRegistered?.call();
+          },
+        );
+      });
+      return;
     }
+
+    _submitted = true;
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = context.colors.error;
+    final successMessage = isEditing
+        ? AppStrings.updateVehicleSnackBarMessage
+        : AppStrings.saveVehicleSnackBarMessage;
+
+    Navigator.of(context).pop();
+
+    future.then((result) {
+      result.fold(
+        (failure) => showAppSnackBarOn(
+          messenger,
+          failure.message,
+          errorColor: errorColor,
+        ),
+        (_) {
+          showAppSnackBarOn(messenger, successMessage);
+          getIt<VehicleListCubit>().loadVehicles();
+        },
+      );
+    });
   }
 
   Future<void> _signOut() async {
@@ -124,110 +176,81 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<RegisterVehicleCubit>(),
-      child: Builder(
-        builder: (context) => Scaffold(
-          backgroundColor: context.colors.background,
-          appBar: AppBar(
-            leading: widget.isOnboarding
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-            automaticallyImplyLeading: !widget.isOnboarding,
-            title: const AppBrandTitle(),
-            centerTitle: true,
-            actions: widget.isOnboarding
-                ? [
-                    TextButton(
-                      onPressed: widget.onSkip,
-                      child: const Text(AppStrings.skipButton),
-                    ),
-                    TextButton(
-                      onPressed: _signOut,
-                      child: Text(
-                        AppStrings.signOutButton,
-                        style: TextStyle(color: context.colors.error),
-                      ),
-                    ),
-                  ]
-                : null,
-          ),
-          body: BlocListener<RegisterVehicleCubit, RegisterVehicleState>(
-            listener: (context, state) {
-              switch (state) {
-                case RegisterVehicleSuccess():
-                  getIt<VehicleListCubit>().loadVehicles();
-                  showAppSnackBar(
-                    context,
-                    _isEditing
-                        ? AppStrings.updateVehicleSnackBarMessage
-                        : AppStrings.saveVehicleSnackBarMessage,
-                  );
-                  if (widget.isOnboarding) {
-                    widget.onVehicleRegistered?.call();
-                  } else {
-                    Navigator.of(context).pop();
-                  }
-                case RegisterVehicleError():
-                  showAppSnackBar(context, state.message, isError: true);
-                default:
-                  break;
-              }
-            },
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.isOnboarding) ...[
-                      const _OnboardingBanner(),
-                      const SizedBox(height: AppSpacing.xxl),
-                    ],
-                    _PageTitle(isEditing: _isEditing),
-                    const SizedBox(height: AppSpacing.xxl),
-                    _RequiredFields(
-                      _brandController,
-                      _modelController,
-                      _plateController,
-                      modelOptions: _modelOptions,
-                      brandError: _brandError,
-                      modelError: _modelError,
-                      plateError: _plateError,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _OptionalDetails(
-                      _yearController,
-                      _colorController,
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    Column(
-                      children: [
-                        PrimaryButton(
-                          label: _isEditing
-                              ? AppStrings.updateVehicleButton
-                              : AppStrings.saveVehicleButton,
-                          icon: Icons.save_alt_rounded,
-                          onPressed: () => _save(context),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          AppStrings.saveVehicleDescription,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodySmall(context).copyWith(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _BrandFooter(),
-                    const SizedBox(height: AppSpacing.xxl),
-                  ],
-                ),
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      appBar: AppBar(
+        leading: widget.isOnboarding
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ),
+        automaticallyImplyLeading: !widget.isOnboarding,
+        title: const AppBrandTitle(),
+        centerTitle: true,
+        actions: widget.isOnboarding
+            ? [
+                TextButton(
+                  onPressed: widget.onSkip,
+                  child: const Text(AppStrings.skipButton),
+                ),
+                TextButton(
+                  onPressed: _signOut,
+                  child: Text(
+                    AppStrings.signOutButton,
+                    style: TextStyle(color: context.colors.error),
+                  ),
+                ),
+              ]
+            : null,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.isOnboarding) ...[
+                const _OnboardingBanner(),
+                const SizedBox(height: AppSpacing.xxl),
+              ],
+              _PageTitle(isEditing: _isEditing),
+              const SizedBox(height: AppSpacing.xxl),
+              _RequiredFields(
+                _brandController,
+                _modelController,
+                _plateController,
+                modelOptions: _modelOptions,
+                brandError: _brandError,
+                modelError: _modelError,
+                plateError: _plateError,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _OptionalDetails(_yearController, _colorController),
+              const SizedBox(height: AppSpacing.xxl),
+              Column(
+                children: [
+                  PrimaryButton(
+                    label: _isEditing
+                        ? AppStrings.updateVehicleButton
+                        : AppStrings.saveVehicleButton,
+                    icon: Icons.save_alt_rounded,
+                    onPressed: _save,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    AppStrings.saveVehicleDescription,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodySmall(
+                      context,
+                    ).copyWith(fontSize: 12),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _BrandFooter(),
+              const SizedBox(height: AppSpacing.xxl),
+            ],
           ),
         ),
       ),

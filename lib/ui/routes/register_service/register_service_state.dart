@@ -11,8 +11,6 @@ class RegisterServiceVehiclesLoaded extends RegisterServiceState {
   RegisterServiceVehiclesLoaded({required this.vehicles});
 }
 
-class RegisterServiceSuccess extends RegisterServiceState {}
-
 class RegisterServiceError extends RegisterServiceState {
   final String message;
   RegisterServiceError({required this.message});

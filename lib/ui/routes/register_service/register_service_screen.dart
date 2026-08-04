@@ -21,7 +21,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class RegisterServiceScreen extends StatefulWidget {
   final MaintenanceEntity? existingMaintenance;
 
-  const RegisterServiceScreen({super.key, this.existingMaintenance});
+  /// Chamado depois que o salvamento em segundo plano realmente terminou
+  /// com sucesso — a tela já saiu antes disso (ver [_save]), então quem
+  /// abriu essa tela usa isso pra saber a hora certa de recarregar a lista.
+  final VoidCallback? onSaved;
+
+  const RegisterServiceScreen({
+    super.key,
+    this.existingMaintenance,
+    this.onSaved,
+  });
 
   @override
   State<RegisterServiceScreen> createState() => _RegisterServiceScreenState();
@@ -42,6 +51,7 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   String? _workshopError;
   String? _descriptionError;
   String? _valueError;
+  bool _submitted = false;
 
   bool get _isEditing => widget.existingMaintenance != null;
 
@@ -84,7 +94,13 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     if (selected != null) setState(() => _selectedVehicle = selected);
   }
 
+  // Padrão otimista: sai da tela assim que o toque acontece (sem esperar a
+  // rede), como curtir uma foto — a gravação continua em segundo plano e só
+  // avisa se der errado. O _submitted evita o toque duplo disparar duas
+  // gravações antes da tela realmente sair.
   void _save() {
+    if (_submitted) return;
+
     final workshop = _workshopController.text.trim();
     final description = _descriptionController.text.trim();
     final value = parseCurrencyInput(_valueController.text);
@@ -111,24 +127,47 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       return;
     }
 
-    if (_isEditing) {
-      _cubit.updateMaintenance(
-        id: widget.existingMaintenance!.id!,
-        vehicleId: _selectedVehicle!.id!,
-        date: _selectedDate!,
-        workshop: workshop,
-        description: description,
-        value: value!,
+    _submitted = true;
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = context.colors.error;
+    final isEditing = _isEditing;
+    final successMessage = isEditing
+        ? AppStrings.updateMaintenanceSnackBarMessage
+        : AppStrings.saveMaintenanceSnackBarMessage;
+    final onSaved = widget.onSaved;
+
+    final future = isEditing
+        ? _cubit.updateMaintenance(
+            id: widget.existingMaintenance!.id!,
+            vehicleId: _selectedVehicle!.id!,
+            date: _selectedDate!,
+            workshop: workshop,
+            description: description,
+            value: value!,
+          )
+        : _cubit.saveMaintenance(
+            vehicleId: _selectedVehicle!.id!,
+            date: _selectedDate!,
+            workshop: workshop,
+            description: description,
+            value: value!,
+          );
+
+    Navigator.of(context).pop();
+
+    future.then((result) {
+      result.fold(
+        (failure) => showAppSnackBarOn(
+          messenger,
+          failure.message,
+          errorColor: errorColor,
+        ),
+        (_) {
+          showAppSnackBarOn(messenger, successMessage);
+          onSaved?.call();
+        },
       );
-    } else {
-      _cubit.saveMaintenance(
-        vehicleId: _selectedVehicle!.id!,
-        date: _selectedDate!,
-        workshop: workshop,
-        description: description,
-        value: value!,
-      );
-    }
+    });
   }
 
   @override
@@ -159,14 +198,6 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                     _selectedVehicle = matches.isEmpty ? null : matches.first;
                   }
                 });
-              case RegisterServiceSuccess():
-                showAppSnackBar(
-                  context,
-                  _isEditing
-                      ? AppStrings.updateMaintenanceSnackBarMessage
-                      : AppStrings.saveMaintenanceSnackBarMessage,
-                );
-                Navigator.of(context).pop();
               case RegisterServiceError():
                 showAppSnackBar(context, state.message, isError: true);
               default:

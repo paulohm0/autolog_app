@@ -15,3 +15,17 @@ void showAppSnackBar(
     ),
   );
 }
+
+/// Igual a [showAppSnackBar], mas recebe o [ScaffoldMessengerState] já
+/// resolvido em vez de um [BuildContext] — usado quando a tela que disparou
+/// a ação (salvar otimista) já pode ter sido fechada quando a resposta
+/// chega, então não dá pra usar `context` de novo.
+void showAppSnackBarOn(
+  ScaffoldMessengerState messenger,
+  String message, {
+  Color? errorColor,
+}) {
+  messenger.showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: errorColor),
+  );
+}

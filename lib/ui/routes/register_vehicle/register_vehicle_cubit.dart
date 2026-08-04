@@ -1,22 +1,24 @@
+import 'package:autolog_app/core/error/failure.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
-import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_state.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
 
-class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
+/// Não é um Cubit — a tela sai otimisticamente assim que o usuário toca em
+/// salvar (ver [RegisterVehicleScreen._save]), então não existe estado de
+/// loading/sucesso pra observar, só o resultado da gravação em si.
+class RegisterVehicleCubit {
   final IVehicleRepository _repository;
 
   RegisterVehicleCubit({required IVehicleRepository repository})
-    : _repository = repository,
-      super(RegisterVehicleInitial());
+    : _repository = repository;
 
-  Future<void> saveVehicleFromForm({
+  Future<Either<Failure, void>> saveVehicleFromForm({
     required String brand,
     required String model,
     required String licensePlate,
     required String year,
     required String color,
-  }) async {
+  }) {
     final vehicle = VehicleEntity(
       brand: brand,
       model: model,
@@ -24,27 +26,21 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
       year: int.tryParse(year),
       color: color,
     );
-    await saveVehicle(vehicle);
+    return saveVehicle(vehicle);
   }
 
-  Future<void> saveVehicle(VehicleEntity vehicle) async {
-    emit(RegisterVehicleLoading());
-    final result = await _repository.saveVehicle(vehicle);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(RegisterVehicleError(message: failure.message)),
-      (success) => emit(RegisterVehicleSuccess()),
-    );
+  Future<Either<Failure, void>> saveVehicle(VehicleEntity vehicle) {
+    return _repository.saveVehicle(vehicle);
   }
 
-  Future<void> updateVehicleFromForm({
+  Future<Either<Failure, void>> updateVehicleFromForm({
     required String id,
     required String brand,
     required String model,
     required String licensePlate,
     required String year,
     required String color,
-  }) async {
+  }) {
     final vehicle = VehicleEntity(
       id: id,
       brand: brand,
@@ -53,12 +49,6 @@ class RegisterVehicleCubit extends Cubit<RegisterVehicleState> {
       year: int.tryParse(year),
       color: color,
     );
-    emit(RegisterVehicleLoading());
-    final result = await _repository.updateVehicle(vehicle);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(RegisterVehicleError(message: failure.message)),
-      (success) => emit(RegisterVehicleSuccess()),
-    );
+    return _repository.updateVehicle(vehicle);
   }
 }

@@ -169,4 +169,14 @@ class AppStrings {
   static const String noVehicleDialogMessage =
       'Cadastre um veículo para começar a registrar suas manutenções, trocas de óleo e bateria.';
   static const String laterButton = 'Agora não';
+
+  // AuthGate (splash)
+  static const String authGateErrorMessage =
+      'Não foi possível conectar. Verifique sua internet e tente novamente.';
+
+  // Confirmação de saída do app
+  static const String exitAppConfirmTitle = 'Sair do app?';
+  static const String exitAppConfirmMessage =
+      'Você será direcionado para fora do AutoLog.';
+  static const String exitAppButton = 'Sair';
 }

@@ -6,6 +6,7 @@ import 'package:autolog_app/firebase_options.dart';
 import 'package:autolog_app/ui/cubit/theme/theme_cubit.dart';
 import 'package:autolog_app/ui/routes/login/login_screen.dart';
 import 'package:autolog_app/ui/routes/main_navigation/main_navigation_screen.dart';
+import 'package:autolog_app/ui/widgets/primary_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -68,9 +69,28 @@ class _AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<_AuthGate> {
-  late final Future<User?> _initialUser = getIt<FirebaseAuth>()
-      .authStateChanges()
-      .first;
+  late Future<User?> _initialUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialUser = _loadInitialUser();
+  }
+
+  // Sem timeout aqui, a splash ficaria presa pra sempre se
+  // authStateChanges() nunca emitir (ex: rede instável no boot do app).
+  Future<User?> _loadInitialUser() {
+    return getIt<FirebaseAuth>()
+        .authStateChanges()
+        .first
+        .timeout(const Duration(seconds: 12));
+  }
+
+  void _retry() {
+    setState(() {
+      _initialUser = _loadInitialUser();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +102,37 @@ class _AuthGateState extends State<_AuthGate> {
             backgroundColor: context.colors.primary,
             body: Center(
               child: Image.asset('assets/images/autolog-logo.png', width: 150),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return Scaffold(
+            backgroundColor: context.colors.background,
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.xxl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.wifi_off_rounded,
+                      size: 48,
+                      color: context.colors.textSecondary,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      AppStrings.authGateErrorMessage,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodyMedium(context),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    PrimaryButton(
+                      label: AppStrings.retryButton,
+                      onPressed: _retry,
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         }
