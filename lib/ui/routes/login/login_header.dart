@@ -4,20 +4,23 @@ import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:flutter/material.dart';
 
 class LoginHeader extends StatelessWidget {
-  const LoginHeader({super.key});
+  final double scale;
+
+  const LoginHeader({super.key, this.scale = 1});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const AppBrandTitle(fontSize: 52),
-        const SizedBox(height: AppSpacing.sm),
+        AppBrandTitle(fontSize: 52 * scale),
+        SizedBox(height: AppSpacing.sm * scale),
         Text(
           AppStrings.loginSubtitle,
           textAlign: TextAlign.center,
           style: AppTextStyles.bodyMedium(context).copyWith(
             color: context.colors.textSecondary,
+            fontSize: 14 * scale,
           ),
         ),
       ],

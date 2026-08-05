@@ -8,6 +8,7 @@ import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
+import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
 import 'package:autolog_app/ui/widgets/app_autocomplete_field.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
@@ -168,6 +169,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
   Future<void> _signOut() async {
     await getIt<IAuthRepository>().signOut();
     getIt<VehicleListCubit>().reset();
+    getIt<HomeCubit>().reset();
     if (!mounted) return;
     Navigator.of(
       context,
@@ -247,9 +249,6 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _BrandFooter(),
-              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
@@ -410,7 +409,10 @@ class _OptionalDetails extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(AppStrings.optionalDetails, style: AppTextStyles.titleLarge(context)),
+              Text(
+                AppStrings.optionalDetails,
+                style: AppTextStyles.titleLarge(context),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -436,47 +438,6 @@ class _OptionalDetails extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BrandFooter extends StatelessWidget {
-  const _BrandFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            AppStrings.appBrandName,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textSecondary,
-              letterSpacing: -0.2,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: context.colors.surfaceVariant,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: Text(
-              AppStrings.proBadge,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textSecondary,
-                letterSpacing: 0.8,
-              ),
-            ),
           ),
         ],
       ),

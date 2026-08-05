@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class LoginTopImage extends StatelessWidget {
-  const LoginTopImage({super.key});
+  final double height;
+
+  const LoginTopImage({super.key, this.height = 280});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 280,
+      height: height,
       width: double.infinity,
       child: Stack(
         fit: StackFit.expand,

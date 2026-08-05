@@ -5,7 +5,6 @@ class AppStrings {
   static const String appBrandName = 'AutoLog';
   static const String appBrandNameSplit1 = "Auto";
   static const String appBrandNameSplit2 = "Log";
-  static const String proBadge = 'PRO';
 
   // Login Screen
   static const String signInGoogleLabel = 'Entrar com o Google';
@@ -19,7 +18,7 @@ class AppStrings {
       'Gerencie todos os seus veículos em um só lugar';
 
   // Home Screen
-  static const String activeVehiclesLabel = 'Veículos Ativos';
+  static const String activeVehiclesLabel = 'Meus Veículos';
   static const String maintenanceHistory = 'Histórico de Manutenção';
   static const String filters = 'Filtros';
   static const String allVehicles = 'Todos os Veículos';
@@ -100,7 +99,8 @@ class AppStrings {
   static const String deleteButton = 'Excluir';
   static const String cancelButton = 'Cancelar';
 
-  // Oil/Battery Screen
+  // Oil/Battery Screen (histórico derivado das manutenções marcadas — ver
+  // Campos de óleo/bateria abaixo, dentro do formulário de Manutenção)
   static const String oilToggleLabel = 'Óleo';
   static const String batteryToggleLabel = 'Bateria';
   static const String oilChangeHistoryTitle = 'Histórico de Troca de Óleo';
@@ -110,38 +110,20 @@ class AppStrings {
       'Nenhuma troca de óleo registrada ainda.';
   static const String emptyBatteryChangeHistory =
       'Nenhuma troca de bateria registrada ainda.';
-  static const String addOilChangeTitle = 'Nova Troca de Óleo';
-  static const String addBatteryChangeTitle = 'Nova Troca de Bateria';
+  static const String emptyFilteredHistory =
+      'Nenhum registro encontrado para esse filtro.';
+
+  // Campos de óleo/bateria dentro do formulário de Manutenção
+  static const String hasOilChangeLabel = 'Houve troca de óleo?';
+  static const String hasBatteryChangeLabel = 'Houve troca de bateria?';
   static const String oilBrandLabel = 'Marca do Óleo';
   static const String oilBrandHint = 'Ex: Mobil, Castrol';
   static const String litersLabel = 'Litros';
   static const String litersHint = 'Ex: 4,5';
   static const String batteryModelLabel = 'Modelo da Bateria';
   static const String batteryModelHint = 'Ex: Moura 60Ah';
-  static const String changeDateLabel = 'DATA DA TROCA';
-  static const String saveOilChangeButton = 'Salvar Troca de Óleo';
-  static const String saveBatteryChangeButton = 'Salvar Troca de Bateria';
-  static const String saveOilChangeSnackBarMessage =
-      'Troca de óleo salva com sucesso!';
-  static const String saveBatteryChangeSnackBarMessage =
-      'Troca de bateria salva com sucesso!';
-  static const String emptyFilteredHistory =
-      'Nenhum registro encontrado para esse filtro.';
-  static const String editOilChangeTitle = 'Editar Troca de Óleo';
-  static const String editBatteryChangeTitle = 'Editar Troca de Bateria';
-  static const String updateOilChangeButton = 'Salvar Alterações';
-  static const String updateBatteryChangeButton = 'Salvar Alterações';
-  static const String updateOilChangeSnackBarMessage =
-      'Troca de óleo atualizada com sucesso!';
-  static const String updateBatteryChangeSnackBarMessage =
-      'Troca de bateria atualizada com sucesso!';
-  static const String deleteOilChangeSnackBarMessage =
-      'Troca de óleo excluída com sucesso!';
-  static const String deleteBatteryChangeSnackBarMessage =
-      'Troca de bateria excluída com sucesso!';
-  static const String deleteOilChangeConfirmTitle = 'Excluir troca de óleo?';
-  static const String deleteBatteryChangeConfirmTitle =
-      'Excluir troca de bateria?';
+  static const String batteryCapacityLabel = 'Capacidade da Bateria';
+  static const String batteryCapacityHint = 'Ex: 60Ah, 12V 60Ah';
 
   // Profile Screen
   static const String appVersionLabel = 'Versão do App';

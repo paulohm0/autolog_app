@@ -36,6 +36,12 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
     required String workshop,
     required String description,
     required double value,
+    required bool hasOilChange,
+    String? oilBrand,
+    double? oilLiters,
+    required bool hasBatteryChange,
+    String? batteryModel,
+    String? batteryCapacity,
   }) {
     final maintenance = MaintenanceEntity(
       vehicleId: vehicleId,
@@ -43,6 +49,12 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       workshop: workshop,
       description: description,
       value: value,
+      hasOilChange: hasOilChange,
+      oilBrand: oilBrand,
+      oilLiters: oilLiters,
+      hasBatteryChange: hasBatteryChange,
+      batteryModel: batteryModel,
+      batteryCapacity: batteryCapacity,
     );
     return _maintenanceRepository.saveMaintenance(maintenance);
   }
@@ -54,6 +66,12 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
     required String workshop,
     required String description,
     required double value,
+    required bool hasOilChange,
+    String? oilBrand,
+    double? oilLiters,
+    required bool hasBatteryChange,
+    String? batteryModel,
+    String? batteryCapacity,
   }) {
     final maintenance = MaintenanceEntity(
       id: id,
@@ -62,6 +80,12 @@ class RegisterServiceCubit extends Cubit<RegisterServiceState> {
       workshop: workshop,
       description: description,
       value: value,
+      hasOilChange: hasOilChange,
+      oilBrand: oilBrand,
+      oilLiters: oilLiters,
+      hasBatteryChange: hasBatteryChange,
+      batteryModel: batteryModel,
+      batteryCapacity: batteryCapacity,
     );
     return _maintenanceRepository.updateMaintenance(maintenance);
   }

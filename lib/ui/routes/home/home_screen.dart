@@ -56,16 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _homeCubit = getIt<HomeCubit>();
-    _homeCubit.loadHomeData();
+    _homeCubit = getIt<HomeCubit>()..ensureLoaded();
     _vehicleListCubit = getIt<VehicleListCubit>()..ensureLoaded();
   }
 
   @override
   void dispose() {
-    _homeCubit.close();
-    // _vehicleListCubit é um singleton compartilhado com outras telas —
-    // não deve ser fechado aqui.
+    // _homeCubit e _vehicleListCubit são singletons compartilhados com
+    // outras telas — não devem ser fechados aqui.
     super.dispose();
   }
 

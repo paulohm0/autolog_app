@@ -6,8 +6,8 @@ class SimpleHistoryCard extends StatelessWidget {
   final String day;
   final String vehicle;
   final String detail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const SimpleHistoryCard({
     super.key,
@@ -15,8 +15,8 @@ class SimpleHistoryCard extends StatelessWidget {
     required this.day,
     required this.vehicle,
     required this.detail,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -65,16 +65,18 @@ class SimpleHistoryCard extends StatelessWidget {
               ],
             ),
           ),
-          _IconAction(
-            icon: Icons.edit_outlined,
-            color: context.colors.textSecondary,
-            onTap: onEdit,
-          ),
-          _IconAction(
-            icon: Icons.delete_outline_rounded,
-            color: context.colors.error,
-            onTap: onDelete,
-          ),
+          if (onEdit != null)
+            _IconAction(
+              icon: Icons.edit_outlined,
+              color: context.colors.textSecondary,
+              onTap: onEdit!,
+            ),
+          if (onDelete != null)
+            _IconAction(
+              icon: Icons.delete_outline_rounded,
+              color: context.colors.error,
+              onTap: onDelete!,
+            ),
         ],
       ),
     );

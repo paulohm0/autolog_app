@@ -32,7 +32,6 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-
   runApp(const AutoLogApp());
 }
 
@@ -80,10 +79,9 @@ class _AuthGateState extends State<_AuthGate> {
   // Sem timeout aqui, a splash ficaria presa pra sempre se
   // authStateChanges() nunca emitir (ex: rede instável no boot do app).
   Future<User?> _loadInitialUser() {
-    return getIt<FirebaseAuth>()
-        .authStateChanges()
-        .first
-        .timeout(const Duration(seconds: 12));
+    return getIt<FirebaseAuth>().authStateChanges().first.timeout(
+      const Duration(seconds: 12),
+    );
   }
 
   void _retry() {

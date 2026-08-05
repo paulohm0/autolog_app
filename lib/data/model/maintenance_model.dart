@@ -10,6 +10,12 @@ class MaintenanceModel extends MaintenanceEntity {
     required super.workshop,
     required super.description,
     required super.value,
+    super.hasOilChange,
+    super.oilBrand,
+    super.oilLiters,
+    super.hasBatteryChange,
+    super.batteryModel,
+    super.batteryCapacity,
   });
 
   factory MaintenanceModel.fromMap(Map<String, dynamic> map, String id) {
@@ -21,6 +27,12 @@ class MaintenanceModel extends MaintenanceEntity {
       workshop: map['workshop'],
       description: map['description'],
       value: (map['value'] as num).toDouble(),
+      hasOilChange: map['hasOilChange'] ?? false,
+      oilBrand: map['oilBrand'],
+      oilLiters: (map['oilLiters'] as num?)?.toDouble(),
+      hasBatteryChange: map['hasBatteryChange'] ?? false,
+      batteryModel: map['batteryModel'],
+      batteryCapacity: map['batteryCapacity'],
     );
   }
 
@@ -32,6 +44,12 @@ class MaintenanceModel extends MaintenanceEntity {
       'workshop': workshop,
       'description': description,
       'value': value,
+      'hasOilChange': hasOilChange,
+      'oilBrand': oilBrand,
+      'oilLiters': oilLiters,
+      'hasBatteryChange': hasBatteryChange,
+      'batteryModel': batteryModel,
+      'batteryCapacity': batteryCapacity,
     };
   }
 }

@@ -41,16 +41,26 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
   late final TextEditingController _workshopController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _valueController;
+  late final TextEditingController _oilBrandController;
+  late final TextEditingController _oilLitersController;
+  late final TextEditingController _batteryModelController;
+  late final TextEditingController _batteryCapacityController;
 
   List<VehicleEntity> _vehicles = [];
   VehicleEntity? _selectedVehicle;
   DateTime? _selectedDate;
+  bool _hasOilChange = false;
+  bool _hasBatteryChange = false;
 
   String? _vehicleError;
   String? _dateError;
   String? _workshopError;
   String? _descriptionError;
   String? _valueError;
+  String? _oilBrandError;
+  String? _oilLitersError;
+  String? _batteryModelError;
+  String? _batteryCapacityError;
   bool _submitted = false;
 
   bool get _isEditing => widget.existingMaintenance != null;
@@ -64,6 +74,16 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     _valueController = TextEditingController(
       text: existing != null ? formatCurrencyInputValue(existing.value) : null,
     );
+    _oilBrandController = TextEditingController(text: existing?.oilBrand);
+    _oilLitersController = TextEditingController(
+      text: existing?.oilLiters?.toString(),
+    );
+    _batteryModelController = TextEditingController(text: existing?.batteryModel);
+    _batteryCapacityController = TextEditingController(
+      text: existing?.batteryCapacity,
+    );
+    _hasOilChange = existing?.hasOilChange ?? false;
+    _hasBatteryChange = existing?.hasBatteryChange ?? false;
     _selectedDate = existing?.date;
     _cubit = getIt<RegisterServiceCubit>();
     _cubit.loadVehicles();
@@ -75,6 +95,10 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     _workshopController.dispose();
     _descriptionController.dispose();
     _valueController.dispose();
+    _oilBrandController.dispose();
+    _oilLitersController.dispose();
+    _batteryModelController.dispose();
+    _batteryCapacityController.dispose();
     super.dispose();
   }
 
@@ -104,6 +128,12 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
     final workshop = _workshopController.text.trim();
     final description = _descriptionController.text.trim();
     final value = parseCurrencyInput(_valueController.text);
+    final oilBrand = _oilBrandController.text.trim();
+    final oilLiters = double.tryParse(
+      _oilLitersController.text.trim().replaceAll(',', '.'),
+    );
+    final batteryModel = _batteryModelController.text.trim();
+    final batteryCapacity = _batteryCapacityController.text.trim();
 
     setState(() {
       _vehicleError = _selectedVehicle == null
@@ -117,13 +147,29 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
       _valueError = (value == null || value <= 0)
           ? AppStrings.valueMustBePositive
           : null;
+      _oilBrandError = _hasOilChange && oilBrand.isEmpty
+          ? AppStrings.requiredFieldError
+          : null;
+      _oilLitersError = _hasOilChange && (oilLiters == null || oilLiters <= 0)
+          ? AppStrings.valueMustBePositive
+          : null;
+      _batteryModelError = _hasBatteryChange && batteryModel.isEmpty
+          ? AppStrings.requiredFieldError
+          : null;
+      _batteryCapacityError = _hasBatteryChange && batteryCapacity.isEmpty
+          ? AppStrings.requiredFieldError
+          : null;
     });
 
     if (_vehicleError != null ||
         _dateError != null ||
         _workshopError != null ||
         _descriptionError != null ||
-        _valueError != null) {
+        _valueError != null ||
+        _oilBrandError != null ||
+        _oilLitersError != null ||
+        _batteryModelError != null ||
+        _batteryCapacityError != null) {
       return;
     }
 
@@ -144,6 +190,12 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
             workshop: workshop,
             description: description,
             value: value!,
+            hasOilChange: _hasOilChange,
+            oilBrand: _hasOilChange ? oilBrand : null,
+            oilLiters: _hasOilChange ? oilLiters : null,
+            hasBatteryChange: _hasBatteryChange,
+            batteryModel: _hasBatteryChange ? batteryModel : null,
+            batteryCapacity: _hasBatteryChange ? batteryCapacity : null,
           )
         : _cubit.saveMaintenance(
             vehicleId: _selectedVehicle!.id!,
@@ -151,6 +203,12 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
             workshop: workshop,
             description: description,
             value: value!,
+            hasOilChange: _hasOilChange,
+            oilBrand: _hasOilChange ? oilBrand : null,
+            oilLiters: _hasOilChange ? oilLiters : null,
+            hasBatteryChange: _hasBatteryChange,
+            batteryModel: _hasBatteryChange ? batteryModel : null,
+            batteryCapacity: _hasBatteryChange ? batteryCapacity : null,
           );
 
     Navigator.of(context).pop();
@@ -223,6 +281,23 @@ class _RegisterServiceScreenState extends State<RegisterServiceScreen> {
                     dateError: _dateError,
                     workshopError: _workshopError,
                     descriptionError: _descriptionError,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _ServiceTypeSection(
+                    hasOilChange: _hasOilChange,
+                    onOilChangeToggled: (value) =>
+                        setState(() => _hasOilChange = value),
+                    oilBrandController: _oilBrandController,
+                    oilLitersController: _oilLitersController,
+                    oilBrandError: _oilBrandError,
+                    oilLitersError: _oilLitersError,
+                    hasBatteryChange: _hasBatteryChange,
+                    onBatteryChangeToggled: (value) =>
+                        setState(() => _hasBatteryChange = value),
+                    batteryModelController: _batteryModelController,
+                    batteryCapacityController: _batteryCapacityController,
+                    batteryModelError: _batteryModelError,
+                    batteryCapacityError: _batteryCapacityError,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _FinancialSection(
@@ -433,17 +508,120 @@ class _FinancialSection extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               valueError!,
-              style: AppTextStyles.bodySmall(context).copyWith(color: context.colors.error),
+              style: AppTextStyles.bodySmall(
+                context,
+              ).copyWith(color: context.colors.error),
             ),
           ],
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            AppStrings.valueWarning,
-            style: AppTextStyles.bodySmall(context).copyWith(
-              fontSize: 11,
-              fontStyle: FontStyle.italic,
+        ],
+      ),
+    );
+  }
+}
+
+/// Marcar óleo/bateria aqui é o único jeito de um registro aparecer na aba
+/// Óleo/Bateria — não existe mais cadastro separado lá (ver
+/// OilBatteryScreen, que só filtra o histórico de manutenção por essas
+/// flags).
+class _ServiceTypeSection extends StatelessWidget {
+  final bool hasOilChange;
+  final ValueChanged<bool> onOilChangeToggled;
+  final TextEditingController oilBrandController;
+  final TextEditingController oilLitersController;
+  final String? oilBrandError;
+  final String? oilLitersError;
+
+  final bool hasBatteryChange;
+  final ValueChanged<bool> onBatteryChangeToggled;
+  final TextEditingController batteryModelController;
+  final TextEditingController batteryCapacityController;
+  final String? batteryModelError;
+  final String? batteryCapacityError;
+
+  const _ServiceTypeSection({
+    required this.hasOilChange,
+    required this.onOilChangeToggled,
+    required this.oilBrandController,
+    required this.oilLitersController,
+    this.oilBrandError,
+    this.oilLitersError,
+    required this.hasBatteryChange,
+    required this.onBatteryChangeToggled,
+    required this.batteryModelController,
+    required this.batteryCapacityController,
+    this.batteryModelError,
+    this.batteryCapacityError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxListTile(
+            value: hasOilChange,
+            onChanged: (value) => onOilChangeToggled(value ?? false),
+            title: Text(
+              AppStrings.hasOilChangeLabel,
+              style: AppTextStyles.titleMedium(context),
             ),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
           ),
+          if (hasOilChange) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: oilBrandController,
+              label: AppStrings.oilBrandLabel,
+              hintText: AppStrings.oilBrandHint,
+              prefixIcon: Icons.local_gas_station_outlined,
+              errorText: oilBrandError,
+              maxLength: 40,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
+              controller: oilLitersController,
+              label: AppStrings.litersLabel,
+              hintText: AppStrings.litersHint,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              maxLength: 6,
+              errorText: oilLitersError,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          const Divider(),
+          CheckboxListTile(
+            value: hasBatteryChange,
+            onChanged: (value) => onBatteryChangeToggled(value ?? false),
+            title: Text(
+              AppStrings.hasBatteryChangeLabel,
+              style: AppTextStyles.titleMedium(context),
+            ),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          if (hasBatteryChange) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: batteryModelController,
+              label: AppStrings.batteryModelLabel,
+              hintText: AppStrings.batteryModelHint,
+              prefixIcon: Icons.battery_charging_full_outlined,
+              errorText: batteryModelError,
+              maxLength: 40,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
+              controller: batteryCapacityController,
+              label: AppStrings.batteryCapacityLabel,
+              hintText: AppStrings.batteryCapacityHint,
+              errorText: batteryCapacityError,
+              maxLength: 20,
+            ),
+          ],
         ],
       ),
     );

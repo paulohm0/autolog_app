@@ -34,6 +34,12 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
         workshop: maintenance.workshop,
         description: maintenance.description,
         value: maintenance.value,
+        hasOilChange: maintenance.hasOilChange,
+        oilBrand: maintenance.oilBrand,
+        oilLiters: maintenance.oilLiters,
+        hasBatteryChange: maintenance.hasBatteryChange,
+        batteryModel: maintenance.batteryModel,
+        batteryCapacity: maintenance.batteryCapacity,
       );
 
       await _maintenancesCollection.add(newMaintenance.toJson());
@@ -86,6 +92,12 @@ class MaintenanceRepositoryImpl implements IMaintenanceRepository {
         workshop: maintenance.workshop,
         description: maintenance.description,
         value: maintenance.value,
+        hasOilChange: maintenance.hasOilChange,
+        oilBrand: maintenance.oilBrand,
+        oilLiters: maintenance.oilLiters,
+        hasBatteryChange: maintenance.hasBatteryChange,
+        batteryModel: maintenance.batteryModel,
+        batteryCapacity: maintenance.batteryCapacity,
       );
 
       await _maintenancesCollection

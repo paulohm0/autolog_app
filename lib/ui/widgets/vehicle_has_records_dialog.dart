@@ -5,14 +5,10 @@ import 'package:flutter/material.dart';
 
 String _maintenanceLabel(int count) =>
     count == 1 ? '1 manutenção' : '$count manutenções';
-String _oilChangeLabel(int count) =>
-    count == 1 ? '1 troca de óleo' : '$count trocas de óleo';
-String _batteryChangeLabel(int count) =>
-    count == 1 ? '1 troca de bateria' : '$count trocas de bateria';
 
-/// Mostra o aviso de exclusão de um veículo que já possui histórico
-/// (manutenções, trocas de óleo/bateria) vinculado a ele. Retorna `true`
-/// só se o usuário confirmar a exclusão em cascata de tudo.
+/// Mostra o aviso de exclusão de um veículo que já possui histórico de
+/// manutenção (inclui as marcadas como óleo/bateria) vinculado a ele.
+/// Retorna `true` só se o usuário confirmar a exclusão em cascata de tudo.
 Future<bool> showVehicleHasRecordsDialog(
   BuildContext context, {
   required VehicleLinkedRecords linkedRecords,
@@ -20,10 +16,6 @@ Future<bool> showVehicleHasRecordsDialog(
   final items = [
     if (linkedRecords.maintenances.isNotEmpty)
       _maintenanceLabel(linkedRecords.maintenances.length),
-    if (linkedRecords.oilChanges.isNotEmpty)
-      _oilChangeLabel(linkedRecords.oilChanges.length),
-    if (linkedRecords.batteryChanges.isNotEmpty)
-      _batteryChangeLabel(linkedRecords.batteryChanges.length),
   ];
 
   final confirmed = await showDialog<bool>(

@@ -6,6 +6,7 @@ import 'package:autolog_app/core/utils/snackbar_utils.dart';
 import 'package:autolog_app/domain/entity/user_entity.dart';
 import 'package:autolog_app/ui/cubit/theme/theme_cubit.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
+import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
@@ -53,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
               if (state is ProfileSignedOut) {
                 getIt<VehicleListCubit>().reset();
+                getIt<HomeCubit>().reset();
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   AppRoutes.login,

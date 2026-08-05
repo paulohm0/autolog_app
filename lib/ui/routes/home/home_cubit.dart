@@ -4,12 +4,25 @@ import 'package:autolog_app/ui/routes/home/home_state.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// Fonte única do histórico de manutenção (inclui os itens de óleo/bateria,
+// que são manutenções marcadas — ver MaintenanceEntity), compartilhada
+// entre Home e a aba Óleo/Bateria. Registrado como lazy singleton, não
+// factory, pra editar/criar/excluir em qualquer tela refletir na outra sem
+// plumbing extra.
 class HomeCubit extends Cubit<HomeState> {
   final IMaintenanceRepository _maintenanceRepository;
 
   HomeCubit({required IMaintenanceRepository maintenanceRepository})
     : _maintenanceRepository = maintenanceRepository,
       super(HomeInitial());
+
+  /// Garante que a lista foi carregada ao menos uma vez, sem forçar um novo
+  /// fetch se algum outro ponto do app já carregou.
+  Future<void> ensureLoaded() async {
+    if (state is HomeInitial) {
+      await loadHomeData();
+    }
+  }
 
   Future<void> loadHomeData() async {
     // Na primeira carga (app acabou de abrir), mostra o que já tinha em
@@ -45,5 +58,12 @@ class HomeCubit extends Cubit<HomeState> {
       await loadHomeData();
     }
     return result;
+  }
+
+  /// Descarta a lista carregada. Chamado no logout — sem isso, o próximo
+  /// usuário a logar no mesmo aparelho veria o histórico da conta anterior,
+  /// já que este cubit é um singleton compartilhado entre todas as telas.
+  void reset() {
+    emit(HomeInitial());
   }
 }

@@ -35,6 +35,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Encolhe imagem/textos proporcionalmente em telas baixas, pra o botão
+    // de login social continuar visível sem precisar rolar (a rolagem
+    // abaixo continua existindo como rede de segurança pra telas bem
+    // pequenas, mas o objetivo é não depender dela na maioria dos casos).
+    final scale = (screenHeight / 800).clamp(0.72, 1.0).toDouble();
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -47,21 +54,21 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              const LoginTopImage(),
-              Expanded(
-                child: Padding(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                LoginTopImage(height: 280 * scale),
+                Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xxl,
                   ),
                   child: Column(
                     children: [
-                      const SizedBox(height: AppSpacing.lg),
-                      const LoginHeader(),
-                      SizedBox(height: AppSpacing.lg),
-                      const LoginBenefits(),
-                      SizedBox(height: AppSpacing.xxxxl),
+                      SizedBox(height: AppSpacing.lg * scale),
+                      LoginHeader(scale: scale),
+                      SizedBox(height: AppSpacing.lg * scale),
+                      LoginBenefits(scale: scale),
+                      SizedBox(height: AppSpacing.xxxxl * scale),
                       BlocConsumer<LoginCubit, LoginState>(
                         bloc: _cubit,
                         listener: (context, state) {
@@ -94,12 +101,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           };
                         },
                       ),
-                      const Spacer(),
+                      SizedBox(height: AppSpacing.xxxxl * scale),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

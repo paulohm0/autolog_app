@@ -1,31 +1,20 @@
 import 'package:autolog_app/core/error/failure.dart';
-import 'package:autolog_app/domain/entity/battery_change_entity.dart';
 import 'package:autolog_app/domain/entity/maintenance_entity.dart';
-import 'package:autolog_app/domain/entity/oil_change_entity.dart';
-import 'package:autolog_app/domain/repository/i_battery_change_repository.dart';
 import 'package:autolog_app/domain/repository/i_maintenance_repository.dart';
-import 'package:autolog_app/domain/repository/i_oil_change_repository.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_state.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Registros de manutenção/óleo/bateria vinculados a um veículo específico,
-/// usado pra avisar o usuário antes de excluir um veículo que já tem
-/// histórico (ver [VehicleListCubit.getLinkedRecords]).
+/// Manutenções (inclui as marcadas como óleo/bateria) vinculadas a um
+/// veículo específico, usado pra avisar o usuário antes de excluir um
+/// veículo que já tem histórico (ver [VehicleListCubit.getLinkedRecords]).
 class VehicleLinkedRecords {
   final List<MaintenanceEntity> maintenances;
-  final List<OilChangeEntity> oilChanges;
-  final List<BatteryChangeEntity> batteryChanges;
 
-  const VehicleLinkedRecords({
-    required this.maintenances,
-    required this.oilChanges,
-    required this.batteryChanges,
-  });
+  const VehicleLinkedRecords({required this.maintenances});
 
-  bool get isEmpty =>
-      maintenances.isEmpty && oilChanges.isEmpty && batteryChanges.isEmpty;
+  bool get isEmpty => maintenances.isEmpty;
 }
 
 // Fonte única da lista de veículos do usuário, compartilhada por todas as
@@ -36,18 +25,12 @@ class VehicleLinkedRecords {
 class VehicleListCubit extends Cubit<VehicleListState> {
   final IVehicleRepository _repository;
   final IMaintenanceRepository _maintenanceRepository;
-  final IOilChangeRepository _oilChangeRepository;
-  final IBatteryChangeRepository _batteryChangeRepository;
 
   VehicleListCubit({
     required IVehicleRepository repository,
     required IMaintenanceRepository maintenanceRepository,
-    required IOilChangeRepository oilChangeRepository,
-    required IBatteryChangeRepository batteryChangeRepository,
   }) : _repository = repository,
        _maintenanceRepository = maintenanceRepository,
-       _oilChangeRepository = oilChangeRepository,
-       _batteryChangeRepository = batteryChangeRepository,
        super(VehicleListInitial());
 
   Future<void> loadVehicles() async {
@@ -92,45 +75,21 @@ class VehicleListCubit extends Cubit<VehicleListState> {
     return result;
   }
 
-  /// Busca manutenções/trocas de óleo/trocas de bateria vinculadas a
+  /// Busca manutenções (inclui as marcadas como óleo/bateria) vinculadas a
   /// [vehicleId], pra avisar o usuário antes de excluir um veículo com
   /// histórico. Usado junto de [deleteVehicleCascade].
   Future<Either<Failure, VehicleLinkedRecords>> getLinkedRecords(
     String vehicleId,
   ) async {
-    final maintenancesFuture = _maintenanceRepository.getMaintenances();
-    final oilChangesFuture = _oilChangeRepository.getOilChanges();
-    final batteryChangesFuture = _batteryChangeRepository.getBatteryChanges();
-
-    final maintenancesResult = await maintenancesFuture;
-    final oilChangesResult = await oilChangesFuture;
-    final batteryChangesResult = await batteryChangesFuture;
-
-    Failure? failure;
-    final maintenances = maintenancesResult.fold((f) {
-      failure = f;
-      return const <MaintenanceEntity>[];
-    }, (list) => list);
-    final oilChanges = oilChangesResult.fold((f) {
-      failure ??= f;
-      return const <OilChangeEntity>[];
-    }, (list) => list);
-    final batteryChanges = batteryChangesResult.fold((f) {
-      failure ??= f;
-      return const <BatteryChangeEntity>[];
-    }, (list) => list);
-
-    if (failure != null) return Left(failure!);
-
-    return Right(
-      VehicleLinkedRecords(
-        maintenances: maintenances
-            .where((m) => m.vehicleId == vehicleId)
-            .toList(),
-        oilChanges: oilChanges.where((o) => o.vehicleId == vehicleId).toList(),
-        batteryChanges: batteryChanges
-            .where((b) => b.vehicleId == vehicleId)
-            .toList(),
+    final result = await _maintenanceRepository.getMaintenances();
+    return result.fold(
+      (failure) => Left(failure),
+      (maintenances) => Right(
+        VehicleLinkedRecords(
+          maintenances: maintenances
+              .where((m) => m.vehicleId == vehicleId)
+              .toList(),
+        ),
       ),
     );
   }
@@ -145,18 +104,6 @@ class VehicleListCubit extends Cubit<VehicleListState> {
     for (final maintenance in linkedRecords.maintenances) {
       final result = await _maintenanceRepository.deleteMaintenance(
         maintenance.id!,
-      );
-      if (result.isLeft()) return result;
-    }
-    for (final oilChange in linkedRecords.oilChanges) {
-      final result = await _oilChangeRepository.deleteOilChange(
-        oilChange.id!,
-      );
-      if (result.isLeft()) return result;
-    }
-    for (final batteryChange in linkedRecords.batteryChanges) {
-      final result = await _batteryChangeRepository.deleteBatteryChange(
-        batteryChange.id!,
       );
       if (result.isLeft()) return result;
     }
