@@ -22,6 +22,22 @@ import 'package:autolog_app/ui/widgets/year_section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+List<MaintenanceEntity> _filterMaintenances(
+  List<MaintenanceEntity> maintenances, {
+  String? filterVehicleId,
+  int? filterYear,
+}) {
+  return maintenances.where((m) {
+    if (filterVehicleId != null && m.vehicleId != filterVehicleId) {
+      return false;
+    }
+    if (filterYear != null && m.date.year != filterYear) {
+      return false;
+    }
+    return true;
+  }).toList();
+}
+
 String _formatCurrency(double value) {
   final fixed = value.toStringAsFixed(2);
   final parts = fixed.split('.');
@@ -52,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _filterYear;
   bool _checkedEmptyVehicles = false;
   String? _expandedMaintenanceId;
+  bool _showTotal = false;
 
   @override
   void initState() {
@@ -233,6 +250,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 return BlocBuilder<HomeCubit, HomeState>(
                   bloc: _homeCubit,
                   builder: (context, state) {
+                    final total = state is HomeLoaded
+                        ? _filterMaintenances(
+                            state.maintenances,
+                            filterVehicleId: _filterVehicle?.id,
+                            filterYear: _filterYear,
+                          ).fold<double>(0, (sum, m) => sum + m.value)
+                        : 0.0;
                     return RefreshIndicator(
                       onRefresh: () async {
                         await _homeCubit.loadHomeData();
@@ -255,6 +279,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _filterVehicle = null;
                                 _filterYear = null;
                               }),
+                              showTotal: _showTotal,
+                              total: total,
+                              onToggleTotal: () =>
+                                  setState(() => _showTotal = !_showTotal),
                             ),
                             _MaintenanceList(
                               state: state,
@@ -325,12 +353,18 @@ class _HistorySection extends StatelessWidget {
   final int? filterYear;
   final VoidCallback onFilterTap;
   final VoidCallback onClearFilters;
+  final bool showTotal;
+  final double total;
+  final VoidCallback onToggleTotal;
 
   const _HistorySection({
     required this.filterVehicle,
     required this.filterYear,
     required this.onFilterTap,
     required this.onClearFilters,
+    required this.showTotal,
+    required this.total,
+    required this.onToggleTotal,
   });
 
   @override
@@ -354,15 +388,36 @@ class _HistorySection extends StatelessWidget {
                 AppStrings.maintenanceHistory,
                 style: AppTextStyles.headlineLarge(context),
               ),
-              IconButton(
-                icon: const Icon(Icons.filter_list_rounded),
-                color: filterActive
-                    ? context.colors.primary
-                    : context.colors.textSecondary,
-                onPressed: onFilterTap,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.attach_money_rounded),
+                    color: showTotal
+                        ? context.colors.primary
+                        : context.colors.textSecondary,
+                    onPressed: onToggleTotal,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.filter_list_rounded),
+                    color: filterActive
+                        ? context.colors.primary
+                        : context.colors.textSecondary,
+                    onPressed: onFilterTap,
+                  ),
+                ],
               ),
             ],
           ),
+          if (showTotal) ...[
+            const SizedBox(height: 2),
+            Text(
+              '${AppStrings.maintenanceTotalLabel} ${_formatCurrency(total)}',
+              style: AppTextStyles.titleMedium(
+                context,
+              ).copyWith(color: context.colors.textSecondary),
+            ),
+          ],
           if (filterActive) ...[
             const SizedBox(height: AppSpacing.sm),
             _ActiveFiltersRow(
@@ -473,21 +528,19 @@ class _MaintenanceList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Text(
           (state as HomeError).message,
-          style: AppTextStyles.bodyMedium(context).copyWith(color: context.colors.error),
+          style: AppTextStyles.bodyMedium(
+            context,
+          ).copyWith(color: context.colors.error),
         ),
       );
     }
 
     final loaded = state as HomeLoaded;
-    final maintenances = loaded.maintenances.where((m) {
-      if (filterVehicleId != null && m.vehicleId != filterVehicleId) {
-        return false;
-      }
-      if (filterYear != null && m.date.year != filterYear) {
-        return false;
-      }
-      return true;
-    }).toList();
+    final maintenances = _filterMaintenances(
+      loaded.maintenances,
+      filterVehicleId: filterVehicleId,
+      filterYear: filterYear,
+    );
 
     if (maintenances.isEmpty) {
       final hasFilter = filterVehicleId != null || filterYear != null;
@@ -695,7 +748,10 @@ class _VehicleRow extends StatelessWidget {
                   style: AppTextStyles.titleMedium(context),
                 ),
                 if (vehicle.licensePlate.isNotEmpty)
-                  Text(vehicle.licensePlate, style: AppTextStyles.bodySmall(context)),
+                  Text(
+                    vehicle.licensePlate,
+                    style: AppTextStyles.bodySmall(context),
+                  ),
               ],
             ),
           ),

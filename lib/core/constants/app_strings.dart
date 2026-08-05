@@ -28,6 +28,7 @@ class AppStrings {
   static const String applyFiltersButton = 'Aplicar Filtros';
   static const String emptyMaintenanceHistory =
       'Nenhuma manutenção registrada ainda.';
+  static const String maintenanceTotalLabel = 'Total:';
 
   // Register Vehicle Screen
   static const String vehicleSection = 'VEÍCULO';
