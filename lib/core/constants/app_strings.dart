@@ -72,7 +72,6 @@ class AppStrings {
   static const String dateHint = 'dd/mm/aaaa';
   static const String workshopLabel = 'Oficina / Estabelecimento';
   static const String workshopHint = 'Ex: Performance Garage SP';
-  static const String serviceValueLabel = "VALOR DO SERVIÇO";
   static const String servicesDescriptionLabel =
       'Descrição dos Serviços e Peças';
   static const String servicesDescriptionHint =
@@ -82,8 +81,6 @@ class AppStrings {
   static const String totalValueLabel = 'VALOR TOTAL';
   static const String moneySignLabel = 'R\$';
   static const String saveMaintenanceButton = 'Salvar Manutenção';
-  static const String valueWarning =
-      '* O valor inserido será contabilizado no seu relatório anual de gastos automotivos automaticamente.';
   static const String saveMaintenanceSnackBarMessage =
       'Manutenção salva com sucesso!';
   static const String noVehiclesRegistered =
@@ -141,7 +138,6 @@ class AppStrings {
   static const String valueMustBePositive = 'Informe um valor maior que zero';
 
   // Onboarding (cadastro do primeiro veículo)
-  static const String onboardingVehicleTitle = 'Vamos começar!';
   static const String onboardingVehicleMessage =
       'Cadastre seu primeiro veículo para começar, ou pule por enquanto e cadastre depois.';
   static const String retryButton = 'Tentar novamente';

@@ -1,4 +1,3 @@
-// login_state.dart — nomes mais seguros
 import 'package:autolog_app/domain/entity/user_entity.dart';
 
 sealed class LoginState {}

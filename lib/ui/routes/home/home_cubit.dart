@@ -11,17 +11,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // plumbing extra.
 class HomeCubit extends Cubit<HomeState> {
   final IMaintenanceRepository _maintenanceRepository;
+  Future<void>? _ensureLoadedFuture;
 
   HomeCubit({required IMaintenanceRepository maintenanceRepository})
     : _maintenanceRepository = maintenanceRepository,
       super(HomeInitial());
 
   /// Garante que a lista foi carregada ao menos uma vez, sem forçar um novo
-  /// fetch se algum outro ponto do app já carregou.
-  Future<void> ensureLoaded() async {
-    if (state is HomeInitial) {
-      await loadHomeData();
-    }
+  /// fetch se algum outro ponto do app já carregou. Home e Óleo/Bateria
+  /// chamam isso ao mesmo tempo (montados juntos pelo IndexedStack), então
+  /// reaproveita a mesma Future em vez de disparar dois loadHomeData().
+  Future<void> ensureLoaded() {
+    if (state is! HomeInitial) return Future.value();
+    return _ensureLoadedFuture ??= loadHomeData().whenComplete(
+      () => _ensureLoadedFuture = null,
+    );
   }
 
   Future<void> loadHomeData() async {

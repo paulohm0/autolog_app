@@ -10,22 +10,35 @@ class LicensePlateInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    final cursorIndex = newValue.selection.end.clamp(0, newValue.text.length);
+    final rawBeforeCursor = newValue.text
+        .substring(0, cursorIndex)
+        .toUpperCase()
+        .replaceAll(RegExp(r'[^A-Z0-9]'), '');
+
     final chars = newValue.text.toUpperCase().replaceAll(
       RegExp(r'[^A-Z0-9]'),
       '',
     );
     final truncated = chars.length > 7 ? chars.substring(0, 7) : chars;
+    final charsBeforeCursor = rawBeforeCursor.length > 7
+        ? 7
+        : rawBeforeCursor.length;
 
     final buffer = StringBuffer();
+    var cursorOffset = charsBeforeCursor;
     for (var i = 0; i < truncated.length; i++) {
-      if (i == 3) buffer.write(' ');
+      if (i == 3) {
+        buffer.write(' ');
+        if (i < charsBeforeCursor) cursorOffset++;
+      }
       buffer.write(truncated[i]);
     }
 
     final formatted = buffer.toString();
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+      selection: TextSelection.collapsed(offset: cursorOffset),
     );
   }
 }

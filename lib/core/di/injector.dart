@@ -36,7 +36,6 @@ void setupDependencyInjection(SharedPreferences prefs) {
     () => GoogleSignIn(),
   );
 
-  //
   getIt.registerLazySingleton<IAuthRepository>(
     () => AuthRepositoryImpl(
       firebaseAuth: getIt<FirebaseAuth>(),
@@ -64,7 +63,6 @@ void setupDependencyInjection(SharedPreferences prefs) {
     ),
   );
 
-  //
   getIt.registerFactory(
     () => LoginCubit(repository: getIt<IAuthRepository>()),
   );

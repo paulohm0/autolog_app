@@ -402,9 +402,9 @@ class _OptionalDetails extends StatelessWidget {
                   color: context.colors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline_rounded,
-                  color: Colors.white,
+                  color: context.colors.textOnPrimary,
                   size: 14,
                 ),
               ),

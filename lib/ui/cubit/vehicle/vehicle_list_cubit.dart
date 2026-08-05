@@ -25,6 +25,7 @@ class VehicleLinkedRecords {
 class VehicleListCubit extends Cubit<VehicleListState> {
   final IVehicleRepository _repository;
   final IMaintenanceRepository _maintenanceRepository;
+  Future<void>? _ensureLoadedFuture;
 
   VehicleListCubit({
     required IVehicleRepository repository,
@@ -59,11 +60,14 @@ class VehicleListCubit extends Cubit<VehicleListState> {
   }
 
   /// Garante que a lista foi carregada ao menos uma vez, sem forçar um novo
-  /// fetch se algum outro ponto do app já carregou.
-  Future<void> ensureLoaded() async {
-    if (state is VehicleListInitial) {
-      await loadVehicles();
-    }
+  /// fetch se algum outro ponto do app já carregou. Home e Óleo/Bateria
+  /// chamam isso ao mesmo tempo (montados juntos pelo IndexedStack), então
+  /// reaproveita a mesma Future em vez de disparar dois loadVehicles().
+  Future<void> ensureLoaded() {
+    if (state is! VehicleListInitial) return Future.value();
+    return _ensureLoadedFuture ??= loadVehicles().whenComplete(
+      () => _ensureLoadedFuture = null,
+    );
   }
 
   Future<Either<Failure, void>> deleteVehicle(String id) async {
