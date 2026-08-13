@@ -9,7 +9,7 @@ import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:autolog_app/ui/cubit/vehicle/vehicle_list_cubit.dart';
 import 'package:autolog_app/ui/routes/home/home_cubit.dart';
-import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
+import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_service.dart';
 import 'package:autolog_app/ui/widgets/app_autocomplete_field.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
 import 'package:autolog_app/ui/widgets/app_text_field.dart';
@@ -36,7 +36,7 @@ class RegisterVehicleScreen extends StatefulWidget {
 }
 
 class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
-  late final RegisterVehicleCubit _cubit;
+  late final RegisterVehicleService _service;
   late final TextEditingController _brandController;
   late final TextEditingController _modelController;
   late final TextEditingController _plateController;
@@ -54,7 +54,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit = getIt<RegisterVehicleCubit>();
+    _service = getIt<RegisterVehicleService>();
     final existing = widget.existingVehicle;
     _brandController = TextEditingController(text: existing?.brand);
     _modelController = TextEditingController(text: existing?.model);
@@ -107,7 +107,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
     final isEditing = _isEditing;
 
     final future = isEditing
-        ? _cubit.updateVehicleFromForm(
+        ? _service.updateVehicleFromForm(
             id: widget.existingVehicle!.id!,
             brand: brand,
             model: model,
@@ -115,7 +115,7 @@ class _RegisterVehicleScreenState extends State<RegisterVehicleScreen> {
             year: year,
             color: color,
           )
-        : _cubit.saveVehicleFromForm(
+        : _service.saveVehicleFromForm(
             brand: brand,
             model: model,
             licensePlate: plate,

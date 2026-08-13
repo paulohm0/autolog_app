@@ -3,13 +3,13 @@ import 'package:autolog_app/domain/entity/vehicle_entity.dart';
 import 'package:autolog_app/domain/repository/i_vehicle_repository.dart';
 import 'package:dartz/dartz.dart';
 
-/// Não é um Cubit — a tela sai otimisticamente assim que o usuário toca em
-/// salvar (ver [RegisterVehicleScreen._save]), então não existe estado de
-/// loading/sucesso pra observar, só o resultado da gravação em si.
-class RegisterVehicleCubit {
+/// A tela sai otimisticamente assim que o usuário toca em salvar (ver
+/// [RegisterVehicleScreen._save]), então esse serviço não emite estado de
+/// loading/sucesso — só devolve o resultado da gravação em si.
+class RegisterVehicleService {
   final IVehicleRepository _repository;
 
-  RegisterVehicleCubit({required IVehicleRepository repository})
+  RegisterVehicleService({required IVehicleRepository repository})
     : _repository = repository;
 
   Future<Either<Failure, void>> saveVehicleFromForm({

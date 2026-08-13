@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openRegisterVehicle(BuildContext context) async {
-    // Não precisa recarregar aqui: RegisterVehicleCubit já recarrega o
+    // Não precisa recarregar aqui: RegisterVehicleService já recarrega o
     // VehicleListCubit (singleton) sozinho assim que a gravação confirma.
     await Navigator.pushNamed(context, AppRoutes.registerVehicle);
   }

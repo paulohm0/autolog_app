@@ -5,69 +5,83 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final formatter = LicensePlateInputFormatter();
 
-  test('insere espaço automático depois dos 3 primeiros caracteres', () {
-    final newValue = TextEditingValue(
-      text: 'ABC1234',
-      selection: TextSelection.collapsed(offset: 7),
-    );
-    final result = formatter.formatEditUpdate(TextEditingValue.empty, newValue);
-    expect(
-      result,
-      TextEditingValue(
-        text: 'ABC 1234',
-        selection: TextSelection.collapsed(offset: 8),
-      ),
-    );
-  });
-
-  test('transforma letras em maiúsculo e exclui caracteres inválidos', () {
-    final newValue = TextEditingValue(
-      text: 'abc-1234',
-      selection: TextSelection.collapsed(offset: 8),
-    );
-    final result = formatter.formatEditUpdate(TextEditingValue.empty, newValue);
-    expect(
-      result,
-      TextEditingValue(
-        text: 'ABC 1234',
-        selection: TextSelection.collapsed(offset: 8),
-      ),
-    );
-  });
-
-  test('restringe ao total de 7 caracteres', () {
-    final newValue = TextEditingValue(
-      text: 'ABC12345',
-      selection: TextSelection.collapsed(offset: 8),
-    );
-    final result = formatter.formatEditUpdate(TextEditingValue.empty, newValue);
-    expect(
-      result,
-      TextEditingValue(
-        text: 'ABC 1234',
-        selection: TextSelection.collapsed(offset: 8),
-      ),
-    );
-  });
-
-  test(
-    'mantém a posição do cursor ao apagar um caractere antes do espaço automático',
+  group(
+    'formatEditUpdate',
     () {
-      final oldValue = TextEditingValue(
-        text: 'ABC 1234',
-        selection: TextSelection.collapsed(offset: 8),
-      );
-      final newValue = TextEditingValue(
-        text: 'BC 1234',
-        selection: TextSelection.collapsed(offset: 0),
-      );
-      final result = formatter.formatEditUpdate(oldValue, newValue);
-      expect(
-        result,
-        TextEditingValue(
-          text: 'BC1 234',
-          selection: TextSelection.collapsed(offset: 0),
-        ),
+      test('inserts automatic space after the first 3 characters', () {
+        final newValue = TextEditingValue(
+          text: 'ABC1234',
+          selection: TextSelection.collapsed(offset: 7),
+        );
+        final result = formatter.formatEditUpdate(
+          TextEditingValue.empty,
+          newValue,
+        );
+        expect(
+          result,
+          TextEditingValue(
+            text: 'ABC 1234',
+            selection: TextSelection.collapsed(offset: 8),
+          ),
+        );
+      });
+
+      test('converts letters to uppercase and strips invalid characters', () {
+        final newValue = TextEditingValue(
+          text: 'abc-1234',
+          selection: TextSelection.collapsed(offset: 8),
+        );
+        final result = formatter.formatEditUpdate(
+          TextEditingValue.empty,
+          newValue,
+        );
+        expect(
+          result,
+          TextEditingValue(
+            text: 'ABC 1234',
+            selection: TextSelection.collapsed(offset: 8),
+          ),
+        );
+      });
+
+      test('restricts total length to 7 characters', () {
+        final newValue = TextEditingValue(
+          text: 'ABC12345',
+          selection: TextSelection.collapsed(offset: 8),
+        );
+        final result = formatter.formatEditUpdate(
+          TextEditingValue.empty,
+          newValue,
+        );
+        expect(
+          result,
+          TextEditingValue(
+            text: 'ABC 1234',
+            selection: TextSelection.collapsed(offset: 8),
+          ),
+        );
+      });
+
+      test(
+        'keeps cursor position when deleting a character before the automatic space',
+        () {
+          final oldValue = TextEditingValue(
+            text: 'ABC 1234',
+            selection: TextSelection.collapsed(offset: 8),
+          );
+          final newValue = TextEditingValue(
+            text: 'BC 1234',
+            selection: TextSelection.collapsed(offset: 0),
+          );
+          final result = formatter.formatEditUpdate(oldValue, newValue);
+          expect(
+            result,
+            TextEditingValue(
+              text: 'BC1 234',
+              selection: TextSelection.collapsed(offset: 0),
+            ),
+          );
+        },
       );
     },
   );

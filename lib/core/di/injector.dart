@@ -11,7 +11,7 @@ import 'package:autolog_app/ui/routes/login/login_cubit.dart';
 import 'package:autolog_app/ui/routes/main_navigation/vehicle_check_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/register_service/register_service_cubit.dart';
-import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_cubit.dart';
+import 'package:autolog_app/ui/routes/register_vehicle/register_vehicle_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -67,7 +67,7 @@ void setupDependencyInjection(SharedPreferences prefs) {
     () => LoginCubit(repository: getIt<IAuthRepository>()),
   );
   getIt.registerFactory(
-    () => RegisterVehicleCubit(repository: getIt<IVehicleRepository>()),
+    () => RegisterVehicleService(repository: getIt<IVehicleRepository>()),
   );
   // Fonte única do histórico de manutenção (inclui óleo/bateria),
   // compartilhada entre Home e a aba Óleo/Bateria.

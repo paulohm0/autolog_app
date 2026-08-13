@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CurrencyInputFormatter', () {
-    test('interpreta os dígitos digitados como centavos', () {
+    test('interprets typed digits as cents', () {
       final formatter = CurrencyInputFormatter();
       final newValue = TextEditingValue(
         text: '150',
@@ -23,7 +23,7 @@ void main() {
       );
     });
 
-    test('ignora caracteres não numéricos', () {
+    test('ignores non-numeric characters', () {
       final formatter = CurrencyInputFormatter();
       final newValue = TextEditingValue(
         text: '1a5b0',
@@ -42,7 +42,7 @@ void main() {
       );
     });
 
-    test('insere separador de milhar a cada 3 dígitos', () {
+    test('inserts thousands separator every 3 digits', () {
       final formatter = CurrencyInputFormatter();
       final newValue = TextEditingValue(
         text: '100000',
@@ -61,7 +61,7 @@ void main() {
       );
     });
 
-    test('corta dígitos além do limite de R\$ 999.999.999,00', () {
+    test('truncates digits beyond the R\$ 999.999.999,00 limit', () {
       final formatter = CurrencyInputFormatter();
       final newValue = TextEditingValue(
         text: '123456789012',
@@ -80,7 +80,7 @@ void main() {
       );
     });
 
-    test('entrada sem nenhum dígito resulta em texto vazio', () {
+    test('empty input (no digits) results in empty text', () {
       final formatter = CurrencyInputFormatter();
       final newValue = TextEditingValue(
         text: '',
@@ -98,23 +98,23 @@ void main() {
   });
 
   group('formatCurrencyInputValue', () {
-    test('formata um double como texto de moeda', () {
+    test('formats a double as currency text', () {
       expect(formatCurrencyInputValue(1000.0), '1.000,00');
     });
 
-    test('formata zero como 0,00', () {
+    test('formats zero as 0,00', () {
       expect(formatCurrencyInputValue(0.0), '0,00');
     });
   });
 
   group('parseCurrencyInput', () {
-    test('converte o texto formatado de volta pra double', () {
+    test('converts formatted text back to a double', () {
       expect(parseCurrencyInput('1.000,00'), 1000.0);
     });
-    test('texto vazio deve retornar null', () {
+    test('empty text should return null', () {
       expect(parseCurrencyInput(""), null);
     });
-    test('texto sem dígitos numéricos deve retornar null', () {
+    test('text without numeric digits should return null', () {
       expect(parseCurrencyInput("abc"), null);
     });
   });

@@ -7,7 +7,7 @@ void main() {
     'mapExceptionToFailure',
     () {
       test(
-        'swtich case -> case 1 - Firestore code [permission-denied] se torna PermissionFailure',
+        'switch case -> case 1 - code [permission-denied] becomes PermissionFailure',
         () {
           final error = FirebaseException(
             plugin: 'firebase_auth',
@@ -19,7 +19,7 @@ void main() {
       );
 
       test(
-        'swtich case -> case 2 - Firestore code [unavailable] se torna NetworkFailure',
+        'switch case -> case 2 - code [unavailable] becomes NetworkFailure',
         () {
           final error = FirebaseException(
             plugin: 'firebase_auth',
@@ -31,7 +31,7 @@ void main() {
       );
 
       test(
-        'swtich case -> case 3 - Firestore code [deadline-exceeded] se torna NetworkFailure',
+        'switch case -> case 3 - code [deadline-exceeded] becomes NetworkFailure',
         () {
           final error = FirebaseException(
             plugin: 'firebase_auth',
@@ -43,18 +43,18 @@ void main() {
       );
 
       test(
-        'swtich case -> default - Firestore code [erro não listado] se torna ServerFailure',
+        'switch case -> default - unmapped code becomes ServerFailure',
         () {
           final error = FirebaseException(
             plugin: 'firebase_auth',
-            code: 'erro não listado',
+            code: 'some-unmapped-code',
           );
           final result = mapExceptionToFailure(error);
           expect(result, isA<ServerFailure>());
         },
       );
 
-      test('se o erro não for um FirebaseException', () {
+      test('when the error is not a FirebaseException', () {
         final error = Exception();
         final result = mapExceptionToFailure(error);
         expect(result, isA<UnexpectedFailure>());
