@@ -258,7 +258,9 @@ class _ThemeModeCard extends StatelessWidget {
     return BlocBuilder<ThemeCubit, ThemeMode>(
       bloc: getIt<ThemeCubit>(),
       builder: (context, themeMode) {
-        final isDark = themeMode == ThemeMode.dark;
+        final isDark = themeMode == ThemeMode.dark ||
+            (themeMode == ThemeMode.system &&
+                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
         return _ProfileSettingRow(
           icon: Icons.dark_mode_outlined,
           label: AppStrings.themeSectionLabel,
