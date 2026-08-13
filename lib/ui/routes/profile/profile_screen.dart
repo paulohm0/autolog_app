@@ -127,7 +127,7 @@ class _ProfileContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           const _AppVersionCard(),
           const SizedBox(height: AppSpacing.lg),
-          const _ThemeModeCard(),
+          const ThemeModeCard(),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
@@ -196,7 +196,7 @@ class _Avatar extends StatelessWidget {
 
 /// Linha padrão das configurações do Perfil: ícone + label à esquerda,
 /// algum controle (texto, switch etc.) à direita. Usada por [_AppVersionCard]
-/// e [_ThemeModeCard], que só diferem no [trailing].
+/// e [ThemeModeCard], que só diferem no [trailing].
 class _ProfileSettingRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -250,8 +250,8 @@ class _AppVersionCard extends StatelessWidget {
   }
 }
 
-class _ThemeModeCard extends StatelessWidget {
-  const _ThemeModeCard();
+class ThemeModeCard extends StatelessWidget {
+  const ThemeModeCard({super.key});
 
   @override
   Widget build(BuildContext context) {
