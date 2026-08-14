@@ -7,6 +7,11 @@ class LoginTopImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final imagePath = isDark
+        ? 'assets/images/image-top-login-dark.png'
+        : 'assets/images/image-top-login-light.png';
+
     return SizedBox(
       height: height,
       width: double.infinity,
@@ -18,10 +23,7 @@ class LoginTopImage extends StatelessWidget {
             offset: const Offset(-20, 0),
             child: Transform.scale(
               scaleX: 1.15,
-              child: Image.asset(
-                'assets/images/image-top-login.png',
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(imagePath, fit: BoxFit.cover),
             ),
           ),
         ],

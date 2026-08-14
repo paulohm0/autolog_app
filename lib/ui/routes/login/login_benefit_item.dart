@@ -20,10 +20,7 @@ class LoginBenefitItem extends StatelessWidget {
         Container(
           width: 40 * scale,
           height: 40 * scale,
-          decoration: BoxDecoration(
-            color: context.colors.primaryLight,
-            shape: BoxShape.circle,
-          ),
+          alignment: Alignment.center,
           child: Icon(icon, color: context.colors.primary, size: 20 * scale),
         ),
 
