@@ -127,6 +127,10 @@ class AppStrings {
   static const String appVersionLabel = 'Versão do App';
   static const String signOutButton = 'Sair';
   static const String themeSectionLabel = 'Modo Dark';
+  static const String deleteAccountButton = 'Excluir conta';
+  static const String deleteAccountConfirmTitle = 'Excluir sua conta?';
+  static const String deleteAccountConfirmMessage =
+      'Essa ação é permanente: todos os seus veículos e manutenções serão apagados, e não será possível desfazer.';
 
   // Main Navigation
   static const String navHistoryLabel = 'Histórico';

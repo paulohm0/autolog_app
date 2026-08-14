@@ -65,4 +65,38 @@ class AuthRepositoryImpl implements IAuthRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return Left(ServerFailure());
+      try {
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        // O Firebase exige uma prova de login recente pra ações sensíveis
+        // como excluir a conta — se a sessão não for recente o bastante,
+        // pede confirmação de novo via Google antes de tentar de novo.
+        if (e.code != 'requires-recent-login') rethrow;
+        await _reauthenticate();
+        await user.delete();
+      }
+      return Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  Future<void> _reauthenticate() async {
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      throw FirebaseAuthException(code: 'requires-recent-login');
+    }
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    await _firebaseAuth.currentUser!.reauthenticateWithCredential(credential);
+  }
 }

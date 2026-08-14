@@ -13,6 +13,8 @@ class ProfileLoaded extends ProfileState {
 
 class ProfileSignedOut extends ProfileState {}
 
+class ProfileAccountDeleted extends ProfileState {}
+
 class ProfileError extends ProfileState {
   final String message;
   ProfileError({required this.message});

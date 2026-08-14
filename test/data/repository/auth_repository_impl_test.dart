@@ -68,4 +68,33 @@ void main() {
       verify(() => mockGoogleSignIn.signOut()).called(1);
     });
   });
+
+  group('deleteAccount', () {
+    test('deletes the signed-in user', () async {
+      final firebaseAuth = MockFirebaseAuth(
+        mockUser: MockUser(uid: 'u1'),
+        signedIn: true,
+      );
+      final repository = AuthRepositoryImpl(
+        firebaseAuth: firebaseAuth,
+        googleSignIn: mockGoogleSignIn,
+      );
+
+      final result = await repository.deleteAccount();
+
+      expect(result.isRight(), isTrue);
+    });
+
+    test('returns a failure when no one is signed in', () async {
+      final firebaseAuth = MockFirebaseAuth(signedIn: false);
+      final repository = AuthRepositoryImpl(
+        firebaseAuth: firebaseAuth,
+        googleSignIn: mockGoogleSignIn,
+      );
+
+      final result = await repository.deleteAccount();
+
+      expect(result.isLeft(), isTrue);
+    });
+  });
 }

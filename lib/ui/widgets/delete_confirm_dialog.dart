@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 Future<bool> showDeleteConfirmDialog(
   BuildContext context, {
   required String title,
+  String message = AppStrings.deleteConfirmMessage,
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(title),
-      content: const Text(AppStrings.deleteConfirmMessage),
+      content: Text(message),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

@@ -10,6 +10,7 @@ import 'package:autolog_app/ui/routes/home/home_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_cubit.dart';
 import 'package:autolog_app/ui/routes/profile/profile_state.dart';
 import 'package:autolog_app/ui/widgets/app_brand_title.dart';
+import 'package:autolog_app/ui/widgets/delete_confirm_dialog.dart';
 import 'package:autolog_app/ui/widgets/section_card.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      title: AppStrings.deleteAccountConfirmTitle,
+      message: AppStrings.deleteAccountConfirmMessage,
+    );
+    if (confirmed) _cubit.deleteAccount();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -52,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (state is ProfileError) {
                 showAppSnackBar(context, state.message, isError: true);
               }
-              if (state is ProfileSignedOut) {
+              if (state is ProfileSignedOut || state is ProfileAccountDeleted) {
                 getIt<VehicleListCubit>().reset();
                 getIt<HomeCubit>().reset();
                 Navigator.pushNamedAndRemoveUntil(
@@ -67,6 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return _ProfileContent(
                   user: state.user,
                   onSignOut: () => _cubit.signOut(),
+                  onDeleteAccount: () => _handleDeleteAccount(context),
                 );
               }
               if (state is ProfileError) {
@@ -104,8 +115,13 @@ class _ProfileErrorMessage extends StatelessWidget {
 class _ProfileContent extends StatelessWidget {
   final UserEntity user;
   final VoidCallback onSignOut;
+  final VoidCallback onDeleteAccount;
 
-  const _ProfileContent({required this.user, required this.onSignOut});
+  const _ProfileContent({
+    required this.user,
+    required this.onSignOut,
+    required this.onDeleteAccount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +151,8 @@ class _ProfileContent extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onSignOut,
               style: OutlinedButton.styleFrom(
-                foregroundColor: context.colors.error,
-                side: BorderSide.none,
+                foregroundColor: context.colors.textPrimary,
+                side: BorderSide(color: context.colors.border),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
@@ -148,6 +164,18 @@ class _ProfileContent extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          TextButton(
+            onPressed: onDeleteAccount,
+            child: Text(
+              AppStrings.deleteAccountButton,
+              style: TextStyle(
+                color: context.colors.error,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

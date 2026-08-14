@@ -81,7 +81,11 @@ void setupDependencyInjection(SharedPreferences prefs) {
     ),
   );
   getIt.registerFactory(
-    () => ProfileCubit(repository: getIt<IAuthRepository>()),
+    () => ProfileCubit(
+      repository: getIt<IAuthRepository>(),
+      vehicleRepository: getIt<IVehicleRepository>(),
+      maintenanceRepository: getIt<IMaintenanceRepository>(),
+    ),
   );
   getIt.registerFactory(
     () => VehicleCheckCubit(vehicleRepository: getIt<IVehicleRepository>()),
