@@ -94,6 +94,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color error;
   final Color border;
   final Color borderFocused;
+  final Color shadow;
 
   const AppColorsExtension({
     required this.primary,
@@ -111,6 +112,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.error,
     required this.border,
     required this.borderFocused,
+    required this.shadow,
   });
 
   static const light = AppColorsExtension(
@@ -129,6 +131,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     error: AppColors.error,
     border: AppColors.border,
     borderFocused: AppColors.borderFocused,
+    shadow: Color(0x26000000),
   );
 
   static const dark = AppColorsExtension(
@@ -147,6 +150,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     error: Color(0xFFF85149),
     border: Color(0xFF30363D),
     borderFocused: Color(0xFF5B7FFF),
+    shadow: Color(0x26000000),
   );
 
   @override
@@ -166,6 +170,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? error,
     Color? border,
     Color? borderFocused,
+    Color? shadow,
   }) {
     return AppColorsExtension(
       primary: primary ?? this.primary,
@@ -183,6 +188,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       error: error ?? this.error,
       border: border ?? this.border,
       borderFocused: borderFocused ?? this.borderFocused,
+      shadow: shadow ?? this.shadow,
     );
   }
 
@@ -205,6 +211,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       error: Color.lerp(error, other.error, t)!,
       border: Color.lerp(border, other.border, t)!,
       borderFocused: Color.lerp(borderFocused, other.borderFocused, t)!,
+      shadow: Color.lerp(shadow, other.shadow, t)!,
     );
   }
 }
