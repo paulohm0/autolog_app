@@ -33,6 +33,7 @@ CLAUDE.md
 .pub/
 /build/
 /coverage/
+/android/build/
 
 # Symbolication related
 app.*.symbols
