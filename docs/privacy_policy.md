@@ -52,4 +52,4 @@ Esta política pode ser atualizada periodicamente. A data da última atualizaç�
 
 ## 8. Contato
 
-Dúvidas sobre esta política ou sobre seus dados: **paulohenrique1019@gmail.com**
+Dúvidas sobre esta política ou sobre seus dados: **paulohenrique.develop@gmail.com**
