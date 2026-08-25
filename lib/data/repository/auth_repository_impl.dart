@@ -3,6 +3,7 @@ import 'package:autolog_app/domain/entity/user_entity.dart';
 import 'package:autolog_app/domain/repository/i_auth_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
@@ -39,7 +40,13 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
       final user = userCredential.user!;
       return Right(_toEntity(user));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'signInWithGoogle failed',
+        fatal: false,
+      );
       return Left(mapExceptionToFailure(e));
     }
   }
@@ -50,7 +57,13 @@ class AuthRepositoryImpl implements IAuthRepository {
       await _googleSignIn.signOut();
       await _firebaseAuth.signOut();
       return Right(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'signOut failed',
+        fatal: false,
+      );
       return Left(mapExceptionToFailure(e));
     }
   }
@@ -61,7 +74,13 @@ class AuthRepositoryImpl implements IAuthRepository {
       final user = _firebaseAuth.currentUser;
       if (user == null) return Left(ServerFailure());
       return Right(_toEntity(user));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'getCurrentUser failed',
+        fatal: false,
+      );
       return Left(mapExceptionToFailure(e));
     }
   }
@@ -82,7 +101,13 @@ class AuthRepositoryImpl implements IAuthRepository {
         await user.delete();
       }
       return Right(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'deleteAccount failed',
+        fatal: false,
+      );
       return Left(mapExceptionToFailure(e));
     }
   }
