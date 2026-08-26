@@ -110,7 +110,10 @@ Código e testes concluídos. Atualmente em **processo de preparação para publ
 - ✅ Assinatura de release configurada (Android)
 - ✅ Política de privacidade publicada
 - ✅ Fluxo de exclusão de conta implementado (exigência das lojas)
-- ⏳ Registro de conta de desenvolvedor e deploy — em andamento
+- ✅ Conta de desenvolvedor Google Play Console criada e verificada
+- ✅ App criado no Play Console, com ficha da loja completa (ícone, feature graphic, screenshots, descrição, Data Safety, classificação indicativa)
+- ✅ Login validado via Firebase Auth + Google Sign-In na versão distribuída pela loja
+- ⏳ Teste fechado em andamento (exigência do Google antes de liberar produção)
 
 ## > Habilidades Testadas
 
@@ -118,6 +121,7 @@ Código e testes concluídos. Atualmente em **processo de preparação para publ
 - ✅ Gerenciamento de estado com Cubit (flutter_bloc)
 - ✅ Injeção de dependência (get_it)
 - ✅ Autenticação e banco de dados com Firebase
+- ✅ Configuração de Firebase Crashlytics para logging de erros não-fatais em produção
 - ✅ Testes unitários, de widget e de integração
 - ✅ Modo escuro com `ThemeExtension` nativa
 - ✅ Preparação de app para publicação em loja (assinatura, ícone, política de privacidade, conformidade de dados)
